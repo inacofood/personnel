@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Employee;
-use App\Models\EmployeeHris;
 use App\Models\EmployeePresensi;
 use App\Models\Department;
 use Illuminate\Http\Request;
@@ -11,6 +9,11 @@ use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use PDF;
+use App\Exports\PresensiExport;
+
+
 class PresensiController extends Controller
 {
     public function index()
@@ -23,126 +26,270 @@ class PresensiController extends Controller
     }
 
     public function import(Request $request)
-    {
-        // $request->validate([
-        //     'file' => 'required|file|mimes:xls,xlsx'
-        // ]);
-        // $filePath = 'C:/Users/User/Desktop/Presensi/absen.xlsx';
-        $file = $request->file('file');
-        $filePath = $file->getRealPath(); 
-        // Periksa apakah file ada
-  
-        $spreadsheet = IOFactory::load($filePath);
- 
-        $allData = [];
-        $employees = Employee::get();
-        try {
-        // Iterasi melalui setiap sheet
+{
+    // Set batas waktu eksekusi menjadi 300 detik
+    set_time_limit(300);
+    
+    $file = $request->file('file');
+    $filePath = $file->getRealPath();
+    $spreadsheet = IOFactory::load($filePath);
+
+    try {
         foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
-            // Iterasi melalui setiap baris
-           
-            $sheet->removeRow(1, 1);
+            $sheet->removeRow(1, 1); // Jika header ada di baris pertama
             foreach ($sheet->getRowIterator() as $row) {
                 $cellIterator = $row->getCellIterator();
-                $cellIterator->setIterateOnlyExistingCells(false); // Ini agar semua sel diiterasi, termasuk yang kosong
-
+                $cellIterator->setIterateOnlyExistingCells(false);
                 $rowData = [];
                 foreach ($cellIterator as $cell) {
-                    $rowData[] = $cell->getValue();
+                    $rowData[] = $cell->getFormattedValue();
                 }
-       
-                $employees = Employee::where('registration_number',$rowData[1])->first();
-                $employee_hris = EmployeeHris::where('NIK',$rowData[1])->first();
-                if($employees){
-                    $departments = Department::where('id',$employees->department_id)->first();
-                    $direct_superior = $employees->direct_superior;
-                    $nama_superior = Employee::where('direct_superior',$employees->direct_superior)->first();
-                }elseif($employee_hris){
-                    $departments = $employee_hris->department;
-                    $direct_superior = $employee_hris->superior;
-                    $nama_superior = Employee::where('direct_superior',$employee_hris->superior)->first();
-                }else{
-                    $departments = null;
-                    $direct_superior =null;
-                    $nama_superior = null;
-                }
-                $tanggal = isset($rowData[4]) ? Carbon::createFromFormat('d-M-y', $rowData[4])->format('Y-m-d') : null;
-                $nik = $rowData[1] ?? null;
 
-                // Periksa apakah data dengan NIK dan tanggal yang sama sudah ada
+                // Parsing kolom tanggal dan join_date
+                $tanggal = null;
+                $joinDate = null;
+
+                // Kolom Tanggal (index 2)
+                if (!empty($rowData[2])) {
+                    if (is_numeric($rowData[2])) {
+                        $tanggal = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[2]))->format('Y-m-d');
+                    } else {
+                        try {
+                            $tanggal = Carbon::createFromFormat('d-M-y', $rowData[2])->format('Y-m-d');
+                        } catch (\Exception $e) {
+                            \Log::error("Format tanggal tidak valid: " . $rowData[2]);
+                        }
+                    }
+                }
+
+                // Kolom Join Date (index 15)
+                if (!empty($rowData[15])) {
+                    if (is_numeric($rowData[15])) {
+                        $joinDate = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[15]))->format('Y-m-d');
+                    } else {
+                        try {
+                            $joinDate = Carbon::createFromFormat('d-M-y', $rowData[15])->format('Y-m-d');
+                        } catch (\Exception $e) {
+                            \Log::error("Format join date tidak valid: " . $rowData[15]);
+                        }
+                    }
+                }
+
+                $nik = $rowData[0] ?? null;
                 $existingData = EmployeePresensi::where('nik', $nik)
-                                                ->where('tanggal', $tanggal)
-                                                ->first();
+                                               ->where('tanggal', $tanggal)
+                                               ->first();
+
+                // Validasi waktu format untuk scan_masuk dan scan_pulang
+                $scan_masuk = isset($rowData[5]) && preg_match("/^\d{2}:\d{2}(:\d{2})?$/", $rowData[5]) ? $rowData[5] . ':00' : null;
+                $scan_pulang = isset($rowData[6]) && preg_match("/^\d{2}:\d{2}(:\d{2})?$/", $rowData[6]) ? $rowData[6] . ':00' : null;
 
                 $data = [
                     'nik' => $nik,
-                    'nama' => $rowData[2] ?? null,
-                    'department' => $departments->department_name ?? null,
-                    'direct_superior' => $direct_superior ?? null,
-                    'nama_superior' => $nama_superior->fullname ?? null,
+                    'nama' => $rowData[1] ?? null,
                     'tanggal' => $tanggal,
-                    'jamkerja' => $rowData[5] ?? null,
-                    'masuk' => $rowData[6] ? $rowData[6].':00' : null,
-                    'keluar' => $rowData[7] ? $rowData[7].':00' : null,
-                    'terlambat' => $rowData[8] ? $rowData[8].':00' : null,
-                    'pulangcepat' => $rowData[9] ? $rowData[9].':00' : null,
-                    'pengecualian' => $rowData[11] ?? null,
+                    'week' => $rowData[3] ?? null,
+                    'jam_kerja' => $rowData[4] ?? null,
+                    'scan_masuk' => $scan_masuk, // Scan masuk validasi
+                    'scan_pulang' => $scan_pulang, // Scan pulang validasi
+                    'terlambat' => $rowData[7] ? $rowData[7] . ':00' : null,
+                    'pulang_cepat' => $rowData[8] ? $rowData[8] . ':00' : null,
+                    'absent' => $rowData[9] ?? null,
+                    'pengecualian' => $rowData[10] ?? null,
+                    'HK' => !empty($rowData[11]) && is_numeric($rowData[11]) ? $rowData[11] : null, 
+                    'dept' => $rowData[12] ?? null,
+                    'section' => $rowData[13] ?? null,
+                    'grade' => $rowData[14] ?? null,
+                    'join_date' => $joinDate, // Join date validasi
+                    'jt' => $rowData[16] ?? null,
+                    'atasan' => $rowData[17] ?? null,
                     'created_by' => 6,
                 ];
 
-                // Jika data sudah ada, lakukan update
                 if ($existingData) {
                     EmployeePresensi::where('nik', $nik)
                                     ->where('tanggal', $tanggal)
                                     ->update($data);
                 } else {
-                    // Insert data baru
                     EmployeePresensi::insert($data);
-
-                    // Periksa apakah waktu keluar kosong (tidak keluar)
-                    if (!$data['keluar']) {
-                        // Buat entri baru untuk hari berikutnya jika karyawan masuk kembali
-                        $nextDay = Carbon::createFromFormat('d-M-y', $rowData[4])->addDay()->format('Y-m-d');
-
-                        // Periksa apakah sudah ada entri untuk hari berikutnya
-                        $nextDayData = EmployeePresensi::where('nik', $nik)
-                                                    ->where('tanggal', $nextDay)
-                                                    ->first();
-
-                        if (!$nextDayData && $data['masuk']) {
-                            // Insert data baru untuk hari berikutnya dengan waktu masuk, keluarnya null
-                            $newData = [
-                                'nik' => $nik,
-                                'nama' => $rowData[2] ?? null,
-                                'department' => $departments->department_name ?? null,
-                                'direct_superior' => $direct_superior ?? null,
-                                'nama_superior' => $nama_superior->fullname ?? null,
-                                'tanggal' => $nextDay,
-                                'jamkerja' => $rowData[5] ?? null,
-                                'masuk' => null, // Masuknya akan diisi nanti, saat ada data masuk yang valid
-                                'keluar' => null,
-                                'terlambat' => null,
-                                'pulangcepat' => null,
-                                'pengecualian' => null,
-                                'created_by' => 6,
-                            ];
-
-                            EmployeePresensi::insert($newData);
-                        }
-                    }
                 }
-              
             }
         }
-        // dd($data);
-        } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
-            return "Error: " . $e->getMessage();
-        }
-        return redirect()->back()->with('alert', [
-            'msg' => 'Berhasil menambahkan Kehadiran'
-        ]);
+    } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
+        return "Error: " . $e->getMessage();
     }
 
+    return redirect()->back()->with('alert', [
+        'msg' => 'Berhasil menambahkan Kehadiran'
+    ]);
+}
+
+public function rekapPresensiBulanan()
+{
+    $datanama = DB::table('employee_presensi_bulanan')
+    ->select('nama')
+    ->distinct()
+    ->get();
+
+    $rekapKehadiran = DB::table('employee_presensi_bulanan')
+        ->select(
+            'nama', // Nama karyawan
+            DB::raw('MONTH(tanggal) as bulan'), // Ambil bulan dari tanggal
+            DB::raw('YEAR(tanggal) as tahun'), // Ambil tahun dari tanggal
+            // Hitung total hadir berdasarkan adanya scan masuk atau scan pulang
+            DB::raw("COUNT(CASE WHEN scan_masuk IS NOT NULL OR scan_pulang IS NOT NULL THEN 1 END) as total_hadir"),
+            // Hitung total telat berdasarkan scan_masuk lebih dari jam 08:00
+            DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > '08:00:00' THEN 1 END) as total_telat"),
+            // Hitung total pulang awal berdasarkan scan_pulang kurang dari jam 17:00
+            DB::raw("COUNT(CASE WHEN TIME(scan_pulang) < '17:00:00' THEN 1 END) as total_awal"),
+            
+            DB::raw("COUNT(CASE WHEN pengecualian IS NOT NULL AND pengecualian != '' THEN 1 END) as total_pengecualian"),
+            // Hitung leave per kategori
+            DB::raw("COUNT(CASE WHEN pengecualian IN ('SAKIT', 'sakit dg srt dokter') THEN 1 END) as total_sakit"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'SAKIT TANPA SD' THEN 1 END) as total_sakit_tanpa_sd"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'CUTI MELAHIRKAN' THEN 1 END) as total_cuti_melahirkan"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'DINAS LUAR' THEN 1 END) as total_dinas_luar"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'CUTI TAHUNAN' THEN 1 END) as total_cuti_tahunan"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'CUTI' THEN 1 END) as total_cuti"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'IZIN' THEN 1 END) as total_izin"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'ANAK BTIS/SUNAT' THEN 1 END) as total_anak_btis"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'ISTRI MELAHIRKAN' THEN 1 END) as total_istri_melahirkan"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'MENIKAH' THEN 1 END) as total_menikah"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'OT/MTUA/KLG MGL' THEN 1 END) as total_ot_mtua_klg_mgl"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'WFH' THEN 1 END) as total_wfh"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'PARUH WAKTU' THEN 1 END) as total_paruh_waktu"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'LIBUR' THEN 1 END) as total_libur"),
+            DB::raw("COUNT(CASE WHEN pengecualian = 'ERROR' THEN 1 END) as total_error"),
+
+            // Hitung total hk berdasarkan kolom hk
+            DB::raw("SUM(hk) as total_hk") // Menambahkan perhitungan jumlah HK
+
+        )
+        ->groupBy('nama', DB::raw('MONTH(tanggal)'), DB::raw('YEAR(tanggal)')) // Kelompokkan berdasarkan nama, bulan, dan tahun
+        ->get();
+
+    return view('presensi.report_presensi', [
+        'rekapKehadiran' => $rekapKehadiran,
+        'datanama' => $datanama,
+    ]);
+}
+
+    public function exportExcel(Request $request)
+    {
+    
+        $month = $request->bulanfilter;
+        $year = $request->tahunfilter;
+        $name = $request->namafilter;
+    
+        return Excel::download(new PresensiExport($month, $year, $name), 'rekap-presensi-bulanan.xlsx');
+    }
+
+    public function getPresensiDetail(Request $request)
+{
+    $nama = $request->input('nama');
+    $bulan = $request->input('bulan');
+    $tahun = $request->input('tahun');
+    $status = $request->input('status');
+
+    $query = EmployeePresensi::select(
+        'nama',
+        'tanggal',
+        'scan_masuk',
+        'scan_pulang',
+        'pengecualian'
+    )
+    ->where('nama', $nama)
+    ->whereMonth('tanggal', $bulan)
+    ->whereYear('tanggal', $tahun);
+
+    if ($status == 'Hadir') {
+        // Menampilkan data Hadir (scan masuk dan scan pulang tidak null)
+        $query->whereNotNull('scan_masuk')
+              ->whereNotNull('scan_pulang');
+    } elseif ($status == 'Telat') {
+        // Misalkan 'Telat' adalah kondisi di mana scan masuk lebih dari jam tertentu
+        $query->whereTime('scan_masuk', '>', '08:00:00');
+    } elseif ($status == 'Awal') {
+        // Misalkan 'Pulang Cepat' adalah kondisi di mana scan pulang kurang dari jam tertentu
+        $query->whereTime('scan_pulang', '<', '17:00:00');
+    } elseif ($status == 'HK') {
+        // Tambahkan kondisi untuk HK (hari kerja) jika diperlukan
+        // Misalnya, pengecualian kolom "pengecualian" ada status "HK"
+        $query->where('HK', 1);
+    } elseif ($status == 'Leave') {
+        // Menampilkan data hanya jika kolom pengecualian memiliki nilai
+        $query->whereNotNull('pengecualian')
+              ->where('pengecualian', '!=', ''); // Pastikan nilai tidak kosong
+    }    
+    elseif ($status == 'Sakit') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['SAKIT', 'sakit dg srt dokter']);
+    }
+    elseif ($status == 'stsd') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['SAKIT TANPA SD']);
+    }
+    elseif ($status == 'cuti') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['CUTI']);
+    }
+    elseif ($status == 'izin') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['IZIN']);
+    }
+    elseif ($status == 'dl') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['DINAS LUAR']);
+    }
+    elseif ($status == 'ct') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['CUTI TAHUNAN']);
+    }
+    elseif ($status == 'cm') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['CUTI MELAHIRKAN']);
+    }
+    elseif ($status == 'nikah') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['MENIKAH']);
+    }
+    elseif ($status == 'im') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['ISTRI MELAHIRKAN']);
+    }
+    elseif ($status == 'as') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['ANAK BTIS/SUNAT']);
+    }
+    elseif ($status == 'mgl') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['OT/MTUA/KLG MGL']);
+    }
+    elseif ($status == 'wfh') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['WFH']);
+    }
+    elseif ($status == 'pw') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['PARUH WAKTU']);
+    }
+    elseif ($status == 'libur') {
+        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
+        $query->whereIn('pengecualian', ['LIBUR']);
+    }
+
+    // Eksekusi query untuk mendapatkan hasil
+    $presensi = $query->get();
+    // Kirim data ke view atau JSON sesuai kebutuhan
+    return response()->json([
+        'status' => 'success',
+        'presensi' => $presensi, 
+        
+    ]);
+}
+
+
+    
 
     public function destroy($id)
     {
@@ -167,16 +314,6 @@ class PresensiController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
-    // public function exportEmployee()
-    // {
-    //     return Excel::download(new BPJSParticipantExport, 'bpjs-participant-export-'.date('Y-m-d').'.xlsx');
-    // }
-
-    // public function exportEmployeeInactive()
-    // {
-    //     return Excel::download(new BPJSParticipantInactiveExport, 'bpjs-participant-inactive-export-'.date('Y-m-d').'.xlsx');
-    // }
 
 
 }
