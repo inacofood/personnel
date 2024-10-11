@@ -20,11 +20,8 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            // Jika autentikasi berhasil, redirect ke halaman yang sesuai
-            return redirect()->intended(route('dashboard.payroll'));
+            return redirect()->intended(route('dashboard'));
         }
-
-        // Jika autentikasi gagal, redirect kembali ke halaman login dengan pesan error
         return redirect()->route('login')->with('error', 'Email atau password salah.');
     }
 

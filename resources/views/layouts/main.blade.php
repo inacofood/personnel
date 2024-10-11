@@ -8,7 +8,9 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.12.1/datatables.min.css"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.2.4/css/buttons.dataTables.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('assets/css/styles.min.css') }}">
+
   <meta name="csrf-token" content="{{ csrf_token() }}" />
 </head>
 
@@ -50,7 +52,25 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
 
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+        <script>
+        $(document).ready(function() {
+            $('#dttable').DataTable({
+                order: [[0, 'asc']]
+            });
+
+            @if(session('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
+        });
+      </script>
+
         @yield('script')
         @stack('script')
+
+
 </body>
 </html>
