@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class EmployeePresensi extends Model
+class Emodule extends Model
 {
     //use SoftDeletes;
     /**
@@ -13,8 +13,8 @@ class EmployeePresensi extends Model
      *
      * @var string
      */
-    // protected $connection = 'mysqlhrms';
-    protected $table = 'employee_presensi_bulanan';
+    protected $connection = 'mysqlemodule';
+    protected $table = 'lists';
 
     /**
      * The attributes that aren't mass assignable.
@@ -23,5 +23,5 @@ class EmployeePresensi extends Model
      */
     protected $guarded = ['id'];
 
-
 }
+

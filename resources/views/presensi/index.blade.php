@@ -2,24 +2,30 @@
 
 @section('content')
 <div class="card">
-
     <div class="card-body">
-       <h5 class="card-title fw-semibold mb-4 d-flex justify-content-between align-items-center">
+    <h5 class="card-title fw-semibold mb-4 d-flex justify-content-between align-items-center">
     Data Presensi
-    <button type="button" class="btn btn-primary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#importModal">
-        Import Data
-    </button>
+    <div class="ms-auto">
+        <a href="{{ route('report.presensi') }}" class="btn btn-primary btn-sm">
+            Report Absensi
+        </a>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
+            Import Data
+        </button>
+    </div>
+</h5>
+
 </h5>
     </button></h5>
             <table class="display table-head-bg-primary" id="dttable">
                 <thead>
                     <tr>
                         <th class="content" style="display: none">ID</th>
-                        <th class="content">Nik</th>
+                        <th class="content">NIK</th>
                         <th class="content">Nama</th>
                         <th class="content">Department</th>
-                        <th class="content">Superior</th>
                         <th class="content">Tanggal</th>
+                        <th class="content">Week</th>
                         <th class="content">Jam Kerja</th>
                         <th class="content">Masuk</th>
                         <th class="content">Keluar</th>
@@ -32,16 +38,16 @@
                     @foreach ($presensi as $data)
                         <tr>
                             <td style="display: none"> </td>
-                            <td class="content">{{ $data->nik ?? null }}</td>
+                            <td class="content">{{ $data->nik}}</td>
                             <td class="content">{{ $data->nama }}</td>
-                            <td class="content">{{ $data->department }}</td>
-                            <td class="content">{{ $data->nama_superior }}</td>
-                            <td class="content">{{ $data->tanggal ?? null }}</td>
-                            <td class="content">{{ $data->jamkerja }}</td>
-                            <td class="content">{{ $data->masuk }}</td>
-                            <td class="content">{{ $data->keluar }}</td>
+                            <td class="content">{{ $data->dept}}</td>
+                            <td class="content">{{ $data->tanggal}}</td>
+                            <td class="content">{{ $data->week }}</td>
+                            <td class="content">{{ $data->jam_kerja }}</td>
+                            <td class="content">{{ $data->scan_masuk }}</td>
+                            <td class="content">{{ $data->scan_pulang }}</td>
                             <td class="content">{{ $data->terlambat ?? null }}</td>
-                            <td class="content">{{ $data->pulangcepat }}</td>
+                            <td class="content">{{ $data->pulang_cepat }}</td>
                             <td class="content">{{ $data->pengecualian }}</td>
                         </tr>
                     @endforeach
@@ -83,22 +89,12 @@
             if (errorMessage) {
                 toastr.error(errorMessage);
             }
-            var table = $('#dttable').DataTable({
-                "order": [[0, 'desc']],
-                "columnDefs": [
-                    { "targets": 0, "visible": false } // Menyembunyikan kolom pertama
-                ],
-                dom: 'Bfrtip',
-                buttons: [
-                    'copy', 'csv', 'excel', 'pdf', 'print'
-                ]
-            });
-
-
-
         });
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 6124c71839bdc2370ff41b9c0c24e8d07ec8fab3
     </script>
 @endsection
 

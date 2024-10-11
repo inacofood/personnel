@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\ListLink;
+use App\Models\Emodule;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Illuminate\Support\Collection;
@@ -11,14 +11,11 @@ class ListLinksExport implements FromCollection, WithHeadings
 {
     public function collection()
     {
-        return ListLink::all()->map(function ($item) {
-            // Menghapus kolom created_at dan updated_at
+        return Emodule::all()->map(function ($item) {
             unset($item['id']);
             unset($item['created_at']);
             unset($item['updated_at']);
-            // return $item;
-
-            // Mengatur ulang urutan kolom
+ 
             return [
                 $item['category'],
                 $item['sub_cat'],
