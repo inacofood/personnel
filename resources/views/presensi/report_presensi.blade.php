@@ -193,6 +193,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editModalLabel">Detail Presensi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <table class="table table-bordered">
@@ -200,6 +201,7 @@
                         <tr>
                             <th>Nama</th>
                             <th>Tanggal</th>
+                            <th>Shift</th>
                             <th>Jam Masuk</th>
                             <th>Jam Keluar</th>
                         </tr>
@@ -211,7 +213,6 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 @section('script')
@@ -281,6 +282,7 @@ $(document).ready(function() {
                         <tr>
                             <td>${presensi.nama}</td>
                             <td>${presensi.tanggal}</td>
+                            <td>${presensi.jam_kerja}</td>
                             <td>${presensi.scan_masuk}</td>
                             <td>${presensi.scan_pulang}</td>
                         </tr>

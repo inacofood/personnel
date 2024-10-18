@@ -1,5 +1,22 @@
 @extends('layouts.main')
 
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse; 
+    }
+    th, td {
+        padding: 10px;
+        text-align: center;
+        vertical-align: middle;
+    th {
+        background-color: #f2f2f2;
+    }
+    td {
+        border-bottom: 1px solid #ddd;
+    }
+</style>
+
 @section('content')
 <div class="card">
     <div class="card-body">
@@ -17,42 +34,40 @@
 
 </h5>
     </button></h5>
-            <table class="display table-head-bg-primary" id="dttable">
-                <thead>
-                    <tr>
-                        <th class="content" style="display: none">ID</th>
-                        <th class="content">NIK</th>
-                        <th class="content">Nama</th>
-                        <th class="content">Department</th>
-                        <th class="content">Tanggal</th>
-                        <th class="content">Week</th>
-                        <th class="content">Jam Kerja</th>
-                        <th class="content">Masuk</th>
-                        <th class="content">Keluar</th>
-                        <th class="content">Terlambat</th>
-                        <th class="content">Pulang Cepat</th>
-                        <th class="content">Pengecualian</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($presensi as $data)
-                        <tr>
-                            <td style="display: none"> </td>
-                            <td class="content">{{ $data->nik}}</td>
-                            <td class="content">{{ $data->nama }}</td>
-                            <td class="content">{{ $data->dept}}</td>
-                            <td class="content">{{ $data->tanggal}}</td>
-                            <td class="content">{{ $data->week }}</td>
-                            <td class="content">{{ $data->jam_kerja }}</td>
-                            <td class="content">{{ $data->scan_masuk }}</td>
-                            <td class="content">{{ $data->scan_pulang }}</td>
-                            <td class="content">{{ $data->terlambat ?? null }}</td>
-                            <td class="content">{{ $data->pulang_cepat }}</td>
-                            <td class="content">{{ $data->pengecualian }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+    <table class="display table-head-bg-primary" id="dttable">
+    <thead>
+        <tr>
+            <th class="content" style="display: none">ID</th>
+            <th class="content">NIK</th>
+            <th class="content">Nama</th>
+            <th class="content">Department</th>
+            <th class="content">Tanggal</th>
+            <th class="content">Jam Kerja</th>
+            <th class="content">Masuk</th>
+            <th class="content">Keluar</th>
+            <th class="content">Terlambat</th>
+            <th class="content">Pulang Cepat</th>
+            <th class="content">Pengecualian</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($presensi as $data)
+            <tr>
+                <td style="display: none"></td>
+                <td class="content">{{ $data->nik }}</td>
+                <td class="content">{{ $data->nama }}</td>
+                <td class="content">{{ $data->dept }}</td>
+                <td class="content">{{ $data->tanggal }}</td>
+                <td class="content">{{ $data->jam_kerja }}</td>
+                <td class="content">{{ $data->scan_masuk }}</td>
+                <td class="content">{{ $data->scan_pulang }}</td>
+                <td class="content">{{ $data->terlambat ?? null }}</td>
+                <td class="content">{{ $data->pulang_cepat }}</td>
+                <td class="content">{{ $data->pengecualian }}</td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
     </div>
 </div>
 <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
