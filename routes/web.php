@@ -37,9 +37,6 @@ Route::prefix('payroll')->middleware(['auth'])->group(function () {
     Route::post('presensi/export-excel', [PresensiController::class, 'exportExcel'])->name('presensi.exportExcel');
     Route::get('/presensi/detail', [PresensiController::class, 'getPresensiDetail'])->name('presensi.detail');
 
-
-
-
 });
 
     Route::get('/hcmworld', 'HCMController@index')->name('hcm.index');

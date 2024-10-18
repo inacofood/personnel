@@ -27,7 +27,6 @@ class PresensiController extends Controller
 
     public function import(Request $request)
 {
-    // Set batas waktu eksekusi menjadi 300 detik
     set_time_limit(300);
     
     $file = $request->file('file');
@@ -36,7 +35,7 @@ class PresensiController extends Controller
 
     try {
         foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
-            $sheet->removeRow(1, 1); // Jika header ada di baris pertama
+            $sheet->removeRow(1, 1); 
             foreach ($sheet->getRowIterator() as $row) {
                 $cellIterator = $row->getCellIterator();
                 $cellIterator->setIterateOnlyExistingCells(false);
@@ -45,11 +44,9 @@ class PresensiController extends Controller
                     $rowData[] = $cell->getFormattedValue();
                 }
 
-                // Parsing kolom tanggal dan join_date
                 $tanggal = null;
                 $joinDate = null;
 
-                // Kolom Tanggal (index 2)
                 if (!empty($rowData[2])) {
                     if (is_numeric($rowData[2])) {
                         $tanggal = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[2]))->format('Y-m-d');
@@ -62,7 +59,6 @@ class PresensiController extends Controller
                     }
                 }
 
-                // Kolom Join Date (index 15)
                 if (!empty($rowData[15])) {
                     if (is_numeric($rowData[15])) {
                         $joinDate = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[15]))->format('Y-m-d');
@@ -127,24 +123,87 @@ class PresensiController extends Controller
 public function rekapPresensiBulanan()
 {
     $datanama = DB::table('employee_presensi_bulanan')
-    ->select('nama')
-    ->distinct()
-    ->get();
+        ->select('nama')
+        ->distinct()
+        ->get();
 
     $rekapKehadiran = DB::table('employee_presensi_bulanan')
         ->select(
-            'nama', // Nama karyawan
-            DB::raw('MONTH(tanggal) as bulan'), // Ambil bulan dari tanggal
-            DB::raw('YEAR(tanggal) as tahun'), // Ambil tahun dari tanggal
-            // Hitung total hadir berdasarkan adanya scan masuk atau scan pulang
+            'nama',
+            DB::raw('GROUP_CONCAT(DISTINCT jam_kerja SEPARATOR ", ") as jam_kerja'),  // Gabungkan shift jika ada lebih dari satu
+            DB::raw('MONTH(tanggal) as bulan'),
+            DB::raw('YEAR(tanggal) as tahun'),
             DB::raw("COUNT(CASE WHEN scan_masuk IS NOT NULL OR scan_pulang IS NOT NULL THEN 1 END) as total_hadir"),
-            // Hitung total telat berdasarkan scan_masuk lebih dari jam 08:00
-            DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > '08:00:00' THEN 1 END) as total_telat"),
-            // Hitung total pulang awal berdasarkan scan_pulang kurang dari jam 17:00
-            DB::raw("COUNT(CASE WHEN TIME(scan_pulang) < '17:00:00' THEN 1 END) as total_awal"),
-            
+            DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja 
+                 WHEN 'Shift 1A' THEN '06:00:00' 
+                 WHEN 'Shift 1B' THEN '07:00:00' 
+                 WHEN 'Shift 1C' THEN '08:00:00' 
+                 WHEN 'Shift 1D' THEN '09:00:00'
+                 WHEN 'Shift 1E' THEN '10:00:00' 
+                 WHEN 'Shift 1F' THEN '05:00:00' 
+                 WHEN 'Shift 2A' THEN '11:00:00'  
+                 WHEN 'Shift 2B' THEN '12:00:00' 
+                 WHEN 'Shift 2C' THEN '13:00:00' 
+                 WHEN 'Shift 2D' THEN '14:00:00' 
+                 WHEN 'Shift 2E' THEN '15:00:00' 
+                 WHEN 'Shift 2F' THEN '16:00:00' 
+                 WHEN 'Shift 3A' THEN '22:00:00' 
+                 WHEN 'Shift 3B' THEN '23:00:00' 
+                 WHEN 'Shift 1 5 jam' THEN '07:00:00' 
+                 WHEN 'Shift 1A 5 jam' THEN '08:00:00'
+                 WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
+                 WHEN 'Shift 1C 5 jam' THEN '10:00:00'
+                 WHEN 'Shift 3 5 jam' THEN '23:00:00'
+                 WHEN 'Shift 3A 5 jam' THEN '24:00:00'
+                 WHEN 'Shift 2 5 jam' THEN '12:00:00'
+                 WHEN 'Shift 2A 5 jam' THEN '17:00:00'
+                 WHEN 'Shift 2B 5 jam' THEN '18:00:00'
+                 WHEN 'Staff Up 5 HK' THEN '08:00:00'
+                 WHEN 'Driver Ops' THEN '08:00:00'
+                 WHEN 'Driver Ekspedisi S-J' THEN '08:00:00'
+                 WHEN 'Driver Ekspedisi Sab' THEN '08:00:00'
+                 WHEN 'Fleksibel' THEN '07:00:00'
+                 WHEN 'Laundry Sab' THEN '06:00:00'
+                 WHEN 'OB Sab' THEN '07:00:00'
+                 WHEN 'OB Sen-Jum' THEN '06:30:00'
+                 WHEN 'Crew Marketing' THEN '08:00:00'
+                 END) THEN 1 END) as total_telat"),
+            DB::raw("COUNT(CASE WHEN TIME(scan_pulang) < TIME(CASE jam_kerja 
+                 WHEN 'Shift 1A' THEN '14:00:00' 
+                 WHEN 'Shift 1B' THEN '15:00:00'
+                 WHEN 'Shift 1C' THEN '16:00:00' 
+                 WHEN 'Shift 1D' THEN '17:00:00'
+                 WHEN 'Shift 1E' THEN '18:00:00' 
+                 WHEN 'Shift 1F' THEN '13:00:00' 
+                 WHEN 'Shift 2A' THEN '19:00:00'  
+                 WHEN 'Shift 2B' THEN '20:00:00' 
+                 WHEN 'Shift 2C' THEN '21:00:00' 
+                 WHEN 'Shift 2D' THEN '22:00:00' 
+                 WHEN 'Shift 2E' THEN '23:00:00' 
+                 WHEN 'Shift 2F' THEN '24:00:00' 
+                 WHEN 'Shift 3A' THEN '06:00:00' 
+                 WHEN 'Shift 3B' THEN '07:00:00' 
+                 WHEN 'Shift 1 5 jam' THEN '12:00:00' 
+                 WHEN 'Shift 1A 5 jam' THEN '13:10:00'
+                 WHEN 'Shift 1B 5 jam' THEN '11:00:00' 
+                 WHEN 'Shift 1C 5 jam' THEN '15:00:00'
+                 WHEN 'Shift 3 5 jam' THEN '04:00:00'
+                 WHEN 'Shift 3A 5 jam' THEN '05:00:00'
+                 WHEN 'Shift 2 5 jam' THEN '17:00:00'
+                 WHEN 'Shift 2A 5 jam' THEN '22:00:00'
+                 WHEN 'Shift 2B 5 jam' THEN '23:00:00'
+                 WHEN 'Staff Up 5 HK' THEN '17:00:00'
+                 WHEN 'Driver Ops' THEN '17:00:00'
+                 WHEN 'Driver Ekspedisi S-J' THEN '16:00:00'
+                 WHEN 'Driver Ekspedisi Sab' THEN '13:10:00'
+                 WHEN 'Fleksibel' THEN '23:59:00'
+                 WHEN 'Laundry Sab' THEN '11:10:00'
+                 WHEN 'OB Sab' THEN '13:10:00'
+                 WHEN 'OB Sen-Jum' THEN '16:30:00'
+                 WHEN 'Crew Marketing' THEN '17:00:00'
+                 END) THEN 1 END) as total_awal"),
+
             DB::raw("COUNT(CASE WHEN pengecualian IS NOT NULL AND pengecualian != '' THEN 1 END) as total_pengecualian"),
-            // Hitung leave per kategori
             DB::raw("COUNT(CASE WHEN pengecualian IN ('SAKIT', 'sakit dg srt dokter') THEN 1 END) as total_sakit"),
             DB::raw("COUNT(CASE WHEN pengecualian = 'SAKIT TANPA SD' THEN 1 END) as total_sakit_tanpa_sd"),
             DB::raw("COUNT(CASE WHEN pengecualian = 'CUTI MELAHIRKAN' THEN 1 END) as total_cuti_melahirkan"),
@@ -160,12 +219,9 @@ public function rekapPresensiBulanan()
             DB::raw("COUNT(CASE WHEN pengecualian = 'PARUH WAKTU' THEN 1 END) as total_paruh_waktu"),
             DB::raw("COUNT(CASE WHEN pengecualian = 'LIBUR' THEN 1 END) as total_libur"),
             DB::raw("COUNT(CASE WHEN pengecualian = 'ERROR' THEN 1 END) as total_error"),
-
-            // Hitung total hk berdasarkan kolom hk
-            DB::raw("SUM(hk) as total_hk") // Menambahkan perhitungan jumlah HK
-
+            DB::raw("SUM(hk) as total_hk")
         )
-        ->groupBy('nama', DB::raw('MONTH(tanggal)'), DB::raw('YEAR(tanggal)')) // Kelompokkan berdasarkan nama, bulan, dan tahun
+        ->groupBy('nama', DB::raw('MONTH(tanggal)'), DB::raw('YEAR(tanggal)'))
         ->get();
 
     return view('presensi.report_presensi', [
@@ -174,18 +230,16 @@ public function rekapPresensiBulanan()
     ]);
 }
 
-    public function exportExcel(Request $request)
-    {
-    
-        $month = $request->bulanfilter;
-        $year = $request->tahunfilter;
-        $name = $request->namafilter;
-    
-        return Excel::download(new PresensiExport($month, $year, $name), 'rekap-presensi-bulanan.xlsx');
-    }
-
-    public function getPresensiDetail(Request $request)
+public function getPresensiDetail(Request $request)
 {
+    // dd($request);
+        $request->validate([
+        'nama' => 'required|string',
+        'bulan' => 'required|integer',
+        'tahun' => 'required|integer',
+        'status' => 'required|string',
+    ]);
+
     $nama = $request->input('nama');
     $bulan = $request->input('bulan');
     $tahun = $request->input('tahun');
@@ -193,25 +247,112 @@ public function rekapPresensiBulanan()
 
     $query = EmployeePresensi::select(
         'nama',
+        'jam_kerja',
         'tanggal',
         'scan_masuk',
         'scan_pulang',
-        'pengecualian'
+        'pengecualian',
     )
     ->where('nama', $nama)
     ->whereMonth('tanggal', $bulan)
     ->whereYear('tanggal', $tahun);
 
+    // dd($query->get());
     if ($status == 'Hadir') {
         // Menampilkan data Hadir (scan masuk dan scan pulang tidak null)
         $query->whereNotNull('scan_masuk')
               ->whereNotNull('scan_pulang');
     } elseif ($status == 'Telat') {
-        // Misalkan 'Telat' adalah kondisi di mana scan masuk lebih dari jam tertentu
-        $query->whereTime('scan_masuk', '>', '08:00:00');
+        $shifts = [
+            'Shift 1A' => ['start' => '06:00:00', 'end' => '14:00:00'],
+            'Shift 1B' => ['start' => '07:00:00', 'end' => '15:00:00'],
+            'Shift 1C' => ['start' => '08:00:00', 'end' => '16:00:00'],
+            'Shift 1D' => ['start' => '09:00:00', 'end' => '17:00:00'],
+            'Shift 1E' => ['start' => '10:00:00', 'end' => '18:00:00'],
+            'Shift 1F' => ['start' => '05:00:00', 'end' => '13:00:00'],
+            'Shift 2A' => ['start' => '11:00:00', 'end' => '19:00:00'],
+            'Shift 2B' => ['start' => '12:00:00', 'end' => '20:00:00'],
+            'Shift 2C' => ['start' => '13:00:00', 'end' => '21:00:00'],
+            'Shift 2D' => ['start' => '14:00:00', 'end' => '22:00:00'],
+            'Shift 2E' => ['start' => '15:00:00', 'end' => '23:00:00'],
+            'Shift 2F' => ['start' => '16:00:00', 'end' => '24:00:00'],
+            'Shift 3A' => ['start' => '22:00:00', 'end' => '06:00:00'],
+            'Shift 3B' => ['start' => '23:00:00', 'end' => '07:00:00'],
+            'Shift 1 5 jam' => ['start' => '07:00:00', 'end' => '12:00:00'],
+            'Shift 1A 5 jam' => ['start' => '08:00:00', 'end' => '13:10:00'],
+            'Shift 1B 5 jam' => ['start' => '06:00:00', 'end' => '11:00:00'],
+            'Shift 1C 5 jam' => ['start' => '10:00:00', 'end' => '15:00:00'],
+            'Shift 3 5 jam' => ['start' => '23:00:00', 'end' => '04:00:00'],
+            'Shift 3A 5 jam' => ['start' => '24:00:00', 'end' => '05:00:00'],
+            'Shift 2 5 jam' => ['start' => '12:00:00', 'end' => '17:00:00'],
+            'Shift 2A 5 jam' => ['start' => '17:00:00', 'end' => '22:00:00'],
+            'Shift 2B 5 jam' => ['start' => '18:00:00', 'end' => '23:00:00'],
+            'Staff Up 5 HK' => ['start' => '08:00:00', 'end' => '17:00:00'],
+            'Driver Ops' => ['start' => '08:00:00', 'end' => '17:00:00'],
+            'Driver Ekspedisi S-J' => ['start' => '08:00:00', 'end' => '16:00:00'],
+            'Driver Ekspedisi Sab' => ['start' => '08:00:00', 'end' => '13:10:00'],
+            'Fleksibel' => ['start' => '07:00:00', 'end' => '23:59:00'],
+            'Laundry Sab' => ['start' => '06:00:00', 'end' => '11:10:00'],
+            'OB Sab' => ['start' => '07:00:00', 'end' => '13:10:00'],
+            'OB Sen-Jum' => ['start' => '06:30:00', 'end' => '16:30:00'],
+            'Crew Marketing' => ['start' => '08:00:00', 'end' => '17:00:00'],
+        ];
+        
+        $query->where(function ($q) use ($shifts) {
+            foreach ($shifts as $shiftName => $shiftTimes) {
+                $q->orWhere(function ($query) use ($shiftName, $shiftTimes) {
+                    $query->where('jam_kerja', $shiftName)
+                          ->whereTime('scan_masuk', '>', $shiftTimes['start']);
+                });
+            }
+        });
+        
     } elseif ($status == 'Awal') {
         // Misalkan 'Pulang Cepat' adalah kondisi di mana scan pulang kurang dari jam tertentu
-        $query->whereTime('scan_pulang', '<', '17:00:00');
+        $shifts = [
+            'Shift 1A' => ['start' => '06:00:00', 'end' => '14:00:00'],
+            'Shift 1B' => ['start' => '07:00:00', 'end' => '15:00:00'],
+            'Shift 1C' => ['start' => '08:00:00', 'end' => '16:00:00'],
+            'Shift 1D' => ['start' => '09:00:00', 'end' => '17:00:00'],
+            'Shift 1E' => ['start' => '10:00:00', 'end' => '18:00:00'],
+            'Shift 1F' => ['start' => '05:00:00', 'end' => '13:00:00'],
+            'Shift 2A' => ['start' => '11:00:00', 'end' => '19:00:00'],
+            'Shift 2B' => ['start' => '12:00:00', 'end' => '20:00:00'],
+            'Shift 2C' => ['start' => '13:00:00', 'end' => '21:00:00'],
+            'Shift 2D' => ['start' => '14:00:00', 'end' => '22:00:00'],
+            'Shift 2E' => ['start' => '15:00:00', 'end' => '23:00:00'],
+            'Shift 2F' => ['start' => '16:00:00', 'end' => '24:00:00'],
+            'Shift 3A' => ['start' => '22:00:00', 'end' => '06:00:00'],
+            'Shift 3B' => ['start' => '23:00:00', 'end' => '07:00:00'],
+            'Shift 1 5 jam' => ['start' => '07:00:00', 'end' => '12:00:00'],
+            'Shift 1A 5 jam' => ['start' => '08:00:00', 'end' => '13:10:00'],
+            'Shift 1B 5 jam' => ['start' => '06:00:00', 'end' => '11:00:00'],
+            'Shift 1C 5 jam' => ['start' => '10:00:00', 'end' => '15:00:00'],
+            'Shift 3 5 jam' => ['start' => '23:00:00', 'end' => '04:00:00'],
+            'Shift 3A 5 jam' => ['start' => '24:00:00', 'end' => '05:00:00'],
+            'Shift 2 5 jam' => ['start' => '12:00:00', 'end' => '17:00:00'],
+            'Shift 2A 5 jam' => ['start' => '17:00:00', 'end' => '22:00:00'],
+            'Shift 2B 5 jam' => ['start' => '18:00:00', 'end' => '23:00:00'],
+            'Staff Up 5 HK' => ['start' => '08:00:00', 'end' => '17:00:00'],
+            'Driver Ops' => ['start' => '08:00:00', 'end' => '17:00:00'],
+            'Driver Ekspedisi S-J' => ['start' => '08:00:00', 'end' => '16:00:00'],
+            'Driver Ekspedisi Sab' => ['start' => '08:00:00', 'end' => '13:10:00'],
+            'Fleksibel' => ['start' => '07:00:00', 'end' => '23:59:00'],
+            'Laundry Sab' => ['start' => '06:00:00', 'end' => '11:10:00'],
+            'OB Sab' => ['start' => '07:00:00', 'end' => '13:10:00'],
+            'OB Sen-Jum' => ['start' => '06:30:00', 'end' => '16:30:00'],
+            'Crew Marketing' => ['start' => '08:00:00', 'end' => '17:00:00'],
+        ];
+        
+        $query->where(function ($q) use ($shifts) {
+            foreach ($shifts as $shiftName => $shiftTimes) {
+                $q->orWhere(function ($query) use ($shiftName, $shiftTimes) {
+                    $query->where('jam_kerja', $shiftName)
+                          ->whereTime('scan_pulang', '<', $shiftTimes['end']);
+                });
+            }
+        });
+        
     } elseif ($status == 'HK') {
         // Tambahkan kondisi untuk HK (hari kerja) jika diperlukan
         // Misalnya, pengecualian kolom "pengecualian" ada status "HK"
@@ -278,7 +419,6 @@ public function rekapPresensiBulanan()
         $query->whereIn('pengecualian', ['LIBUR']);
     }
 
-    // Eksekusi query untuk mendapatkan hasil
     $presensi = $query->get();
     // Kirim data ke view atau JSON sesuai kebutuhan
     return response()->json([
@@ -288,8 +428,16 @@ public function rekapPresensiBulanan()
     ]);
 }
 
+    public function exportExcel(Request $request)
+    {
 
-    
+        $month = $request->bulanfilter;
+        $year = $request->tahunfilter;
+        $name = $request->namafilter;
+
+        return Excel::download(new PresensiExport($month, $year, $name), 'rekap-presensi-bulanan.xlsx');
+    }
+
 
     public function destroy($id)
     {
