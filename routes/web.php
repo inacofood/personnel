@@ -9,6 +9,7 @@ use App\Http\Controllers\InputController;
 use App\Http\Controllers\MonitoringinvoiceController;
 use App\Http\Controllers\PettycashController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\KendaraanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,6 +95,26 @@ Route::prefix('payroll')->middleware(['auth'])->group(function () {
     Route::get('/export-pp', [PettycashController::class, 'exportpp'])->name('exportpp');
     Route::get('/import', [PettycashController::class, 'indeximport'])->name('importpp');
     Route::post('/import-cc', [PettycashController::class, 'importcc'])->name('importcc');
+
+    Route::get('/kendaraanasset', [KendaraanController::class, 'indexasset'])->name('kendaraanasset');
+    Route::get('/kendaraansewa', [KendaraanController::class, 'indexsewa'])->name('kendaraansewa');
+    Route::post('/import-kendaraan', [KendaraanController::class, 'importKendaraan'])->name('kendaraan.import');
+    Route::post('/import-kendaraan-sewa', [KendaraanController::class, 'importKendaraanSewa'])->name('kendaraan.sewa.import');
+    Route::put('/update-data-sewa', [KendaraanController::class, 'updatesewa'])->name('sewa.update');
+    Route::put('/update-user-sewa', [KendaraanController::class, 'updateuser'])->name('user.update');
+    Route::put('/perpanjang-sewa', [KendaraanController::class, 'perpanjangsewa'])->name('perpanjangsewa');
+    Route::put('/update-data-asset', [KendaraanController::class, 'updateasset'])->name('asset.update');
+    Route::post('/create-data-asset', [KendaraanController::class, 'createasset'])->name('asset.store');
+    Route::post('/create-data-sewa', [KendaraanController::class, 'createsewa'])->name('sewa.store');
+
+
+
+    
+
+    
+
+
+
 
 
 
