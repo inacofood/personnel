@@ -260,8 +260,10 @@ public function getPresensiDetail(Request $request)
     // dd($query->get());
     if ($status == 'Hadir') {
         // Menampilkan data Hadir (scan masuk dan scan pulang tidak null)
-        $query->whereNotNull('scan_masuk')
-              ->whereNotNull('scan_pulang');
+        $query->where(function($query) {
+            $query->whereNotNull('scan_masuk')
+                  ->orWhereNotNull('scan_pulang');
+        });
     } elseif ($status == 'Telat') {
         $shifts = [
             'Shift 1A' => ['start' => '06:00:00', 'end' => '14:00:00'],

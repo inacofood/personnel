@@ -1,11 +1,7 @@
 @extends('layouts.main')
 
-<!-- Select2 CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
-<!-- Select2 JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
 
 @section('content')
 <div class="card" style="max-width: 110%; margin: auto;">
@@ -13,7 +9,6 @@
         <h5 class="card-title fw-semibold mb-4 d-flex justify-content-between align-items-center">
             Report Presensi
         </h5>
-        <!-- Filters Section -->
         <form action="{{ route('presensi.exportExcel') }}" method="POST">
             @csrf
             <div class="row mb-3">
@@ -46,7 +41,6 @@
                 </div>
             </div>
         </form>
-
         <div class="table-responsive">
             <table class="table table-striped table-bordered display" id="dttable">
                 <thead>
@@ -79,6 +73,7 @@
                 <tbody>
                 @foreach($rekapKehadiran as $kehadiran)
                     <tr>
+                      
                         <td>{{ $kehadiran->nama }}</td>
                         <td>{{ \Carbon\Carbon::create()->month($kehadiran->bulan)->translatedFormat('F') }}</td>
                         <td hidden>{{ $kehadiran->bulan }}</td>
@@ -199,7 +194,7 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Nama</th>
+                            <th>No</th>
                             <th>Tanggal</th>
                             <th>Shift</th>
                             <th>Jam Masuk</th>
@@ -218,7 +213,6 @@
 @section('script')
 <script>
 $(document).ready(function() {
-    // Initialize DataTable
     var table = $('#dttable').DataTable({
         paging: true,
         searching: true,
@@ -228,73 +222,78 @@ $(document).ready(function() {
         columnDefs: [
             { orderable: false, targets: [4, 5, 6, 7, 8] }
         ],
-        destroy: true // Allows reinitialization of DataTable if necessary
+        destroy: true 
     });
 
-    // Filter by name
     $('#namaFilter').on('change', function () {
         table.columns(0).search(this.value).draw();
         });
-    // Filter by month
+   
     $('#bulanFilter').on('change', function () {
         table.columns(2).search(this.value).draw();
         table.columns(2).search(this.value).draw();
     });
 
-    // Filter by year
     $('#tahunFilter').on('change', function () {
         table.columns(3).search(this.value).draw();
     });
 
-    // Reset filters if all inputs are empty
     $('#namaFilter, #bulanFilter, #tahunFilter').on('input change', function() {
     if ($('#namaFilter').val() === '' && $('#bulanFilter').val() === '' && $('#tahunFilter').val() === '') {
-        table.search('').columns().search('').draw(); // Reset all filters
+        table.search('').columns().search('').draw(); 
     }
     });
 
-    // Event delegation for showing presensi modal
     $(document).on('click', '.show-presensi-modal', function(e) {
-        e.preventDefault();
+    e.preventDefault();
 
-        var nama = $(this).data('nama');
-        var bulan = $(this).data('bulan');
-        var tahun = $(this).data('tahun');
-        var status = $(this).data('status');
+    var nama = $(this).data('nama');
+    var bulan = $(this).data('bulan');
+    var tahun = $(this).data('tahun');
+    var status = $(this).data('status');
 
-        // AJAX request to fetch presensi details
-        $.ajax({
-            url: '{{ route('presensi.detail') }}', // Use the route helper to ensure the route is correct
-            method: 'GET',
-            data: {
-                nama: nama,
-                bulan: bulan,
-                tahun: tahun,
-                status: status
-            },
-            success: function(response) {
-                // Clear previous modal content
-                $('#modal-presensi-data').empty();
+    $.ajax({
+        url: '{{ route('presensi.detail') }}', 
+        method: 'GET',
+        data: {
+            nama: nama,
+            bulan: bulan,
+            tahun: tahun,
+            status: status
+        },
+        success: function(response) {
+            $('#modal-presensi-data').empty();
+            var nomor = 1;
 
-                // Iterate through presensi data and append it to the modal
-                $.each(response.presensi, function(index, presensi) {
-                    $('#modal-presensi-data').append(`
-                        <tr>
-                            <td>${presensi.nama}</td>
-                            <td>${presensi.tanggal}</td>
-                            <td>${presensi.jam_kerja}</td>
-                            <td>${presensi.scan_masuk}</td>
-                            <td>${presensi.scan_pulang}</td>
-                        </tr>
-                    `);
-                });
+            function formatTanggal(tanggal) {
+                if (!tanggal) return '-'; 
+                var days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                var dateObj = new Date(tanggal);
+                var day = days[dateObj.getUTCDay()]; 
+                var date = ('0' + dateObj.getUTCDate()).slice(-2); 
+                var month = ('0' + (dateObj.getUTCMonth() + 1)).slice(-2); 
+                var year = dateObj.getUTCFullYear(); 
 
-                // Show the modal
-                $('#editModal').modal('show');
+                return `${day}, ${date}-${month}-${year}`; 
             }
-        });
+
+            $.each(response.presensi, function(index, presensi) {
+                $('#modal-presensi-data').append(`
+                    <tr>  
+                        <td>${nomor}</td> <!-- Nomor urut -->
+                        <td>${formatTanggal(presensi.tanggal)}</td> <!-- Format date with day -->
+                        <td>${presensi.jam_kerja || '-'}</td> <!-- Show '-' if jam_kerja is null -->
+                        <td>${presensi.scan_masuk || '-'}</td> <!-- Show '-' if scan_masuk is null -->
+                        <td>${presensi.scan_pulang || '-'}</td> <!-- Show '-' if scan_pulang is null -->
+                    </tr>
+                `);
+                nomor++; 
+            });
+
+            $('#editModal').modal('show');
+        }
     });
 });
+});
 </script>
-
 @endsection

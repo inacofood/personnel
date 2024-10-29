@@ -51,22 +51,23 @@
         </tr>
     </thead>
     <tbody>
-        @foreach ($presensi as $data)
-            <tr>
-                <td style="display: none"></td>
-                <td class="content">{{ $data->nik }}</td>
-                <td class="content">{{ $data->nama }}</td>
-                <td class="content">{{ $data->dept }}</td>
-                <td class="content">{{ $data->tanggal }}</td>
-                <td class="content">{{ $data->jam_kerja }}</td>
-                <td class="content">{{ $data->scan_masuk }}</td>
-                <td class="content">{{ $data->scan_pulang }}</td>
-                <td class="content">{{ $data->terlambat ?? null }}</td>
-                <td class="content">{{ $data->pulang_cepat }}</td>
-                <td class="content">{{ $data->pengecualian }}</td>
-            </tr>
-        @endforeach
-    </tbody>
+    @foreach ($presensi as $data)
+        <tr>
+            <td style="display: none"></td>
+            <td class="content">{{ $data->nik !== '#N/A' ? ($data->nik ?? '-') : '-' }}</td>
+            <td class="content">{{ $data->nama !== '#N/A' ? ($data->nama ?? '-') : '-' }}</td>
+            <td class="content">{{ $data->dept !== '#N/A' ? ($data->dept ?? '-') : '-' }}</td>
+            <td class="content">{{ ($data->tanggal && $data->tanggal !== '#N/A') ? \Carbon\Carbon::parse($data->tanggal)->format('d-m-Y') : '-' }}</td>
+            <td class="content">{{ $data->jam_kerja !== '#N/A' ? ($data->jam_kerja ?? '-') : '-' }}</td>
+            <td class="content">{{ $data->scan_masuk !== '#N/A' ? ($data->scan_masuk ?? '-') : '-' }}</td>
+            <td class="content">{{ $data->scan_pulang !== '#N/A' ? ($data->scan_pulang ?? '-') : '-' }}</td>
+            <td class="content">{{ $data->terlambat !== '#N/A' ? ($data->terlambat ?? '-') : '-' }}</td>
+            <td class="content">{{ $data->pulang_cepat !== '#N/A' ? ($data->pulang_cepat ?? '-') : '-' }}</td>
+            <td class="content">{{ $data->pengecualian !== '#N/A' ? ($data->pengecualian ?? '-') : '-' }}</td>
+        </tr>
+    @endforeach
+</tbody>
+
 </table>
     </div>
 </div>

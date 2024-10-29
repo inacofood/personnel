@@ -68,10 +68,24 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" aria-expanded="false">
+                    <a class="sidebar-link has-arrow" aria-expanded="false">
                         <span><i class="ti ti-car"></i></span>
                         <span class="hide-menu">Vehicle Management System</span>
                     </a>
+                    <ul aria-expanded="false" class="collapse first-level">
+                        <li class="sidebar-item" style="padding-left: 30px;"> <!-- Menambahkan padding-left untuk menjorok -->
+                            <a href="{{ route('kendaraanasset') }}" class="sidebar-link">
+                                <span><i class="ti ti-package"></i></span> <!-- Ikon untuk Kendaraan Asset -->
+                                <span class="hide-menu">Kendaraan Asset</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item" style="padding-left: 30px;"> <!-- Menambahkan padding-left untuk menjorok -->
+                            <a href="{{ route('kendaraansewa') }}" class="sidebar-link">
+                                <span><i class="ti ti-key"></i></span> <!-- Ikon untuk Kendaraan Sewa -->
+                                <span class="hide-menu">Kendaraan Sewa</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="sidebar-item">
                     <a class="sidebar-link" aria-expanded="false">
