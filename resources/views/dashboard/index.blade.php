@@ -3,36 +3,38 @@
 @section('content')
 <section class="section" id="home">
 <div class="d-flex justify-content-end">
-    <form action="{{ route('dashboard') }}" method="GET" class="d-flex align-items-end">
+<form action="{{ route('dashboard') }}" method="GET" class="d-flex align-items-end">
     @csrf
-        <div class="form-group mx-2">
-            <select name="bulan" id="bulan" class="form-control">
-                <option value="">-- Semua Bulan --</option>
-                @foreach(range(1, 12) as $month)
-                    <option value="{{ $month }}" {{ request('bulan') == $month ? 'selected' : '' }}>
-                        {{ DateTime::createFromFormat('!m', $month)->format('F') }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+    <div class="form-group mx-2">
+    <select name="bulan" id="bulan" class="form-control">
+        <option value="">-- Semua Bulan --</option>
+        @foreach(range(1, 12) as $month)
+            <option value="{{ $month }}" {{ session('bulan', now()->month) == $month ? 'selected' : '' }}>
+                {{ DateTime::createFromFormat('!m', $month)->format('F') }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
-        <div class="form-group mx-2">
-            <select name="tahun" id="tahun" class="form-control">
-                <option value="">-- Semua Tahun --</option>
-                @foreach(range(date('Y'), 2020) as $year) <!-- Adjust range of years as needed -->
-                    <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>
-                        {{ $year }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+<div class="form-group mx-2">
+    <select name="tahun" id="tahun" class="form-control">
+        <option value="">-- Semua Tahun --</option>
+        @foreach(range(date('Y'), 2020) as $year)
+            <option value="{{ $year }}" {{ session('tahun', date('Y')) == $year ? 'selected' : '' }}>
+                {{ $year }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
-        <div class="form-group mx-2">
+
+    <div class="form-group mx-2">
         <button type="submit" class="btn btn-primary">
             <i class="fas fa-search"></i>
         </button>
-        </div>
-    </form>
+    </div>
+</form>
+
 </div>
 
     <div class="container2 text-center" style="padding-top:20px">
@@ -40,44 +42,78 @@
             <div class="col-md-12">
                 <div class="row">
                     <!-- Total Leave -->
-                    <div class="col-md-4">
-                        <div class="total-box bg-primary text-white" style="border-radius: 10px; height: 100px;">
-                            <h5 style="color:white; padding-top:10px"><b>Total Leave</b></h5>
-                            <p style="color:white; font-size:28px; font-weight:bold; padding-bottom:10px">
+                    <div class="col-md-3">
+                    <div class="total-box bg-primary text-white" style="border-radius: 10px; height: 100px;">
+                        <h5 style="color:white; padding-top:10px"><b>Total Leave</b></h5>
+                        <form action="{{ route('detail.count.dashboard') }}" method="GET">
+                            @csrf
+                            <input type="hidden" name="status" value="LEAVE">
+                            <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
+                            <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
+                            <button type="submit" style="font-size:28px; font-weight:bold; padding-bottom:10px; border:none; background:none; cursor:pointer; color:white">
                                 {{
-                                    ($totals->total_sakit ?? 0) + 
-                                    ($totals->total_sakit_tanpa_sd ?? 0) + 
-                                    ($totals->total_cuti_melahirkan ?? 0) + 
-                                    ($totals->total_dinas_luar ?? 0) + 
-                                    ($totals->total_cuti_tahunan ?? 0) + 
-                                    ($totals->total_cuti ?? 0) + 
-                                    ($totals->total_izin ?? 0) + 
-                                    ($totals->total_anak_btis ?? 0) + 
-                                    ($totals->total_istri_melahirkan ?? 0) + 
-                                    ($totals->total_menikah ?? 0) + 
-                                    ($totals->total_ot_mtua_klg_mgl ?? 0) + 
-                                    ($totals->total_wfh ?? 0) + 
+                                    ($totals->total_sakit ?? 0) +
+                                    ($totals->total_sakit_tanpa_sd ?? 0) +
+                                    ($totals->total_cuti_melahirkan ?? 0) +
+                                    ($totals->total_cuti_tahunan ?? 0) +
+                                    ($totals->total_cuti ?? 0) +
+                                    ($totals->total_izin ?? 0) +
+                                    ($totals->total_anak_btis ?? 0) +
+                                    ($totals->total_istri_melahirkan ?? 0) +
+                                    ($totals->total_menikah ?? 0) +
+                                    ($totals->total_ot_mtua_klg_mgl ?? 0) +
+                                    ($totals->total_wfh ?? 0) +
                                     ($totals->total_paruh_waktu ?? 0)
                                 }}
-                            </p>
-                        </div>
+                            </button>
+                        </form>
                     </div>
+                </div>
 
-                    <!-- Total Telat -->
-                    <div class="col-md-4">
-                        <div class="total-box bg-danger text-white" style="border-radius: 10px; height: 100px;">
-                            <h5 style="color:white; padding-top:10px"><b>Total Late</b></h5>
-                            <p style="color:white; font-size:28px; font-weight:bold; padding-bottom:10px">{{ $telatAwalData[0]['y'] ?? 'N/A' }}</p>
-                        </div>
+                 <!-- Total Dinas Luar -->
+                 <div class="col-md-3">
+                    <div class="total-box bg-secondary text-white" style="border-radius: 10px; height: 100px;">
+                        <h5 style="color:white; padding-top:10px"><b>Total Dinas Luar</b></h5>
+                        <form action="{{ route('detail.dinasluar.dashboard') }}" method="GET">
+                    @csrf
+                    <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
+                    <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
+                    <button type="submit" style="font-size:28px; font-weight:bold; padding-bottom:10px; border:none; background:none; cursor:pointer; color:white">
+                        {{ $totals->total_dinas_luar ?? 'N/A' }}
+                    </button>
+                </form>
                     </div>
+                </div>
 
-                    <!-- Total Pulang Awal -->
-                    <div class="col-md-4">
-                        <div class="total-box bg-warning text-white" style="border-radius: 10px; height: 100px;">
-                            <h5 style="color:white; padding-top:10px"><b>Total Pulang Awal</b></h5>
-                            <p style="color:white; font-size:28px; font-weight:bold; padding-bottom:10px">{{ $telatAwalData[1]['y'] ?? 'N/A' }}</p>
-                        </div>
+                <!-- Total Telat -->
+                <div class="col-md-3">
+                    <div class="total-box bg-danger text-white" style="border-radius: 10px; height: 100px;">
+                        <h5 style="color:white; padding-top:10px"><b>Total Late</b></h5>
+                        <form action="{{ route('detail.late.dashboard') }}" method="GET">
+                    @csrf
+                    <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
+                    <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
+                    <button type="submit" style="font-size:28px; font-weight:bold; padding-bottom:10px; border:none; background:none; cursor:pointer; color:white">
+                        {{ $telatAwalData[0]['y'] ?? 'N/A' }}
+                    </button>
+                </form>
                     </div>
+                </div>
+
+                <!-- Total Pulang Awal -->
+                <div class="col-md-3">
+                    <div class="total-box bg-warning text-white" style="border-radius: 10px; height: 100px;">
+                        <h5 style="color:white; padding-top:10px"><b>Total Pulang Awal</b></h5>
+                        <form action="{{ route('detail.awal.dashboard') }}" method="GET">
+                    @csrf
+                    <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
+                    <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
+                    <button type="submit" style="font-size:28px; font-weight:bold; padding-bottom:10px; border:none; background:none; cursor:pointer; color:white">
+                        {{ $telatAwalData[1]['y'] ?? 'N/A' }}
+                    </button>
+                </form>
+                </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -104,7 +140,7 @@
                         </tr>
                         <tr>
                             <th>Nama</th>
-                            <th>Kategori Leave</th> <!-- Kolom untuk kategori leave -->
+                            <th>Kategori Leave</th>
                             <th>Jumlah Leave</th>
                         </tr>
                     </thead>
@@ -112,7 +148,7 @@
                         @foreach($rekapLeave as $leave)
                             <tr>
                                 <td>{{ $leave['nama'] }}</td>
-                                <td>{{ $leave['kategori_leave'] }}</td> <!-- Menampilkan kategori leave -->
+                                <td>{{ $leave['kategori_leave'] }}</td>
                                 <td>{{ $leave['total_leave'] }}</td>
                             </tr>
                         @endforeach
@@ -156,7 +192,6 @@
                             <th>Sakit</th>
                             <th>Sakit Tanpa SD</th>
                             <th>Cuti Melahirkan</th>
-                            <th>Dinas Luar</th>
                             <th>Cuti Tahunan</th>
                             <th>Cuti</th>
                             <th>Izin</th>
@@ -173,7 +208,6 @@
                             <td>{{ $totals->total_sakit ?? 0 }}</td>
                             <td>{{ $totals->total_sakit_tanpa_sd ?? 0 }}</td>
                             <td>{{ $totals->total_cuti_melahirkan ?? 0 }}</td>
-                            <td>{{ $totals->total_dinas_luar ?? 0 }}</td>
                             <td>{{ $totals->total_cuti_tahunan ?? 0 }}</td>
                             <td>{{ $totals->total_cuti ?? 0 }}</td>
                             <td>{{ $totals->total_izin ?? 0 }}</td>
@@ -199,7 +233,6 @@
     $(document).ready(function() {
         var data = {!! json_encode($data ?? []) !!};
 
-        // First pie chart for Leave Performance
         Highcharts.chart('donut-container', {
             chart: {
                 type: 'pie'
@@ -233,7 +266,6 @@
 
         });
 
-        // Second pie chart for Total Leave, Total Late, and Total Pulang Awal
         Highcharts.chart('donut-container-2', {
             chart: {
                 type: 'pie'
@@ -263,7 +295,7 @@
                 name: 'Total',
                 colorByPoint: true,
                 data: [
-                    { name: 'Total Leave', y: {{ ($totals->total_sakit ?? 0) + ($totals->total_sakit_tanpa_sd ?? 0) + ($totals->total_cuti_melahirkan ?? 0) + ($totals->total_dinas_luar ?? 0) + ($totals->total_cuti_tahunan ?? 0) + ($totals->total_cuti ?? 0) + ($totals->total_izin ?? 0) + ($totals->total_anak_btis ?? 0) + ($totals->total_istri_melahirkan ?? 0) + ($totals->total_menikah ?? 0) + ($totals->total_ot_mtua_klg_mgl ?? 0) + ($totals->total_wfh ?? 0) + ($totals->total_paruh_waktu ?? 0) }}, sliced: true },
+                    { name: 'Total Leave', y: {{ ($totals->total_sakit ?? 0) + ($totals->total_sakit_tanpa_sd ?? 0) + ($totals->total_cuti_melahirkan ?? 0) + ($totals->total_cuti_tahunan ?? 0) + ($totals->total_cuti ?? 0) + ($totals->total_izin ?? 0) + ($totals->total_anak_btis ?? 0) + ($totals->total_istri_melahirkan ?? 0) + ($totals->total_menikah ?? 0) + ($totals->total_ot_mtua_klg_mgl ?? 0) + ($totals->total_wfh ?? 0) + ($totals->total_paruh_waktu ?? 0) }}, sliced: true },
                     { name: 'Total Late', y: {{ $telatAwalData[0]['y'] ?? 0 }} },
                     { name: 'Total Pulang Awal', y: {{ $telatAwalData[1]['y'] ?? 0 }} }
                 ]

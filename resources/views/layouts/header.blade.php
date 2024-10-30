@@ -17,11 +17,13 @@
         <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
 
           <li class="nav-item dropdown">
-            <a class="nav-link " href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
-              aria-expanded="false" style="font-size: 16px;color:white;">  {{ Auth::user()->name }} &nbsp;
-              <img src="../assets/images/profile/user-1.jpg" alt="" width="35" height="35" class="rounded-circle">
-
-            </a>
+          @auth
+              <a class="nav-link" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
+                aria-expanded="false" style="font-size: 16px; color:white;">
+                {{ auth()->user()->name }} &nbsp;
+                <img src="{{ asset('assets/images/profile/user-1.jpg') }}" alt="Profile Image" width="35" height="35" class="rounded-circle">
+              </a>
+          @endauth
             <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
               <div class="message-body">
                 <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">

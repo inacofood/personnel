@@ -76,7 +76,6 @@ class PresensiController extends Controller
                                                ->where('tanggal', $tanggal)
                                                ->first();
 
-                // Validasi waktu format untuk scan_masuk dan scan_pulang
                 $scan_masuk = isset($rowData[5]) && preg_match("/^\d{2}:\d{2}(:\d{2})?$/", $rowData[5]) ? $rowData[5] . ':00' : null;
                 $scan_pulang = isset($rowData[6]) && preg_match("/^\d{2}:\d{2}(:\d{2})?$/", $rowData[6]) ? $rowData[6] . ':00' : null;
 
@@ -86,8 +85,8 @@ class PresensiController extends Controller
                     'tanggal' => $tanggal,
                     'week' => $rowData[3] ?? null,
                     'jam_kerja' => $rowData[4] ?? null,
-                    'scan_masuk' => $scan_masuk, // Scan masuk validasi
-                    'scan_pulang' => $scan_pulang, // Scan pulang validasi
+                    'scan_masuk' => $scan_masuk, 
+                    'scan_pulang' => $scan_pulang, 
                     'terlambat' => $rowData[7] ? $rowData[7] . ':00' : null,
                     'pulang_cepat' => $rowData[8] ? $rowData[8] . ':00' : null,
                     'absent' => $rowData[9] ?? null,
@@ -96,7 +95,7 @@ class PresensiController extends Controller
                     'dept' => $rowData[12] ?? null,
                     'section' => $rowData[13] ?? null,
                     'grade' => $rowData[14] ?? null,
-                    'join_date' => $joinDate, // Join date validasi
+                    'join_date' => $joinDate,
                     'jt' => $rowData[16] ?? null,
                     'atasan' => $rowData[17] ?? null,
                     'created_by' => 6,
@@ -120,6 +119,7 @@ class PresensiController extends Controller
     ]);
 }
 
+
 public function rekapPresensiBulanan()
 {
     $datanama = DB::table('employee_presensi_bulanan')
@@ -130,7 +130,7 @@ public function rekapPresensiBulanan()
     $rekapKehadiran = DB::table('employee_presensi_bulanan')
         ->select(
             'nama',
-            DB::raw('GROUP_CONCAT(DISTINCT jam_kerja SEPARATOR ", ") as jam_kerja'),  // Gabungkan shift jika ada lebih dari satu
+            DB::raw('GROUP_CONCAT(DISTINCT jam_kerja SEPARATOR ", ") as jam_kerja'), 
             DB::raw('MONTH(tanggal) as bulan'),
             DB::raw('YEAR(tanggal) as tahun'),
             DB::raw("COUNT(CASE WHEN scan_masuk IS NOT NULL OR scan_pulang IS NOT NULL THEN 1 END) as total_hadir"),
@@ -232,7 +232,6 @@ public function rekapPresensiBulanan()
 
 public function getPresensiDetail(Request $request)
 {
-    // dd($request);
         $request->validate([
         'nama' => 'required|string',
         'bulan' => 'required|integer',
@@ -251,15 +250,13 @@ public function getPresensiDetail(Request $request)
         'tanggal',
         'scan_masuk',
         'scan_pulang',
-        'pengecualian',
+        'pengecualian'
     )
     ->where('nama', $nama)
     ->whereMonth('tanggal', $bulan)
     ->whereYear('tanggal', $tahun);
 
-    // dd($query->get());
     if ($status == 'Hadir') {
-        // Menampilkan data Hadir (scan masuk dan scan pulang tidak null)
         $query->where(function($query) {
             $query->whereNotNull('scan_masuk')
                   ->orWhereNotNull('scan_pulang');
@@ -310,7 +307,6 @@ public function getPresensiDetail(Request $request)
         });
         
     } elseif ($status == 'Awal') {
-        // Misalkan 'Pulang Cepat' adalah kondisi di mana scan pulang kurang dari jam tertentu
         $shifts = [
             'Shift 1A' => ['start' => '06:00:00', 'end' => '14:00:00'],
             'Shift 1B' => ['start' => '07:00:00', 'end' => '15:00:00'],
@@ -356,73 +352,55 @@ public function getPresensiDetail(Request $request)
         });
         
     } elseif ($status == 'HK') {
-        // Tambahkan kondisi untuk HK (hari kerja) jika diperlukan
-        // Misalnya, pengecualian kolom "pengecualian" ada status "HK"
         $query->where('HK', 1);
     } elseif ($status == 'Leave') {
-        // Menampilkan data hanya jika kolom pengecualian memiliki nilai
         $query->whereNotNull('pengecualian')
-              ->where('pengecualian', '!=', ''); // Pastikan nilai tidak kosong
+              ->where('pengecualian', '!=', ''); 
     }    
     elseif ($status == 'Sakit') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['SAKIT', 'sakit dg srt dokter']);
     }
     elseif ($status == 'stsd') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['SAKIT TANPA SD']);
     }
     elseif ($status == 'cuti') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['CUTI']);
     }
     elseif ($status == 'izin') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['IZIN']);
     }
     elseif ($status == 'dl') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['DINAS LUAR']);
     }
     elseif ($status == 'ct') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['CUTI TAHUNAN']);
     }
     elseif ($status == 'cm') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['CUTI MELAHIRKAN']);
     }
     elseif ($status == 'nikah') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['MENIKAH']);
     }
     elseif ($status == 'im') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['ISTRI MELAHIRKAN']);
     }
     elseif ($status == 'as') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['ANAK BTIS/SUNAT']);
     }
     elseif ($status == 'mgl') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['OT/MTUA/KLG MGL']);
     }
     elseif ($status == 'wfh') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['WFH']);
     }
     elseif ($status == 'pw') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['PARUH WAKTU']);
     }
     elseif ($status == 'libur') {
-        // Mencari data dengan pengecualian bernilai 'SAKIT' atau 'sakit dg srt dokter'
         $query->whereIn('pengecualian', ['LIBUR']);
     }
 
     $presensi = $query->get();
-    // Kirim data ke view atau JSON sesuai kebutuhan
     return response()->json([
         'status' => 'success',
         'presensi' => $presensi, 
@@ -464,6 +442,8 @@ public function getPresensiDetail(Request $request)
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+
 
 
 }

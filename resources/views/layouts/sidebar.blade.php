@@ -5,7 +5,7 @@
     <div>
         <div class="brand-logo d-flex align-items-center justify-content-between">
             <a href="./index.html" class="text-nowrap logo-img">
-                <img src="{{ asset('assets/images/logos/personnel.png') }}" alt="Logo" style="width:240px;">
+                <img src="{{ asset('assets/images/logos/hcmapps.png') }}" alt="Logo" style="width:240px;">
             </a>
             <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                 <i class="ti ti-x fs-8"></i>

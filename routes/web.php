@@ -10,6 +10,7 @@ use App\Http\Controllers\MonitoringinvoiceController;
 use App\Http\Controllers\PettycashController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\KendaraanController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,10 @@ Route::post('/login', 'AuthController@login');
 Route::post('/logout', 'AuthController@logout')->name('logout');
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
+    Route::get('/leave/detail', [DashboardController::class, 'showLeaveDetails'])->name('detail.count.dashboard');
+    Route::get('/late/detail', [DashboardController::class, 'getLateRecords'])->name('detail.late.dashboard');
+    Route::get('/awal/detail', [DashboardController::class, 'getAwalRecords'])->name('detail.awal.dashboard');
+    Route::get('/dinasluar/detail', [DashboardController::class, 'getDinasLuarData'])->name('detail.dinasluar.dashboard');
 });
 Route::prefix('payroll')->middleware(['auth'])->group(function () {
     Route::get('/presensi', 'PresensiController@index')->name('presensi.index');
@@ -39,7 +44,6 @@ Route::prefix('payroll')->middleware(['auth'])->group(function () {
     Route::get('/presensi/detail', [PresensiController::class, 'getPresensiDetail'])->name('presensi.detail');
     Route::get('/rekap-presensi-bulanan', [PresensiController::class, 'rekapPresensiBulanan'])->name('rekap.presensi');
     Route::get('/rekap-piechart', [PresensiController::class, 'rekapPieChart'])->name('rekap.piechart');
-
 
 });
 
