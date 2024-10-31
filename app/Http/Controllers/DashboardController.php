@@ -356,6 +356,7 @@ public function getTotalPresensi($bulan, $tahun)
     return $totals;
 }
 
+//FUNGSI UNTUK MENAMPILKAN DETAILS DARI SETIAP KATEGORI LEAVE
 public function getLeaveDetail(Request $request)
 {
     $request->validate([
@@ -368,7 +369,6 @@ public function getLeaveDetail(Request $request)
         ->whereMonth('tanggal', $request->bulan)
         ->whereYear('tanggal', $request->tahun);
 
-    // Use $request->status instead of $status
     if ($request->status == 'Sakit') {
         $query->whereIn('pengecualian', ['SAKIT', 'sakit dg srt dokter']);
     } elseif ($request->status == 'stsd') {
@@ -403,9 +403,6 @@ public function getLeaveDetail(Request $request)
 
     return view('dashboard.detailskategorileave', compact('lateDetails'));
 }
-
-
-
 
 public function getTotalLeave($bulan, $tahun)
 {
@@ -521,7 +518,7 @@ public function getLateRecords(Request $request)
 }
 
 
-
+//FUNGSI UNTUK MENAMPILKAN DATA DETAILS YANG PULANG LEBIH AWAL
 public function getAwalRecords(Request $request)
 {
     $month = $request->input('bulan', now()->month);
@@ -574,7 +571,7 @@ public function getAwalRecords(Request $request)
     ]);
 }
 
-
+//FUNGSI UNTUK MENAMPILKAN DATA YANG DINAS LUAR 
 public function getDinasLuarData(Request $request)
 {
     $bulan = $request->input('bulan', now()->month);

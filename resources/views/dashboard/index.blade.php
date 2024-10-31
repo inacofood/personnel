@@ -341,7 +341,12 @@
 @endsection
 
 @section('script')
+
 <script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/variable-pie.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
 
 <script>
     $(document).ready(function() {
@@ -376,7 +381,10 @@
                 name: 'Kehadiran',
                 colorByPoint: true,
                 data: data
-            }]
+            }],
+            credits: {
+                enabled: false // Disable Highcharts credits
+            }
 
         });
 
@@ -413,7 +421,10 @@
                     { name: 'Total Late', y: {{ $telatAwalData[0]['y'] ?? 0 }} },
                     { name: 'Total Pulang Awal', y: {{ $telatAwalData[1]['y'] ?? 0 }} }
                 ]
-            }]
+            }],
+            credits: {
+                enabled: false // Disable Highcharts credits
+            }
         });
     });
 </script>

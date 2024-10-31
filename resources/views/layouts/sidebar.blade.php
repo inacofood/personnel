@@ -64,13 +64,13 @@
                 <li class="sidebar-item">
                     <a class="sidebar-link" aria-expanded="false">
                         <span><i class="ti ti-users"></i></span>
-                        <span class="hide-menu">Visitor Management System</span>
+                        <span class="hide-menu">Visitor</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a class="sidebar-link has-arrow" aria-expanded="false">
                         <span><i class="ti ti-car"></i></span>
-                        <span class="hide-menu">Vehicle Management System</span>
+                        <span class="hide-menu">Vehicle</span>
                     </a>
                     <ul aria-expanded="false" class="collapse first-level">
                         <li class="sidebar-item" style="padding-left: 30px;"> <!-- Menambahkan padding-left untuk menjorok -->
@@ -114,7 +114,7 @@
                 <li class="sidebar-item">
                     <a class="sidebar-link" aria-expanded="false">
                         <span><i class="ti ti-settings"></i></span>
-                        <span class="hide-menu">Monitoring Permintaan HC</span>
+                        <span class="hide-menu">Monitoring PR</span>
                     </a>
                 </li>
                 @endif
