@@ -35,6 +35,10 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/late/detail', [DashboardController::class, 'getLateRecords'])->name('detail.late.dashboard');
     Route::get('/awal/detail', [DashboardController::class, 'getAwalRecords'])->name('detail.awal.dashboard');
     Route::get('/dinasluar/detail', [DashboardController::class, 'getDinasLuarData'])->name('detail.dinasluar.dashboard');
+    Route::get('/leave/terbanyak', [DashboardController::class, 'leaveterbanyak'])->name('detail.lima.leave');
+    Route::get('/kehadiran/detail', [DashboardController::class, 'kehadiranDetail'])->name('kehadiran.detail');
+    Route::get('/kategori/detail', [DashboardController::class, 'getLeaveDetail'])->name('leave.detail');
+
 });
 Route::prefix('payroll')->middleware(['auth'])->group(function () {
     Route::get('/presensi', 'PresensiController@index')->name('presensi.index');

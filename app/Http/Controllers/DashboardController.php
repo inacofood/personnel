@@ -77,6 +77,7 @@ class DashboardController extends Controller
         return $data;
     }
 
+    // FUNGSI MENGHITUNG 5 LEAVE TERBANYAK
     public function rekapLeaveTerbanyak($bulan, $tahun)
     {
         $rekapKehadiran = DB::table('employee_presensi_bulanan')
@@ -101,9 +102,37 @@ class DashboardController extends Controller
             ];
         }
         return $data;
-    }    
+    }
+     
 
+    // FUNGSI UNTUK MENAMPILKAN DATA 5 LEAVE TERBANYAK
+    public function leaveterbanyak(Request $request)
+    {
+    $month = $request->input('bulan', now()->month);
+    $year = $request->input('tahun', now()->year);
+    $nama = $request->input('nama'); 
+    $kategoriLeave = $request->input('kategori_leave'); 
 
+    $query = EmployeePresensi::select('nama', 'tanggal', 'scan_masuk', 'scan_pulang')
+        ->whereMonth('tanggal', $month)
+        ->whereYear('tanggal', $year);
+    
+    if ($nama) {
+        $query->where('nama', $nama);
+    }
+
+    if ($kategoriLeave) {
+        $query->where('pengecualian', $kategoriLeave);
+    }
+
+    $presensi = $query->get();
+    
+    return view('dashboard.limaterbanyakleave', [
+        'presensi' => $presensi
+    ]);
+}
+
+    // FUNGSI UNTUK MENAMPILKAN JUMLAH TELAT DAN PULANG AWAL SETIAP BULAN
     public function rekapTelatAwalBulanan($bulan, $tahun)
     {
         $rekapKehadiran = DB::table('employee_presensi_bulanan')
@@ -189,64 +218,118 @@ class DashboardController extends Controller
         return $data;
     }
 
-
+    // FUNGSI UNTUK MENAMPILKAN 5 ORANG YANG TELAT TERBANYAK
     public function rekapTelatBulanan($bulan, $tahun)
-{
-    $rekapKehadiran = DB::table('employee_presensi_bulanan')
-        ->select(
-            'nama', 
-            DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja 
-                WHEN 'Shift 1A' THEN '06:00:00' 
-                WHEN 'Shift 1B' THEN '07:00:00' 
-                WHEN 'Shift 1C' THEN '08:00:00' 
-                WHEN 'Shift 1D' THEN '09:00:00'
-                WHEN 'Shift 1E' THEN '10:00:00' 
-                WHEN 'Shift 1F' THEN '05:00:00' 
-                WHEN 'Shift 2A' THEN '11:00:00'  
-                WHEN 'Shift 2B' THEN '12:00:00' 
-                WHEN 'Shift 2C' THEN '13:00:00' 
-                WHEN 'Shift 2D' THEN '14:00:00' 
-                WHEN 'Shift 2E' THEN '15:00:00' 
-                WHEN 'Shift 2F' THEN '16:00:00' 
-                WHEN 'Shift 3A' THEN '22:00:00' 
-                WHEN 'Shift 3B' THEN '23:00:00' 
-                WHEN 'Shift 1 5 jam' THEN '07:00:00' 
-                WHEN 'Shift 1A 5 jam' THEN '08:00:00'
-                WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
-                WHEN 'Shift 1C 5 jam' THEN '10:00:00'
-                WHEN 'Shift 3 5 jam' THEN '23:00:00'
-                WHEN 'Shift 3A 5 jam' THEN '24:00:00'
-                WHEN 'Shift 2 5 jam' THEN '12:00:00'
-                WHEN 'Shift 2A 5 jam' THEN '17:00:00'
-                WHEN 'Shift 2B 5 jam' THEN '18:00:00'
-                WHEN 'Staff Up 5 HK' THEN '08:00:00'
-                WHEN 'Driver Ops' THEN '08:00:00'
-                WHEN 'Driver Ekspedisi S-J' THEN '08:00:00'
-                WHEN 'Driver Ekspedisi Sab' THEN '08:00:00'
-                WHEN 'Fleksibel' THEN '07:00:00'
-                WHEN 'Laundry Sab' THEN '06:00:00'
-                WHEN 'OB Sab' THEN '07:00:00'
-                WHEN 'OB Sen-Jum' THEN '06:30:00'
-                WHEN 'Crew Marketing' THEN '08:00:00'
-            END) THEN 1 END) as total_telat")
-        )
-        ->whereMonth('tanggal', $bulan) 
-        ->whereYear('tanggal', $tahun)  
-        ->groupBy('nama')
-        ->orderBy('total_telat', 'DESC')
-        ->limit(5)
-        ->get();
+    {
+        $rekapKehadiran = DB::table('employee_presensi_bulanan')
+            ->select(
+                'nama',
+                DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja 
+                    WHEN 'Shift 1A' THEN '06:00:00' 
+                    WHEN 'Shift 1B' THEN '07:00:00' 
+                    WHEN 'Shift 1C' THEN '08:00:00' 
+                    WHEN 'Shift 1D' THEN '09:00:00'
+                    WHEN 'Shift 1E' THEN '10:00:00' 
+                    WHEN 'Shift 1F' THEN '05:00:00' 
+                    WHEN 'Shift 2A' THEN '11:00:00'  
+                    WHEN 'Shift 2B' THEN '12:00:00' 
+                    WHEN 'Shift 2C' THEN '13:00:00' 
+                    WHEN 'Shift 2D' THEN '14:00:00' 
+                    WHEN 'Shift 2E' THEN '15:00:00' 
+                    WHEN 'Shift 2F' THEN '16:00:00' 
+                    WHEN 'Shift 3A' THEN '22:00:00' 
+                    WHEN 'Shift 3B' THEN '23:00:00' 
+                    WHEN 'Shift 1 5 jam' THEN '07:00:00' 
+                    WHEN 'Shift 1A 5 jam' THEN '08:00:00'
+                    WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
+                    WHEN 'Shift 1C 5 jam' THEN '10:00:00'
+                    WHEN 'Shift 3 5 jam' THEN '23:00:00'
+                    WHEN 'Shift 3A 5 jam' THEN '24:00:00'
+                    WHEN 'Shift 2 5 jam' THEN '12:00:00'
+                    WHEN 'Shift 2A 5 jam' THEN '17:00:00'
+                    WHEN 'Shift 2B 5 jam' THEN '18:00:00'
+                    WHEN 'Staff Up 5 HK' THEN '08:00:00'
+                    WHEN 'Driver Ops' THEN '08:00:00'
+                    WHEN 'Driver Ekspedisi S-J' THEN '08:00:00'
+                    WHEN 'Driver Ekspedisi Sab' THEN '08:00:00'
+                    WHEN 'Fleksibel' THEN '07:00:00'
+                    WHEN 'Laundry Sab' THEN '06:00:00'
+                    WHEN 'OB Sab' THEN '07:00:00'
+                    WHEN 'OB Sen-Jum' THEN '06:30:00'
+                    WHEN 'Crew Marketing' THEN '08:00:00'
+                END) THEN 1 END) as total_telat")
+            )
+            ->whereMonth('tanggal', $bulan) 
+            ->whereYear('tanggal', $tahun)  
+            ->groupBy('nama')
+            ->orderBy('total_telat', 'DESC')
+            ->limit(5)
+            ->get();
 
-    $data = [];
-    foreach ($rekapKehadiran as $kehadiran) {
-        $data[] = [
-            'nama' => $kehadiran->nama, 
-            'total_telat' => $kehadiran->total_telat
-        ];
+        $data = [];
+        foreach ($rekapKehadiran as $kehadiran) {
+            $data[] = [
+                'nama' => $kehadiran->nama, 
+                'total_telat' => $kehadiran->total_telat
+            ];
+        }
+        return $data;
     }
-    return $data;
-}
 
+    // FUNGSI UNTUK MENAMPILKAN DATA DETAIL 5 TELAT TERBANYAK
+    public function kehadiranDetail(Request $request)
+    {
+        $nama = $request->input('nama');
+        $month = $request->input('bulan', now()->month);
+        $year = $request->input('tahun', now()->year);
+    
+        $lateDetails = EmployeePresensi::select('nama', 'tanggal', 'scan_masuk', 'scan_pulang')
+            ->where('nama', $nama)
+            ->whereMonth('tanggal', $month)
+            ->whereYear('tanggal', $year)
+            ->whereTime('scan_masuk', '>', DB::raw("
+                CASE jam_kerja 
+                    WHEN 'Shift 1A' THEN '06:00:00' 
+                    WHEN 'Shift 1B' THEN '07:00:00' 
+                    WHEN 'Shift 1C' THEN '08:00:00' 
+                    WHEN 'Shift 1D' THEN '09:00:00'
+                    WHEN 'Shift 1E' THEN '10:00:00' 
+                    WHEN 'Shift 1F' THEN '05:00:00' 
+                    WHEN 'Shift 2A' THEN '11:00:00'  
+                    WHEN 'Shift 2B' THEN '12:00:00' 
+                    WHEN 'Shift 2C' THEN '13:00:00' 
+                    WHEN 'Shift 2D' THEN '14:00:00' 
+                    WHEN 'Shift 2E' THEN '15:00:00' 
+                    WHEN 'Shift 2F' THEN '16:00:00' 
+                    WHEN 'Shift 3A' THEN '22:00:00' 
+                    WHEN 'Shift 3B' THEN '23:00:00' 
+                    WHEN 'Shift 1 5 jam' THEN '07:00:00' 
+                    WHEN 'Shift 1A 5 jam' THEN '08:00:00'
+                    WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
+                    WHEN 'Shift 1C 5 jam' THEN '10:00:00'
+                    WHEN 'Shift 3 5 jam' THEN '23:00:00'
+                    WHEN 'Shift 3A 5 jam' THEN '00:00:00'
+                    WHEN 'Shift 2 5 jam' THEN '12:00:00'
+                    WHEN 'Shift 2A 5 jam' THEN '17:00:00'
+                    WHEN 'Shift 2B 5 jam' THEN '18:00:00'
+                    WHEN 'Staff Up 5 HK' THEN '08:00:00'
+                    WHEN 'Driver Ops' THEN '08:00:00'
+                    WHEN 'Driver Ekspedisi S-J' THEN '08:00:00'
+                    WHEN 'Driver Ekspedisi Sab' THEN '08:00:00'
+                    WHEN 'Fleksibel' THEN '07:00:00'
+                    WHEN 'Laundry Sab' THEN '06:00:00'
+                    WHEN 'OB Sab' THEN '07:00:00'
+                    WHEN 'OB Sen-Jum' THEN '06:30:00'
+                    WHEN 'Crew Marketing' THEN '08:00:00'
+                END
+            "))
+            ->get();
+    
+        return view('dashboard.detailslateterbanyak', [
+            'nama' => $nama,
+            'lateDetails' => $lateDetails
+        ]);
+    }
     
 public function getTotalPresensi($bulan, $tahun)
 {
@@ -273,6 +356,57 @@ public function getTotalPresensi($bulan, $tahun)
     return $totals;
 }
 
+public function getLeaveDetail(Request $request)
+{
+    $request->validate([
+        'bulan' => 'required|integer',
+        'tahun' => 'required|integer',
+        'status' => 'required|string',
+    ]);
+
+    $query = EmployeePresensi::select('nama', 'jam_kerja', 'tanggal', 'scan_masuk', 'scan_pulang', 'pengecualian')
+        ->whereMonth('tanggal', $request->bulan)
+        ->whereYear('tanggal', $request->tahun);
+
+    // Use $request->status instead of $status
+    if ($request->status == 'Sakit') {
+        $query->whereIn('pengecualian', ['SAKIT', 'sakit dg srt dokter']);
+    } elseif ($request->status == 'stsd') {
+        $query->whereIn('pengecualian', ['SAKIT TANPA SD']);
+    } elseif ($request->status == 'cuti') {
+        $query->whereIn('pengecualian', ['CUTI']);
+    } elseif ($request->status == 'izin') {
+        $query->whereIn('pengecualian', ['IZIN']);
+    } elseif ($request->status == 'dl') {
+        $query->whereIn('pengecualian', ['DINAS LUAR']);
+    } elseif ($request->status == 'ct') {
+        $query->whereIn('pengecualian', ['CUTI TAHUNAN']);
+    } elseif ($request->status == 'cm') {
+        $query->whereIn('pengecualian', ['CUTI MELAHIRKAN']);
+    } elseif ($request->status == 'nikah') {
+        $query->whereIn('pengecualian', ['MENIKAH']);
+    } elseif ($request->status == 'im') {
+        $query->whereIn('pengecualian', ['ISTRI MELAHIRKAN']);
+    } elseif ($request->status == 'as') {
+        $query->whereIn('pengecualian', ['ANAK BTIS/SUNAT']);
+    } elseif ($request->status == 'mgl') {
+        $query->whereIn('pengecualian', ['OT/MTUA/KLG MGL']);
+    } elseif ($request->status == 'wfh') {
+        $query->whereIn('pengecualian', ['WFH']);
+    } elseif ($request->status == 'pw') {
+        $query->whereIn('pengecualian', ['PARUH WAKTU']);
+    } elseif ($request->status == 'libur') {
+        $query->whereIn('pengecualian', ['LIBUR']);
+    }
+
+    $lateDetails = $query->get();
+
+    return view('dashboard.detailskategorileave', compact('lateDetails'));
+}
+
+
+
+
 public function getTotalLeave($bulan, $tahun)
 {
     $leaves = DB::table('employee_presensi_bulanan')
@@ -298,6 +432,7 @@ public function getTotalLeave($bulan, $tahun)
     return $leaves;
 }
 
+// FUNGSI UNTUK MENAMPILKAN DATA LEAVE TERBANYAK
 public function showLeaveDetails(Request $request)
 {
 
@@ -332,8 +467,7 @@ public function showLeaveDetails(Request $request)
     ]);
 }
 
-
-
+// FUNGSI UNTUK MENAMPILKAN DATA 5 ORANG TERTELAT
 public function getLateRecords(Request $request)
 {
     $month = $request->input('bulan', now()->month);
@@ -390,7 +524,6 @@ public function getLateRecords(Request $request)
 
 public function getAwalRecords(Request $request)
 {
-
     $month = $request->input('bulan', now()->month);
     $year = $request->input('tahun', now()->year);
 
