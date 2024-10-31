@@ -352,6 +352,7 @@
     $(document).ready(function() {
         var data = {!! json_encode($data ?? []) !!};
 
+        
         Highcharts.chart('donut-container', {
             chart: {
                 type: 'pie'
