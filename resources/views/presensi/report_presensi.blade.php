@@ -1,7 +1,11 @@
 @extends('layouts.main')
 
+<!-- Select2 CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+<!-- Select2 JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
 
 @section('content')
 <div class="card" style="max-width: 110%; margin: auto;">
@@ -9,6 +13,7 @@
         <h5 class="card-title fw-semibold mb-4 d-flex justify-content-between align-items-center">
             Report Presensi
         </h5>
+        <!-- Filters Section -->
         <form action="{{ route('presensi.exportExcel') }}" method="POST">
             @csrf
             <div class="row mb-3">
@@ -41,6 +46,7 @@
                 </div>
             </div>
         </form>
+
         <div class="table-responsive">
             <table class="table table-striped table-bordered display" id="dttable">
                 <thead>
@@ -213,6 +219,7 @@
 @section('script')
 <script>
 $(document).ready(function() {
+    // Initialize DataTable
     var table = $('#dttable').DataTable({
         paging: true,
         searching: true,
@@ -222,25 +229,28 @@ $(document).ready(function() {
         columnDefs: [
             { orderable: false, targets: [4, 5, 6, 7, 8] }
         ],
-        destroy: true 
+        destroy: true // Allows reinitialization of DataTable if necessary
     });
 
+    // Filter by name
     $('#namaFilter').on('change', function () {
         table.columns(0).search(this.value).draw();
         });
-   
+    // Filter by month
     $('#bulanFilter').on('change', function () {
         table.columns(2).search(this.value).draw();
         table.columns(2).search(this.value).draw();
     });
 
+    // Filter by year
     $('#tahunFilter').on('change', function () {
         table.columns(3).search(this.value).draw();
     });
 
+    // Reset filters if all inputs are empty
     $('#namaFilter, #bulanFilter, #tahunFilter').on('input change', function() {
     if ($('#namaFilter').val() === '' && $('#bulanFilter').val() === '' && $('#tahunFilter').val() === '') {
-        table.search('').columns().search('').draw(); 
+        table.search('').columns().search('').draw(); // Reset all filters
     }
     });
 
@@ -253,7 +263,7 @@ $(document).ready(function() {
     var status = $(this).data('status');
 
     $.ajax({
-        url: '{{ route('presensi.detail') }}', 
+        url: '{{ route('presensi.detail') }}', // Use the route helper to ensure the route is correct
         method: 'GET',
         data: {
             nama: nama,
@@ -262,21 +272,27 @@ $(document).ready(function() {
             status: status
         },
         success: function(response) {
+            // Clear previous modal content
             $('#modal-presensi-data').empty();
+
+            // Initialize nomor urut
             var nomor = 1;
 
+            // Helper function to format date as "Day, dd-mm-yyyy"
             function formatTanggal(tanggal) {
-                if (!tanggal) return '-'; 
+                if (!tanggal) return '-'; // Return '-' if date is null
+
                 var days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                 var dateObj = new Date(tanggal);
-                var day = days[dateObj.getUTCDay()]; 
-                var date = ('0' + dateObj.getUTCDate()).slice(-2); 
-                var month = ('0' + (dateObj.getUTCMonth() + 1)).slice(-2); 
-                var year = dateObj.getUTCFullYear(); 
+                var day = days[dateObj.getUTCDay()]; // Get day of the week
+                var date = ('0' + dateObj.getUTCDate()).slice(-2); // Get day of the month with leading 0
+                var month = ('0' + (dateObj.getUTCMonth() + 1)).slice(-2); // Get month with leading 0
+                var year = dateObj.getUTCFullYear(); // Get full year
 
-                return `${day}, ${date}-${month}-${year}`; 
+                return `${day}, ${date}-${month}-${year}`; // Return formatted date
             }
 
+            // Iterate through presensi data and append it to the modal
             $.each(response.presensi, function(index, presensi) {
                 $('#modal-presensi-data').append(`
                     <tr>  
@@ -287,13 +303,16 @@ $(document).ready(function() {
                         <td>${presensi.scan_pulang || '-'}</td> <!-- Show '-' if scan_pulang is null -->
                     </tr>
                 `);
-                nomor++; 
+                nomor++; // Increment nomor urut after each iteration
             });
 
+            // Show the modal
             $('#editModal').modal('show');
         }
     });
 });
+
 });
 </script>
+
 @endsection
