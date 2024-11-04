@@ -24,7 +24,7 @@
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $leave->nama }}</td>
-                            <td>{{ $leave->tanggal }}</td>
+                            <td>{{ \Carbon\Carbon::parse($leave->tanggal)->locale('id')->translatedFormat('l, d F Y') ?? '-' }}</td>
                             <td>{{ $leave->scan_masuk ?? '-' }}</td>
                             <td>{{ $leave->scan_pulang ?? '-' }}</td>
                         </tr>

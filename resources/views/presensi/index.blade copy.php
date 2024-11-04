@@ -40,14 +40,11 @@
             </table>
     </div>
 </div>
-
 @endsection
 
 @section('script')
-
     <script>
         $(document).ready(function() {
-            // Initialize DataTables with fixed header
             var table = $('#dttable').DataTable({
                 dom: 'Bfrtip',
                 buttons: [

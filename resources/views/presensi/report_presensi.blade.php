@@ -1,11 +1,7 @@
 @extends('layouts.main')
 
-<!-- Select2 CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
-<!-- Select2 JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
 
 @section('content')
 <div class="card" style="max-width: 110%; margin: auto;">
@@ -13,7 +9,6 @@
         <h5 class="card-title fw-semibold mb-4 d-flex justify-content-between align-items-center">
             Report Presensi
         </h5>
-        <!-- Filters Section -->
         <form action="{{ route('presensi.exportExcel') }}" method="POST">
             @csrf
             <div class="row mb-3">
@@ -58,6 +53,7 @@
                         <th>Hadir</th>
                         <th>Telat</th>
                         <th>Pulang Cepat</th>
+                        <th>Absen</th>
                         <th>HK</th>
                         <th>Leave</th>
                         <th title="Sakit">S</th>
@@ -79,7 +75,6 @@
                 <tbody>
                 @foreach($rekapKehadiran as $kehadiran)
                     <tr>
-                      
                         <td>{{ $kehadiran->nama }}</td>
                         <td>{{ \Carbon\Carbon::create()->month($kehadiran->bulan)->translatedFormat('F') }}</td>
                         <td hidden>{{ $kehadiran->bulan }}</td>
@@ -100,6 +95,11 @@
                                data-bulan="{{ $kehadiran->bulan }}" 
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="Awal">{{ $kehadiran->total_awal }}</a></td>
+                        <td><a href="#" class="show-presensi-modal" 
+                               data-nama="{{ $kehadiran->nama }}" 
+                               data-bulan="{{ $kehadiran->bulan }}" 
+                               data-tahun="{{ $kehadiran->tahun }}"
+                               data-status="absent">{{ $kehadiran->total_absent }}</a></td>
                         <td><a href="#" class="show-presensi-modal" 
                                data-nama="{{ $kehadiran->nama }}" 
                                data-bulan="{{ $kehadiran->bulan }}" 
@@ -219,7 +219,6 @@
 @section('script')
 <script>
 $(document).ready(function() {
-    // Initialize DataTable
     var table = $('#dttable').DataTable({
         paging: true,
         searching: true,
@@ -229,28 +228,25 @@ $(document).ready(function() {
         columnDefs: [
             { orderable: false, targets: [4, 5, 6, 7, 8] }
         ],
-        destroy: true // Allows reinitialization of DataTable if necessary
+        destroy: true 
     });
 
-    // Filter by name
     $('#namaFilter').on('change', function () {
         table.columns(0).search(this.value).draw();
         });
-    // Filter by month
+
     $('#bulanFilter').on('change', function () {
         table.columns(2).search(this.value).draw();
         table.columns(2).search(this.value).draw();
     });
 
-    // Filter by year
     $('#tahunFilter').on('change', function () {
         table.columns(3).search(this.value).draw();
     });
 
-    // Reset filters if all inputs are empty
     $('#namaFilter, #bulanFilter, #tahunFilter').on('input change', function() {
     if ($('#namaFilter').val() === '' && $('#bulanFilter').val() === '' && $('#tahunFilter').val() === '') {
-        table.search('').columns().search('').draw(); // Reset all filters
+        table.search('').columns().search('').draw();
     }
     });
 
@@ -263,7 +259,7 @@ $(document).ready(function() {
     var status = $(this).data('status');
 
     $.ajax({
-        url: '{{ route('presensi.detail') }}', // Use the route helper to ensure the route is correct
+        url: '{{ route('presensi.detail') }}', 
         method: 'GET',
         data: {
             nama: nama,
@@ -272,27 +268,22 @@ $(document).ready(function() {
             status: status
         },
         success: function(response) {
-            // Clear previous modal content
             $('#modal-presensi-data').empty();
-
-            // Initialize nomor urut
             var nomor = 1;
-
-            // Helper function to format date as "Day, dd-mm-yyyy"
             function formatTanggal(tanggal) {
-                if (!tanggal) return '-'; // Return '-' if date is null
-
+                if (!tanggal) return '-'; 
                 var days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                var months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                
                 var dateObj = new Date(tanggal);
-                var day = days[dateObj.getUTCDay()]; // Get day of the week
-                var date = ('0' + dateObj.getUTCDate()).slice(-2); // Get day of the month with leading 0
-                var month = ('0' + (dateObj.getUTCMonth() + 1)).slice(-2); // Get month with leading 0
-                var year = dateObj.getUTCFullYear(); // Get full year
+                var day = days[dateObj.getUTCDay()];
+                var date = dateObj.getUTCDate(); 
+                var month = months[dateObj.getUTCMonth()]; 
+                var year = dateObj.getUTCFullYear();
 
-                return `${day}, ${date}-${month}-${year}`; // Return formatted date
+                return `${day}, ${date} ${month} ${year}`;
             }
 
-            // Iterate through presensi data and append it to the modal
             $.each(response.presensi, function(index, presensi) {
                 $('#modal-presensi-data').append(`
                     <tr>  
@@ -303,16 +294,13 @@ $(document).ready(function() {
                         <td>${presensi.scan_pulang || '-'}</td> <!-- Show '-' if scan_pulang is null -->
                     </tr>
                 `);
-                nomor++; // Increment nomor urut after each iteration
+                nomor++;
             });
 
-            // Show the modal
             $('#editModal').modal('show');
         }
     });
 });
-
 });
 </script>
-
 @endsection
