@@ -25,7 +25,7 @@
                     <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $record->nama ?? '-' }}</td>
-                    <td>{{ $record->tanggal ?? '-' }}</td>
+                    <td>{{ \Carbon\Carbon::parse($record->tanggal)->locale('id')->translatedFormat('l, d F Y') ?? '-' }}</td>
                     <td>{{ $record->scan_masuk ?? '-' }}</td>
                     <td>{{ $record->scan_pulang ?? '-' }}</td>
                     </tr>

@@ -15,7 +15,6 @@
         @endforeach
     </select>
     </div>
-
     <div class="form-group mx-2">
         <select name="tahun" id="tahun" class="form-control">
             <option value="">-- Semua Tahun --</option>
@@ -26,8 +25,6 @@
             @endforeach
         </select>
     </div>
-
-
     <div class="form-group mx-2">
         <button type="submit" class="btn btn-primary">
             <i class="fas fa-search"></i>
@@ -78,7 +75,7 @@
                     <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
                     <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
                     <button type="submit" style="font-size:28px; font-weight:bold; padding-bottom:10px; border:none; background:none; cursor:pointer; color:white">
-                        {{ $totals->total_dinas_luar ?? 'N/A' }}
+                        {{ $totals->total_dinas_luar ?? 0 }}
                     </button>
                     </form>
                     </div>
@@ -93,14 +90,14 @@
                     <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
                     <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
                     <button type="submit" style="font-size:28px; font-weight:bold; padding-bottom:10px; border:none; background:none; cursor:pointer; color:white">
-                        {{ $telatAwalData[0]['y'] ?? 'N/A' }}
+                        {{ $telatAwalData[0]['y'] ?? 0 }}
                     </button>
                     </form>
                     </div>
                 </div>
 
                 <!-- Total Pulang Awal -->
-                <div class="col-md-3">
+                <!-- <div class="col-md-3">
                     <div class="total-box bg-warning text-white" style="border-radius: 10px; height: 100px;">
                         <h5 style="color:white; padding-top:10px"><b>Total Pulang Awal</b></h5>
                         <form action="{{ route('detail.awal.dashboard') }}" method="GET">
@@ -112,10 +109,27 @@
                     </button>
                 </form>
                 </div>
+                </div> -->
+
+
+                <!-- Total Tidak Absen -->
+                <div class="col-md-3">
+                    <div class="total-box bg-warning text-white" style="border-radius: 10px; height: 100px;">
+                        <h5 style="color:white; padding-top:10px"><b>Total Absen</b></h5>
+                        <form action="{{ route('absent.detail') }}" method="GET">
+                            @csrf
+                            <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
+                            <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
+                            <button type="submit" style="font-size:28px; font-weight:bold; padding-bottom:10px; border:none; background:none; cursor:pointer; color:white">
+                                {{ $totals->total_absent ?? 0 }}
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                </div>
+
             </div>
         </div>
+    </div>
 
         <!-- Donut chart and top latecomers -->
         <div class="row justify-content-center">
@@ -335,13 +349,11 @@
             </table>
         </div>
     </div>
-
     </div>
 </section>
 @endsection
 
 @section('script')
-
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/modules/variable-pie.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
@@ -352,7 +364,6 @@
     $(document).ready(function() {
         var data = {!! json_encode($data ?? []) !!};
 
-        
         Highcharts.chart('donut-container', {
             chart: {
                 type: 'pie'
@@ -384,7 +395,7 @@
                 data: data
             }],
             credits: {
-                enabled: false // Disable Highcharts credits
+                enabled: false 
             }
 
         });
@@ -424,7 +435,7 @@
                 ]
             }],
             credits: {
-                enabled: false // Disable Highcharts credits
+                enabled: false
             }
         });
     });

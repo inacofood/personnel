@@ -7,7 +7,7 @@
     }
     th, td {
         padding: 10px;
-        text-align: center;
+        text-align: left;
         vertical-align: middle;
     th {
         background-color: #f2f2f2;
@@ -31,7 +31,6 @@
         </button>
     </div>
 </h5>
-
 </h5>
     </button></h5>
     <table class="display table-head-bg-primary" id="dttable">
@@ -45,8 +44,6 @@
             <th class="content">Jam Kerja</th>
             <th class="content">Masuk</th>
             <th class="content">Keluar</th>
-            <th class="content">Terlambat</th>
-            <th class="content">Pulang Cepat</th>
             <th class="content">Pengecualian</th>
         </tr>
     </thead>
@@ -57,19 +54,18 @@
             <td class="content">{{ $data->nik !== '#N/A' ? ($data->nik ?? '-') : '-' }}</td>
             <td class="content">{{ $data->nama !== '#N/A' ? ($data->nama ?? '-') : '-' }}</td>
             <td class="content">{{ $data->dept !== '#N/A' ? ($data->dept ?? '-') : '-' }}</td>
-            <td class="content">{{ ($data->tanggal && $data->tanggal !== '#N/A') ? \Carbon\Carbon::parse($data->tanggal)->format('d-m-Y') : '-' }}</td>
+            <td class="content">
+                {{ ($data->tanggal && $data->tanggal !== '#N/A') ? \Carbon\Carbon::parse($data->tanggal)->locale('id')->translatedFormat('l, d F Y') : '-' }}
+            </td>
             <td class="content">{{ $data->jam_kerja !== '#N/A' ? ($data->jam_kerja ?? '-') : '-' }}</td>
             <td class="content">{{ $data->scan_masuk !== '#N/A' ? ($data->scan_masuk ?? '-') : '-' }}</td>
             <td class="content">{{ $data->scan_pulang !== '#N/A' ? ($data->scan_pulang ?? '-') : '-' }}</td>
-            <td class="content">{{ $data->terlambat !== '#N/A' ? ($data->terlambat ?? '-') : '-' }}</td>
-            <td class="content">{{ $data->pulang_cepat !== '#N/A' ? ($data->pulang_cepat ?? '-') : '-' }}</td>
             <td class="content">{{ $data->pengecualian !== '#N/A' ? ($data->pengecualian ?? '-') : '-' }}</td>
         </tr>
     @endforeach
 </tbody>
-
 </table>
-    </div>
+</div>
 </div>
 <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
         <div class="modal-dialog">

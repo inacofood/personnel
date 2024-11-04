@@ -25,7 +25,7 @@
                     <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $dinasluar->nama ?? '-' }}</td>
-                    <td>{{ $dinasluar->tanggal ?? '-' }}</td>
+                    <td>{{ \Carbon\Carbon::parse($dinasluar->tanggal)->locale('id')->translatedFormat('l, d F Y') ?? '-' }}</td>
                     <td>{{ $dinasluar->scan_masuk ?? '-' }}</td>
                     <td>{{ $dinasluar->scan_pulang ?? '-' }}</td>
                     </tr>

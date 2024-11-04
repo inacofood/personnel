@@ -2,11 +2,10 @@
 
 @section('content')
 <div class="container">
-    <h5 class="text-dark" style="padding-top:10px; padding-bottom: 5px"><b>Detail Kategori Leave</b>&nbsp; 
-    <button class="btn btn-sm btn-warning mb-3" onclick="history.back()" style="margin-top: 10px">
-        <i class="fa fa-arrow-left"></i>
-         Back
-    </button>
+    <h5 class="text-dark" style="padding-top:10px; padding-bottom: 5px"><b>Absent Details</b>&nbsp; 
+        <button class="btn btn-sm btn-warning mb-3" onclick="history.back()" style="margin-top: 10px">
+            <i class="fa fa-arrow-left"></i> Back
+        </button>
     </h5>
     <div class="row">
         <div class="col-md-12 mt-4">   
@@ -21,15 +20,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($lateDetails as $index => $record)
+                    @foreach($absentRecords as $index => $record)
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $record->nama ?? '-' }}</td>
                         <td>{{ \Carbon\Carbon::parse($record->tanggal)->locale('id')->translatedFormat('l, d F Y') ?? '-' }}</td>
-                        <td>{{ $record->scan_masuk ?? '-'}}</td>
+                        <td>{{ $record->scan_masuk ?? '-' }}</td>
                         <td>{{ $record->scan_pulang ?? '-' }}</td>
                     </tr>
-                     @endforeach
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -43,16 +42,12 @@
 
 <script>
 $(document).ready(function() {
-    var table = $('#dttable').DataTable({
+    $('#dttable').DataTable({
         paging: true,
         searching: true,
         ordering: true,
         autoWidth: false,
         responsive: true,
-        columnDefs: [
-            { orderable: false, targets: [4, 5, 6, 7, 8] } 
-        ],
-        destroy: true
     });
 });
 </script>

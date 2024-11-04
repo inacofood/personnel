@@ -118,9 +118,7 @@
 @endsection
 
 @section('script')
-
 <script>
-
     var perusahaanSelect = document.getElementById("perusahaan");
     var otherSelect = document.getElementById("otherPerusahaan");
 

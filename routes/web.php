@@ -38,16 +38,20 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/leave/terbanyak', [DashboardController::class, 'leaveterbanyak'])->name('detail.lima.leave');
     Route::get('/kehadiran/detail', [DashboardController::class, 'kehadiranDetail'])->name('kehadiran.detail');
     Route::get('/kategori/detail', [DashboardController::class, 'getLeaveDetail'])->name('leave.detail');
-
+    Route::get('/absent/detail', [DashboardController::class, 'getAbsentData'])->name('absent.detail');
 });
-Route::prefix('payroll')->middleware(['auth'])->group(function () {
+Route::prefix('presensi')->middleware(['auth'])->group(function () {
     Route::get('/presensi', 'PresensiController@index')->name('presensi.index');
     Route::post('/import', 'PresensiController@import')->name('presensi.import');
     Route::get('/reportpresensi', 'PresensiController@rekapPresensiBulanan')->name('report.presensi');
     Route::post('presensi/export-excel', [PresensiController::class, 'exportExcel'])->name('presensi.exportExcel');
     Route::get('/presensi/detail', [PresensiController::class, 'getPresensiDetail'])->name('presensi.detail');
-    Route::get('/rekap-presensi-bulanan', [PresensiController::class, 'rekapPresensiBulanan'])->name('rekap.presensi');
+    // Route::get('/rekap-presensi-bulanan', [PresensiController::class, 'rekapPresensiBulanan'])->name('rekap.presensi');
+    Route::get('/presensi/rekap/{tahun}/{bulan}', [PresensiController::class, 'rekapPresensiBulanan'])->name('presensi.rekap');
     Route::get('/rekap-piechart', [PresensiController::class, 'rekapPieChart'])->name('rekap.piechart');
+    Route::get('/presensi/{id}/edit', [PresensiController::class, 'edit'])->name('presensi.edit');
+    Route::put('/presensi/{id}', [PresensiController::class, 'update'])->name('presensi.update');
+    Route::delete('/deletepresensi/{id}', [PresensiController::class, 'deletepresensi'])->name('presensi.delete');
 
 });
 
