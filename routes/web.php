@@ -37,8 +37,11 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/dinasluar/detail', [DashboardController::class, 'getDinasLuarData'])->name('detail.dinasluar.dashboard');
     Route::get('/leave/terbanyak', [DashboardController::class, 'leaveterbanyak'])->name('detail.lima.leave');
     Route::get('/kehadiran/detail', [DashboardController::class, 'kehadiranDetail'])->name('kehadiran.detail');
+    Route::get('/leave/mingguan/detail', [DashboardController::class, 'LeaveMingguanDetail'])->name('leave.mingguan.detail');
+    Route::get('/late/mingguan/detail', [DashboardController::class, 'LateMingguanDetail'])->name('late.mingguan.detail');
     Route::get('/kategori/detail', [DashboardController::class, 'getLeaveDetail'])->name('leave.detail');
     Route::get('/absent/detail', [DashboardController::class, 'getAbsentData'])->name('absent.detail');
+    Route::get('/wfh/detail', [DashboardController::class, 'getWFH'])->name('wfh.detail');
 });
 Route::prefix('presensi')->middleware(['auth'])->group(function () {
     Route::get('/presensi', 'PresensiController@index')->name('presensi.index');
@@ -46,13 +49,12 @@ Route::prefix('presensi')->middleware(['auth'])->group(function () {
     Route::get('/reportpresensi', 'PresensiController@rekapPresensiBulanan')->name('report.presensi');
     Route::post('presensi/export-excel', [PresensiController::class, 'exportExcel'])->name('presensi.exportExcel');
     Route::get('/presensi/detail', [PresensiController::class, 'getPresensiDetail'])->name('presensi.detail');
-    // Route::get('/rekap-presensi-bulanan', [PresensiController::class, 'rekapPresensiBulanan'])->name('rekap.presensi');
     Route::get('/presensi/rekap/{tahun}/{bulan}', [PresensiController::class, 'rekapPresensiBulanan'])->name('presensi.rekap');
     Route::get('/rekap-piechart', [PresensiController::class, 'rekapPieChart'])->name('rekap.piechart');
-    Route::get('/presensi/{id}/edit', [PresensiController::class, 'edit'])->name('presensi.edit');
-    Route::put('/presensi/{id}', [PresensiController::class, 'update'])->name('presensi.update');
-    Route::delete('/deletepresensi/{id}', [PresensiController::class, 'deletepresensi'])->name('presensi.delete');
-
+    Route::get('/editpresensi/{id_presensi_bulanan}', [PresensiController::class, 'editpresensi'])->name('presensi.edit');
+    Route::put('/updatepresensi/{id_presensi_bulanan}', [PresensiController::class, 'updatepresensi'])->name('presensi.update');
+    Route::delete('/deletepresensi/{id_presensi_bulanan}', [PresensiController::class, 'deletepresensi'])->name('presensi.delete');
+    
 });
 
     Route::get('/hcmworld', 'HCMController@index')->name('hcm.index');
@@ -118,6 +120,16 @@ Route::prefix('presensi')->middleware(['auth'])->group(function () {
     Route::put('/update-data-asset', [KendaraanController::class, 'updateasset'])->name('asset.update');
     Route::post('/create-data-asset', [KendaraanController::class, 'createasset'])->name('asset.store');
     Route::post('/create-data-sewa', [KendaraanController::class, 'createsewa'])->name('sewa.store');
+    Route::get('/kendaraan/{id}/perpanjangasset', [KendaraanController::class, 'perpanjangasset'])->name('perpanjangasset');
+    Route::post('/kendaraan/history/store', [KendaraanController::class, 'HistoryAsset'])->name('history.store');    
+    Route::post('/service', [KendaraanController::class, 'service'])->name('service.store');
+    Route::get('/serviceasset/{id}', [KendaraanController::class, 'serviceasset'])->name('service.form');
+    Route::delete('/delete-history-asset/{id_history_asset}', [KendaraanController::class, 'deleteHistoryAsset'])->name('historyasset.delete');
+
+
+
+
+
 
 
 

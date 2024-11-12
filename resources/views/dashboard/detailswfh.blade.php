@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h5 class="text-dark" style="padding-top:10px; padding-bottom: 5px"><b>Leave Details</b>&nbsp; 
+    <h5 class="text-dark" style="padding-top:10px; padding-bottom: 5px"><b>Detail WFH</b>&nbsp; 
     <button class="btn btn-sm btn-warning mb-3" onclick="history.back()" style="margin-top: 10px">
         <i class="fa fa-arrow-left"></i>
          Back
@@ -16,18 +16,20 @@
                         <th>No</th>
                         <th>Nama</th>
                         <th>Tanggal</th>
-                        <th>Leave</th>
+                        <th>Scan Masuk</th>
+                        <th>Scan Keluar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($presensi as $index => $leave)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $leave -> nama ?? '-'}}</td>
-                            <td>{{ \Carbon\Carbon::parse($leave->tanggal)->locale('id')->translatedFormat('l, d F Y') ?? '-' }}</td>
-                            <td>{{ $leave->pengecualian ?? '-' }}</td>
-                        </tr>
-                    @endforeach
+                    @foreach($wfh as $index => $wfh)
+                    <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $wfh->nama ?? '-' }}</td>
+                    <td>{{ \Carbon\Carbon::parse($wfh->tanggal)->locale('id')->translatedFormat('l, d F Y') ?? '-' }}</td>
+                    <td>{{ $wfh->scan_masuk ?? '-' }}</td>
+                    <td>{{ $wfh->scan_pulang ?? '-' }}</td>
+                    </tr>
+                     @endforeach
                 </tbody>
             </table>
         </div>

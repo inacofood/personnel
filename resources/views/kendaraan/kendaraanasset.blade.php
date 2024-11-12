@@ -86,6 +86,8 @@
                         data-lima_tahunan_start="{{ $data->lima_tahunan_start }}" 
                         data-lima_tahunan_end="{{ $data->lima_tahunan_end }}" 
                         data-ket="{{ $data->ket }}"  
+                        data-ownrisk="{{ $data->ownrisk }}"
+                        data-jenis_asuransi="{{ $data->jenis_asuransi }}"  
                         data-toggle="modal" 
                         data-target="#viewModal">
                         <i class="fas fa-eye"></i>
@@ -119,28 +121,18 @@
                         data-lima_tahunan_start="{{ $data->lima_tahunan_start }}" 
                         data-lima_tahunan_end="{{ $data->lima_tahunan_end }}" 
                         data-ket="{{ $data->ket }}" 
+                        data-ownrisk="{{ $data->ownrisk }}"
+                        data-jenis_asuransi="{{ $data->jenis_asuransi }}"  
                         data-toggle="modal" 
                         data-target="#editModal">
                         <i class="fas fa-pencil"></i>
                     </button>
-                    <button class="btn btn-success btn-sm btn-sewa-module" 
-                        data-nama_karyawan="{{ $data->nama_karyawan }}" 
-                        data-departemen="{{ $data->departemen }}" 
-                        data-masa_sewa_start="{{ $data->masa_sewa_start }}" 
-                        data-masa_sewa_end="{{ $data->masa_sewa_end }}" 
-                        data-id="{{ $data->id }}" 
-                        data-toggle="modal" 
-                        data-target="#sewaModal">
+                    <a href="{{ route('perpanjangasset', ['id' => $data->id_asset]) }}" class="btn btn-success btn-sm">
                         <i class="fas fa-book"></i> 
-                    </button>
-                    <button class="btn btn-primary btn-sm btn-user-module" 
-                        data-nama_karyawan="{{ $data->nama_karyawan }}" 
-                        data-departemen="{{ $data->departemen }}" 
-                        data-id="{{ $data->id }}"
-                        data-bs-toggle="modal" 
-                        data-bs-target="#userModal">
+                    </a>
+                    <a href="{{ route('service.form', ['id' => $data->id_asset]) }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-wrench"></i>
-                    </button>
+                    </a>
                 </td>
             </tr>
         @endforeach
@@ -190,6 +182,10 @@
                             <div class="mb-3">
                                 <label class="fw-bold"><b>Departemen</b></label>
                                 <input type="text" class="form-control" name="dept">
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold"><b>Keterangan</b></label>
+                                <input type="text" class="form-control" name="ket">
                             </div>
                         </div>
                         <!-- Second Column -->
@@ -250,8 +246,8 @@
                                 <input type="text" class="form-control" name="vendor_asuransi">
                             </div>
                             <div class="mb-3">
-                                <label class="fw-bold"><b>Keterangan</b></label>
-                                <input type="text" class="form-control" name="ket">
+                                <label class="fw-bold"><b>Own Risk (Harga)</b></label>
+                                <input type="text" class="form-control" name="ownrisk">
                             </div>
                         </div>
                         <!-- Fourth Column -->
@@ -279,6 +275,10 @@
                             <div class="mb-3">
                                 <label class="fw-bold"><b>Lima Tahunan End</b></label>
                                 <input type="date" class="form-control" name="lima_tahunan_end">
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold"><b>Jenis Asuransi</b></label>
+                                <input type="text" class="form-control" name="jenis_asuransi">
                             </div>
                         </div>
                     </div>
@@ -357,6 +357,10 @@
                                 <label class="fw-bold"><b>Departemen</b></label>
                                 <input type="text" class="form-control" id="edit_dept" name="dept">
                             </div>
+                            <div class="mb-3">
+                                <label class="fw-bold"><b>Keterangan</b></label>
+                                <input type="text" class="form-control" id="edit_ket" name="ket">
+                            </div>
                         </div>
                         <!-- Second Column -->
                         <div class="col-md-3">
@@ -416,8 +420,8 @@
                                 <input type="text" class="form-control" id="edit_vendor_asuransi" name="vendor_asuransi">
                             </div>
                             <div class="mb-3">
-                                <label class="fw-bold"><b>Keterangan</b></label>
-                                <input type="text"class="form-control" id="edit_ket" name="ket">
+                                <label class="fw-bold"><b>Own Risk (Harga)</b></label>
+                                <input type="text"class="form-control" id="edit_ownrisk" name="ownrisk">
                             </div>
                         </div>
                         <!-- Fourth Column -->
@@ -445,6 +449,10 @@
                             <div class="mb-3">
                                 <label class="fw-bold"><b>Lima Tahunan End</b></label>
                                 <input type="date" class="form-control" id="edit_lima_tahunan_end" name="lima_tahunan_end">
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold"><b>Jenis Asuransi</b></label>
+                                <input type="text"class="form-control" id="edit_jenis_asuransi" name="jenis_asuransi">
                             </div>
                         </div>
                     </div>
@@ -497,6 +505,10 @@
         <div class="mb-3">
             <label class="fw-bold"><b>Departemen</b></label>
             <div id="dept"></div>
+        </div>
+        <div class="mb-12">
+            <label class="fw-bold"><b>Keterangan</b></label>
+            <div id="ket"></div>
         </div>
     </div>
     <!-- Second Column -->
@@ -557,8 +569,8 @@
             <div id="premi_asuransi"></div>
         </div>
         <div class="mb-3">
-            <label class="fw-bold"><b>Keterangan</b></label>
-            <div id="ket"></div>
+            <label class="fw-bold"><b>Own Risk (Harga)</b></label>
+            <div id="ownrisk"></div>
         </div>
     </div>
     <!-- Fourth Column -->
@@ -587,11 +599,16 @@
                 <label class="fw-bold"><b>Lima Tahunan End</b></label>
                 <div id="lima_tahunan_end"></div>
             </div>
+            <div class="mb-3">
+                <label class="fw-bold"><b>Jenis Asuransi</b></label>
+                <div id="jenis_asuransi"></div>
+            </div>
         </div>
     </div> 
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
     </div>
+   
     </div>
     </div>
 </div>
@@ -649,7 +666,9 @@ $('.btn-view-module').on('click', function() {
         satu_tahunan_end: formatDate($(this).data('satu_tahunan_end')) || '-',
         lima_tahunan_start: formatDate($(this).data('lima_tahunan_start')) || '-',
         lima_tahunan_end: formatDate($(this).data('lima_tahunan_end')) || '-',
-        ket: $(this).data('ket') || '-'
+        ket: $(this).data('ket') || '-',
+        ownrisk: $(this).data('ownrisk') || '-',
+        jenis_asuransi: $(this).data('jenis_asuransi') || '-',
     };
     $('id').val($(this).data('id') || '-');
     $('#plat_no').text(data.plat_no);
@@ -679,6 +698,9 @@ $('.btn-view-module').on('click', function() {
     $('#lima_tahunan_start').text(data.lima_tahunan_start);
     $('#lima_tahunan_end').text(data.lima_tahunan_end);
     $('#ket').text(data.ket);
+    $('#ownrisk').text(data.ownrisk);
+    $('#jenis_asuransi').text(data.jenis_asuransi);
+
 
     $('#viewModal').modal('show');
 });
@@ -712,7 +734,8 @@ $('.btn-edit-module').on('click', function() {
     $('#edit_lima_tahunan_start').val($(this).data('lima_tahunan_start'));
     $('#edit_lima_tahunan_end').val($(this).data('lima_tahunan_end'));
     $('#edit_ket').val($(this).data('ket'));
-    
+    $('#edit_ownrisk').val($(this).data('ownrisk'));
+    $('#edit_jenis_asuransi').val($(this).data('jenis_asuransi'));
     $('#editModal').modal('show');
 });
 

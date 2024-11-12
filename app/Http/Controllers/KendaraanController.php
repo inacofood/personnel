@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\KendaraanSewa;
 use App\Models\KendaraanAsset;
+use App\Models\HistoryAsset;
+use App\Models\ServiceAsset;
 use App\Imports\KendaraanImport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -17,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class KendaraanController extends Controller
 {
+    // FUNGSI UNTUK MENAMPILKAN DATA KENDARAAN ASSET
     public function indexasset()
     {
         $kendaraan = KendaraanAsset::all(); 
@@ -24,6 +27,7 @@ class KendaraanController extends Controller
         return view('kendaraan.kendaraanasset', compact('kendaraan')); 
     }
 
+    // FUNGSI UNTUK MENAMPILKAN DATA KENDARAAN SEWA
     public function indexsewa()
     {
         $kendaraan = KendaraanSewa::all();
@@ -166,6 +170,8 @@ class KendaraanController extends Controller
                         'lima_tahunan_start' =>  $limaTahunanStart,
                         'lima_tahunan_end' =>  $limaTahunanEnd,
                         'ket' => $rowData[27] ?? null,
+                        'ownrisk' =>  $rowData[28] ?? null,
+                        'jenis_asuransi' =>  $rowData[29] ?? null,
                     ];
                     if ($existingData) {
                         $existingData->update($data);
@@ -183,6 +189,7 @@ class KendaraanController extends Controller
         ]);
     }
 
+    // FUNGSI UNTUK MELAKUKAN IMPORT KENDARAAN SEWA
     public function importKendaraanSewa(Request $request)
     {
         ini_set('memory_limit', '1024M');
@@ -273,6 +280,7 @@ class KendaraanController extends Controller
         ]);
     }
     
+    // FUNGSI UNRUK 
     private function convertExcelDate($value, $fieldName, $row)
     {
         if (empty($value)) {
@@ -291,6 +299,7 @@ class KendaraanController extends Controller
         }
     }
 
+    // FUNGSI UNTUK MELAKUKAN UPDATE KENDARAAN SEWA
     public function updatesewa(Request $request)
     {
        
@@ -329,149 +338,234 @@ class KendaraanController extends Controller
         return redirect()->back()->with('success', 'Data Sewa berhasil diperbarui.');
     }
     
+    // FUNGSI UNTUK MELAKUKAN UPDATE USER 
+    public function updateuser(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_karyawan' => 'required|string|max:255',
+            'departemen' => 'required|string|max:255',
+        ]);
+
+        $sewa = KendaraanSewa::findOrFail($request->id);
+        $sewa->update([
+            'nama_karyawan' => $request->nama_karyawan,
+            'departemen' => $request->departemen,
+        ]);
+
+        return redirect()->back()->with('success', 'User updated successfully.');
+    }
+
+
+    public function perpanjangsewa(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_karyawan' => 'required|string|max:255',
+            'departemen' => 'required|string|max:255',
+            'masa_sewa_start' => 'required|string|max:255',
+            'masa_sewa_end' => 'required|string|max:255',
+        ]);
+
+        $sewa = KendaraanSewa::findOrFail($request->id);
+        $sewa->update([
+            'nama_karyawan' => $request->nama_karyawan,
+            'departemen' => $request->departemen,
+            'masa_sewa_start' => $request->masa_sewa_start,
+            'masa_sewa_end' => $request->masa_sewa_end,
+        ]);
+
+        return redirect()->back()->with('success', 'Data Sewa berhasil diperbarui.');
+    }
+
+    public function createsewa(Request $request)
+    {
+
+        KendaraanSewa::create([
+                'plat_no' => $request->plat_no,
+                'nik' => $request->nik,
+                'nama_karyawan' => $request->nama_karyawan,
+                'lokasi' => $request->lokasi,
+                'cc' => $request->cc,
+                'cc_nama' => $request->cc_nama,
+                'departemen' => $request->departemen,
+                'vendor' => $request->vendor,
+                'grade_title' => $request->grade_title,
+                'no_tlp' => $request->no_tlp,
+                'merk' => $request->merk,
+                'tipe' => $request->tipe,
+                'tahun' => $request->tahun,
+                'jenis' => $request->jenis,
+                'harga_sewa' => $request->harga_sewa,
+                'harga_sewa_ppn' => $request->harga_sewa_ppn,
+                'masa_sewa_start' =>  $request->masa_sewa_start,
+                'masa_sewa_end' => $request->masa_sewa_end,
+                'end_date_h_empatlima' =>  $request->end_date_h_empatlima,
+                'alert_masa_sewa' => $request->alert_masa_sewa,
+                'status' => $request->status,
+                'note_to_do' => $request->note_to_do,
+                'ket' => $request->ket,
+        ]);
+
+        return redirect()->back()->with('success', 'Data Sewa berhasil ditambahkan.');
+    }
+
+
+    public function updateasset(Request $request)
+    {
+        $asset = KendaraanAsset::findOrFail($request->id);
     
-public function updateuser(Request $request)
-{
-    $validated = $request->validate([
-        'nama_karyawan' => 'required|string|max:255',
-        'departemen' => 'required|string|max:255',
-    ]);
-
-    $sewa = KendaraanSewa::findOrFail($request->id);
-    $sewa->update([
-        'nama_karyawan' => $request->nama_karyawan,
-        'departemen' => $request->departemen,
-    ]);
-
-    return redirect()->back()->with('success', 'User updated successfully.');
-}
-
-
-public function perpanjangsewa(Request $request)
-{
-    $validated = $request->validate([
-        'nama_karyawan' => 'required|string|max:255',
-        'departemen' => 'required|string|max:255',
-        'masa_sewa_start' => 'required|string|max:255',
-        'masa_sewa_end' => 'required|string|max:255',
-    ]);
-
-    $sewa = KendaraanSewa::findOrFail($request->id);
-    $sewa->update([
-        'nama_karyawan' => $request->nama_karyawan,
-        'departemen' => $request->departemen,
-        'masa_sewa_start' => $request->masa_sewa_start,
-        'masa_sewa_end' => $request->masa_sewa_end,
-    ]);
-
-    return redirect()->back()->with('success', 'Data Sewa berhasil diperbarui.');
-}
-
-public function createsewa(Request $request)
-{
-
-    KendaraanSewa::create([
+        $asset->update([
             'plat_no' => $request->plat_no,
             'nik' => $request->nik,
             'nama_karyawan' => $request->nama_karyawan,
             'lokasi' => $request->lokasi,
             'cc' => $request->cc,
             'cc_nama' => $request->cc_nama,
-            'departemen' => $request->departemen,
-            'vendor' => $request->vendor,
+            'dept' => $request->dept,
             'grade_title' => $request->grade_title,
-            'no_tlp' => $request->no_tlp,
             'merk' => $request->merk,
             'tipe' => $request->tipe,
             'tahun' => $request->tahun,
             'jenis' => $request->jenis,
-            'harga_sewa' => $request->harga_sewa,
-            'harga_sewa_ppn' => $request->harga_sewa_ppn,
-            'masa_sewa_start' =>  $request->masa_sewa_start,
-            'masa_sewa_end' => $request->masa_sewa_end,
-            'end_date_h_empatlima' =>  $request->end_date_h_empatlima,
-            'alert_masa_sewa' => $request->alert_masa_sewa,
-            'status' => $request->status,
-            'note_to_do' => $request->note_to_do,
+            'warna' => $request->warna,
+            'kategori' => $request->kategori,
+            'no_rangka' => $request->no_rangka,
+            'no_mesin' => $request->no_mesin,
+            'no_bpkb' => $request->no_bpkb,
+            'no_polis_asuransi' => $request->no_polis_asuransi,
+            'premi_asuransi' => $request->premi_asuransi,
+            'vendor_asuransi' => $request->vendor_asuransi,
+            'asuransi_start_date' => $request->asuransi_start_date,
+            'asuransi_end_date' => $request->asuransi_end_date,
+            'satu_tahunan_start' => $request->satu_tahunan_start,
+            'satu_tahunan_end' => $request->satu_tahunan_end,
+            'lima_tahunan_start' => $request->lima_tahunan_start,
+            'lima_tahunan_end' => $request->lima_tahunan_end,
             'ket' => $request->ket,
-    ]);
+            'ownrisk' => $request->ownrisk,
+            'jenis_asuransi' => $request->jenis_asuransi,
+        ]);
+    
+        return redirect()->back()->with('success', 'Asset data updated successfully!');
+    }
 
-    return redirect()->back()->with('success', 'Data Sewa berhasil ditambahkan.');
-}
+    public function createasset(Request $request)
+    {
+        KendaraanAsset::create([
+            'plat_no' => $request->plat_no,
+            'nik' => $request->nik,
+            'nama_karyawan' => $request->nama_karyawan,
+            'lokasi' => $request->lokasi,
+            'cc' => $request->cc,
+            'cc_nama' => $request->cc_nama,
+            'dept' => $request->dept,
+            'grade_title' => $request->grade_title,
+            'merk' => $request->merk,
+            'tipe' => $request->tipe,
+            'tahun' => $request->tahun,
+            'jenis' => $request->jenis,
+            'warna' => $request->warna,
+            'kategori' => $request->kategori,
+            'no_rangka' => $request->no_rangka,
+            'no_mesin' => $request->no_mesin,
+            'no_bpkb' => $request->no_bpkb,
+            'no_polis_asuransi' => $request->no_polis_asuransi,
+            'premi_asuransi' => $request->premi_asuransi,
+            'vendor_asuransi' => $request->vendor_asuransi,
+            'asuransi_start_date' => $request->asuransi_start_date,
+            'asuransi_end_date' => $request->asuransi_end_date,
+            'satu_tahunan_start' => $request->satu_tahunan_start,
+            'satu_tahunan_end' => $request->satu_tahunan_end,
+            'lima_tahunan_start' => $request->lima_tahunan_start,
+            'lima_tahunan_end' => $request->lima_tahunan_end,
+            'ket' => $request->ket,
+            'ownrisk' => $request->ownrisk,
+            'jenis_asuransi' => $request->jenis_asuransi,
+        ]);
 
+        return redirect()->back()->with('success', 'New asset data created successfully!');
+    }
 
-public function updateasset(Request $request)
-{
-  
-    $asset = KendaraanAsset::findOrFail($request->id);
-   
-    $asset->update([
-        'plat_no' => $request->plat_no,
-        'nik' => $request->nik,
-        'nama_karyawan' => $request->nama_karyawan,
-        'lokasi' => $request->lokasi,
-        'cc' => $request->cc,
-        'cc_nama' => $request->cc_nama,
-        'dept' => $request->dept,
-        'grade_title' => $request->grade_title,
-        'merk' => $request->merk,
-        'tipe' => $request->tipe,
-        'tahun' => $request->tahun,
-        'jenis' => $request->jenis,
-        'warna' => $request->warna,
-        'kategori' => $request->kategori,
-        'no_rangka' => $request->no_rangka,
-        'no_mesin' => $request->no_mesin,
-        'no_bpkb' => $request->no_bpkb,
-        'no_polis_asuransi' => $request->no_polis_asuransi,
-        'premi_asuransi' => $request->premi_asuransi,
-        'vendor_asuransi' => $request->vendor_asuransi,
-        'asuransi_start_date' => $request->asuransi_start_date,
-        'asuransi_end_date' => $request->asuransi_end_date,
-        'satu_tahunan_start' => $request->satu_tahunan_start,
-        'satu_tahunan_end' => $request->satu_tahunan_end,
-        'lima_tahunan_start' => $request->lima_tahunan_start,
-        'lima_tahunan_end' => $request->lima_tahunan_end,
-        'ket' => $request->ket,
-    ]);
-   
-    return redirect()->back()->with('success', 'Asset data updated successfully!');
-}
+    public function perpanjangasset($id)
+    {
+        $kendaraan = KendaraanAsset::with('historyAssets')->findOrFail($id);
+    
+        return view('kendaraan.perpanjangasset', compact('kendaraan'));
+    }
+    
+    public function HistoryAsset(Request $request)
+    {
+        $filePath = $request->hasFile('file') ? $request->file('file')->store('assets', 'public') : null;
 
-public function createasset(Request $request)
-{
-    KendaraanAsset::create([
-        'plat_no' => $request->plat_no,
-        'nik' => $request->nik,
-        'nama_karyawan' => $request->nama_karyawan,
-        'lokasi' => $request->lokasi,
-        'cc' => $request->cc,
-        'cc_nama' => $request->cc_nama,
-        'dept' => $request->dept,
-        'grade_title' => $request->grade_title,
-        'merk' => $request->merk,
-        'tipe' => $request->tipe,
-        'tahun' => $request->tahun,
-        'jenis' => $request->jenis,
-        'warna' => $request->warna,
-        'kategori' => $request->kategori,
-        'no_rangka' => $request->no_rangka,
-        'no_mesin' => $request->no_mesin,
-        'no_bpkb' => $request->no_bpkb,
-        'no_polis_asuransi' => $request->no_polis_asuransi,
-        'premi_asuransi' => $request->premi_asuransi,
-        'vendor_asuransi' => $request->vendor_asuransi,
-        'asuransi_start_date' => $request->asuransi_start_date,
-        'asuransi_end_date' => $request->asuransi_end_date,
-        'satu_tahunan_start' => $request->satu_tahunan_start,
-        'satu_tahunan_end' => $request->satu_tahunan_end,
-        'lima_tahunan_start' => $request->lima_tahunan_start,
-        'lima_tahunan_end' => $request->lima_tahunan_end,
-        'ket' => $request->ket,
-    ]);
+        $historyData = [
+            'id_asset' => $request->id_asset,
+            'tipe' => $request->tipe,
+            'nama_karyawan' => $request->nama_karyawan,
+            'harga_asset' => $request->harga_asset,
+            'file_asset' => $filePath,
+        ];
+    
+        if ($request->tipe === 'Asuransi') {
+            $historyData['no_polis_asuransi'] = $request->no_polis_asuransi;
+            $historyData['asuransi_start_date'] = $request->asuransi_start_date;
+            $historyData['asuransi_end_date'] = $request->asuransi_end_date;
+        } elseif ($request->tipe === 'Pajak') {
+            $historyData['satu_tahunan_start'] = $request->satu_tahunan_start;
+            $historyData['satu_tahunan_end'] = $request->satu_tahunan_end;
+            $historyData['lima_tahunan_start'] = $request->lima_tahunan_start;
+            $historyData['lima_tahunan_end'] = $request->lima_tahunan_end;
+        }
 
-    return redirect()->back()->with('success', 'New asset data created successfully!');
-}
+        HistoryAsset::create($historyData);
+    
+        $kendaraan = KendaraanAsset::find($request->id_asset);
+        if ($kendaraan) {
+            $kendaraan->nama_karyawan = $request->nama_karyawan;
+            if ($request->tipe === 'Asuransi') {
+                $kendaraan->no_polis_asuransi = $request->no_polis_asuransi;
+                $kendaraan->asuransi_start_date = $request->asuransi_start_date;
+                $kendaraan->asuransi_end_date = $request->asuransi_end_date;
+            } elseif ($request->tipe === 'Pajak') {
+                $kendaraan->satu_tahunan_start = $request->satu_tahunan_start;
+                $kendaraan->satu_tahunan_end = $request->satu_tahunan_end;
+                $kendaraan->lima_tahunan_start = $request->lima_tahunan_start;
+                $kendaraan->lima_tahunan_end = $request->lima_tahunan_end;
+            }
 
+            $kendaraan->save();
+        }
+    
+        return redirect()->back()->with('success', 'Data service kendaraan berhasil ditambahkan dan diperbarui!');
+    }    
+    
+    public function  deleteHistoryAsset($id_history_asset)
+    {
+        $historyAsset = HistoryAsset::findOrFail($id_history_asset);
+        $historyAsset->delete();
+        return redirect()->back()->with('success', 'History berhasil dihapus!');
+    }
+
+    
+    public function service(Request $request)
+    {
+
+        ServiceAsset::create([
+            'id_asset' => $request->id_asset,
+            'km_sebelum' => $request->km_sebelum,
+            'km_saat_ini' => $request->km_saat_ini,
+            'jenis_service' => $request->jenis_service,
+            'vendor' => $request->vendor,
+            'harga' => $request->harga,
+            'keterangan' => $request->keterangan,
+        ]);
+    
+        return redirect()->back()->with('success', 'Data service kendaraan berhasil ditambahkan!');
+    }
+    
+    public function serviceasset($id)
+        {
+            $kendaraan = KendaraanAsset::with('serviceAssets')->findOrFail($id);
+            
+            return view('kendaraan.serviceasset', compact('kendaraan'));
+        }
 
 }
