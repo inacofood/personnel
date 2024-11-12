@@ -405,7 +405,7 @@
       <form id="sewaForm" action="{{ route('perpanjangsewa') }}" method="POST">
         @csrf
         @method('PUT') 
-        <input type="hidden" name="id" id="sewa-id"> <!-- Pastikan ID ini unik -->
+        <input type="hidden" name="id" id="sewa-id">
         <div class="modal-header">
             <h5 class="modal-title" id="sewaModalLabel"><b>Perpanjang Sewa</b></h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -417,8 +417,8 @@
               <input type="text" id="sewa_nama_karyawan" name="nama_karyawan" class="form-control">
             </div>
             <div class="col-md-6 mb-3">
-              <label><b>Departemen</b></label>
-              <input type="text" id="sewa_departemen" name="departemen" class="form-control">
+              <label><b>Nilai Ownrisk</b></label>
+              <input type="text" id="sewa_ownrisk" name="ownrisk" class="form-control">
             </div>
           </div>
           <div class="row">
@@ -456,12 +456,16 @@
         <div class="modal-body">
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label><b>Nama Karyawan</b></label>
+              <label><b>Nama Karyawan Lama</b></label>
               <input type="text" id="user_nama_karyawan" name="nama_karyawan" class="form-control" required> 
             </div>
             <div class="col-md-6 mb-3">
-              <label><b>Departemen</b></label>
-              <input type="text" id="user_departemen" name="departemen" class="form-control" required> 
+              <label><b>Nama Karyawan Baru</b></label>
+              <input type="text" id="user_nama_karyawan_baru" name="nama_karyawan_baru" class="form-control" required> 
+            </div>
+            <div class="col-md-6 mb-3">
+              <label><b>Tanggal Pindah/Resign</b></label>
+              <input type="date" id="user_tanggal_resign" name="tanggal_resign" class="form-control" required> 
             </div>
           </div>
         </div>
@@ -525,6 +529,14 @@
             <label class="fw-bold"><b>Lokasi</b></label>
             <div id="lokasi"></div>
         </div>
+        <div class="mb-3">
+            <label class="fw-bold"><b>Tahun</b></label>
+            <div id="tahun"></div>
+        </div>
+        <div class="mb-3">
+            <label class="fw-bold"><b>Jenis</b></label>
+            <div id="jenis"></div>
+        </div>
     </div>
     <!-- Second Column -->
     <div class="col-md-3">
@@ -563,6 +575,22 @@
             <label class="fw-bold"><b>No Telepon</b></label>
             <div id="no_tlp"></div>
         </div>
+        <div class="mb-3">
+            <label class="fw-bold"><b>Harga Sewa</b></label>
+            <div id="harga_sewa"></div>
+        </div>
+        <div class="mb-3">
+            <label class="fw-bold"><b>Harga Sewa PPN</b></label>
+            <div id="harga_sewa_ppn"></div>
+        </div>
+        <div class="mb-3">
+            <label class="fw-bold"><b>Masa Sewa Start</b></label>
+            <div id="masa_sewa_start"></div>
+        </div>
+        <div class="mb-3">
+            <label class="fw-bold"><b>Masa Sewa End</b></label>
+            <div id="masa_sewa_end"></div>
+        </div>
     </div>
     <!-- Fourth Column -->
     <div class="col-md-3">
@@ -582,55 +610,10 @@
             <label class="fw-bold"><b>Keterangan</b></label>
             <div id="ket"></div>
         </div>
-    </div>
-</div>
-<!-- Second Row -->
-<div class="row">
-    <!-- First Column -->
-    <div class="col-md-3">
         <div class="mb-3">
-            <label class="fw-bold"><b>Tahun</b></label>
-            <div id="tahun"></div>
-        </div>
-        <div class="mb-3">
-            <label class="fw-bold"><b>Jenis</b></label>
-            <div id="jenis"></div>
-        </div>
-    </div>
-    <!-- Second Column -->
-    <div class="col-md-3">
-        <div class="mb-3">
-            <label class="fw-bold"><b>Harga Sewa</b></label>
-            <div id="harga_sewa"></div>
-        </div>
-        <div class="mb-3">
-            <label class="fw-bold"><b>Harga Sewa PPN</b></label>
-            <div id="harga_sewa_ppn"></div>
-        </div>
-    </div>
-    <!-- Third Column -->
-    <div class="col-md-3">
-        <div class="mb-3">
-            <label class="fw-bold"><b>Masa Sewa Start</b></label>
-            <div id="masa_sewa_start"></div>
-        </div>
-        <div class="mb-3">
-            <label class="fw-bold"><b>Masa Sewa End</b></label>
-            <div id="masa_sewa_end"></div>
-        </div>
-    </div>
-    <!-- Fourth Column -->
-    <div class="col-md-3">
-            <div class="mb-3">
                 <label class="fw-bold"><b>Status</b></label>
                 <div id="status"></div>
             </div>
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-    </div>
-    </div>
     </div>
 </div>
 @endsection
@@ -753,7 +736,7 @@
         $('#dttable').on('click', '.btn-sewa-module', function() {
             $('#sewa-id').val($(this).data('id'));
             $('#sewa_nama_karyawan').val($(this).data('nama_karyawan'));
-            $('#sewa_departemen').val($(this).data('departemen'));
+            $('#sewa_ownrisk').val($(this).data('ownrisk'));
             $('#sewa_masa_sewa_start').val($(this).data('masa_sewa_start'));
             $('#sewa_masa_sewa_end').val($(this).data('masa_sewa_end'));
             $('#sewaModal').modal('show');
@@ -762,7 +745,8 @@
         $('#dttable').on('click', '.btn-user-module', function() {
             $('#user-id').val($(this).data('id'));
             $('#user_nama_karyawan').val($(this).data('nama_karyawan'));
-            $('#user_departemen').val($(this).data('departemen'));
+            $('#user_nama_karyawan_baru').val($(this).data('nama_karyawan_baru'));
+            $('#user_tanggal_resign').val($(this).data('tanggal_resign'));
             $('#userModal').modal('show');
         });
 

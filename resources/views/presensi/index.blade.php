@@ -22,14 +22,39 @@
     <div class="card-body">
     <h5 class="card-title fw-semibold mb-4 d-flex justify-content-between align-items-center">
     Data Presensi
-    <div class="ms-auto">
-        <a href="{{ route('report.presensi') }}" class="btn btn-primary btn-sm">
-            Report Absensi
-        </a>
-        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
-            Import Data
-        </button>
-    </div>
+    <div class="ms-auto d-flex align-items-center">
+    <!-- Filter Form -->
+    <form method="GET" action="{{ route('presensi.index') }}" class="d-flex me-2">
+        <div class="me-2">
+            <select name="bulan" id="bulan" class="form-select">
+                @for ($i = 1; $i <= 12; $i++)
+                    <option value="{{ sprintf('%02d', $i) }}" {{ request('bulan') == sprintf('%02d', $i) ? 'selected' : '' }}>
+                        {{ DateTime::createFromFormat('!m', $i)->format('F') }}
+                    </option>
+                @endfor
+            </select>
+        </div>
+        <div class="me-2">
+            <select name="tahun" id="tahun" class="form-select">
+                @for ($i = now()->year - 5; $i <= now()->year + 5; $i++)
+                    <option value="{{ $i }}" {{ request('tahun') == $i ? 'selected' : '' }}>
+                        {{ $i }}
+                    </option>
+                @endfor
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </form>
+    <a href="{{ route('report.presensi') }}" class="btn btn-secondary btn me-2">
+        Report Absensi
+    </a>
+    <button type="button" class="btn btn-success btn" data-bs-toggle="modal" data-bs-target="#importModal">
+        Import Data
+    </button>
+</div>
+
 </h5>
 </h5>
     </button></h5>
@@ -39,12 +64,14 @@
             <th class="content" style="display: none">ID</th>
             <th class="content">NIK</th>
             <th class="content">Nama</th>
+            <th class="content">Grade</th>
             <th class="content">Department</th>
             <th class="content">Tanggal</th>
             <th class="content">Jam Kerja</th>
             <th class="content">Masuk</th>
             <th class="content">Keluar</th>
             <th class="content">Pengecualian</th>
+            <th class="content">Action</th>
         </tr>
     </thead>
     <tbody>
@@ -53,6 +80,7 @@
             <td style="display: none"></td>
             <td class="content">{{ $data->nik !== '#N/A' ? ($data->nik ?? '-') : '-' }}</td>
             <td class="content">{{ $data->nama !== '#N/A' ? ($data->nama ?? '-') : '-' }}</td>
+            <td class="content">{{ $data->grade !== '#N/A' ? ($data->grade ?? '-') : '-' }}</td>
             <td class="content">{{ $data->dept !== '#N/A' ? ($data->dept ?? '-') : '-' }}</td>
             <td class="content">
                 {{ ($data->tanggal && $data->tanggal !== '#N/A') ? \Carbon\Carbon::parse($data->tanggal)->locale('id')->translatedFormat('l, d F Y') : '-' }}
@@ -61,6 +89,18 @@
             <td class="content">{{ $data->scan_masuk !== '#N/A' ? ($data->scan_masuk ?? '-') : '-' }}</td>
             <td class="content">{{ $data->scan_pulang !== '#N/A' ? ($data->scan_pulang ?? '-') : '-' }}</td>
             <td class="content">{{ $data->pengecualian !== '#N/A' ? ($data->pengecualian ?? '-') : '-' }}</td>
+            <td style="width: 15%;">
+                    <a href="{{ route('presensi.edit', $data->id_presensi_bulanan) }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-pencil"></i>
+                     </a>
+                    <form action="{{ route('presensi.delete', $data->id_presensi_bulanan) }}" method="POST" style="display: inline-block;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+            </td>
         </tr>
     @endforeach
 </tbody>

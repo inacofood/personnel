@@ -61,6 +61,9 @@
             $('#dttable').DataTable({
                 order: [[0, 'asc']]
             });
+            $('#dttable2').DataTable({
+                order: [[0, 'asc']]
+            });
 
             @if(session('success'))
                 toastr.success("{{ session('success') }}");

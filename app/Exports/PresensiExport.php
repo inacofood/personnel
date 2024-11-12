@@ -13,23 +13,25 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping, Shoul
 {
     use Exportable;
 
-    protected $month;
-    protected $year;
+    protected $startDate;
+    protected $endDate;
     protected $name;
 
-    public function __construct($month = null, $year = null,$name = null)
+    public function __construct($startDate = null, $endDate = null, $name = null)
     {
-        $this->month = $month;
-        $this->year = $year;
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
         $this->name = $name;
     }
-    // Ambil data dari fungsi yang sama seperti di view
+
     public function collection()
     {
       
         $query = DB::table('employee_presensi_bulanan')
             ->select(
+                'nik',
                 'nama', 
+                'grade', 
                 DB::raw('MONTH(tanggal) as bulan'),
                 DB::raw('YEAR(tanggal) as tahun'),
                 DB::raw("COUNT(CASE WHEN scan_masuk IS NOT NULL OR scan_pulang IS NOT NULL THEN 1 END) as total_hadir"),
@@ -120,18 +122,17 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping, Shoul
                 DB::raw("SUM(hk) as total_hk")
             );
 
-        if ($this->month) {
-            $query->whereMonth('tanggal', $this->month);
-        }
-        if ($this->year) {
-            $query->whereYear('tanggal', $this->year);
-        }
-        if ($this->name) {
-            $query->where('nama', $this->name);
-        }
+            if ($this->startDate && $this->endDate) {
+                $query->whereBetween('tanggal', [$this->startDate, $this->endDate]);
+            }
+    
+            if ($this->name) {
+                $query->where('nama', $this->name);
+            }
+    
 
         return $query
-            ->groupBy('nama', DB::raw('MONTH(tanggal)'), DB::raw('YEAR(tanggal)'))
+            ->groupBy('nik', 'nama', 'grade', DB::raw('MONTH(tanggal)'), DB::raw('YEAR(tanggal)'))
             ->get();
     
 
@@ -141,7 +142,7 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping, Shoul
     public function headings(): array
     {
         return [
-            'Nama', 'Bulan', 'Tahun', 'Total Hadir', 'Total Telat', 'Total Pulang Awal', 'Total Pengecualian',
+            'NIK', 'Nama', 'Grade', 'Bulan', 'Tahun', 'Total Hadir', 'Total Telat', 'Total Pulang Awal', 'Total Ketidakhadiran',
             'Total Sakit', 'Total Sakit Tanpa SD', 'Total Cuti Melahirkan', 'Total Dinas Luar', 'Total Cuti Tahunan',
             'Total Cuti', 'Total Izin', 'Total Anak BTIS/Sunat', 'Total Istri Melahirkan', 'Total Menikah',
             'Total OT/MTUA/KLG MGL', 'Total WFH', 'Total Paruh Waktu', 'Total Libur', 'Total Error', 'Total HK'
@@ -151,8 +152,10 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping, Shoul
     public function map($row): array
     {
         return [
+            $row->nik,
             $row->nama,
-            \Carbon\Carbon::create()->month($row->bulan)->translatedFormat('F'), // Konversi angka bulan ke nama bulan
+            $row->grade,
+            \Carbon\Carbon::create()->month($row->bulan)->translatedFormat('F'), 
             $row->tahun,
             $row->total_hadir,
             $row->total_telat,

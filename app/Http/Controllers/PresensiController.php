@@ -16,12 +16,19 @@ use App\Exports\PresensiExport;
 
 class PresensiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $presensi = EmployeePresensi::all();
-
+        $bulan = $request->input('bulan', Carbon::now()->format('m'));
+        $tahun = $request->input('tahun', Carbon::now()->format('Y'));
+    
+        $presensi = EmployeePresensi::whereMonth('tanggal', $bulan)
+                                     ->whereYear('tanggal', $tahun)
+                                     ->get();
+    
         return view('presensi.index', [
-            'presensi' => $presensi
+            'presensi' => $presensi,
+            'bulan' => $bulan,
+            'tahun' => $tahun
         ]);
     }
 
@@ -123,13 +130,15 @@ class PresensiController extends Controller
 public function rekapPresensiBulanan()
 {
     $datanama = DB::table('employee_presensi_bulanan')
-        ->select('nama')
+        ->select('nama', 'nik', 'grade')
         ->distinct()
         ->get();
 
     $rekapKehadiran = DB::table('employee_presensi_bulanan')
         ->select(
             'nama',
+            'nik',
+            'grade',
             DB::raw('GROUP_CONCAT(DISTINCT jam_kerja SEPARATOR ", ") as jam_kerja'), 
             DB::raw('MONTH(tanggal) as bulan'),
             DB::raw('YEAR(tanggal) as tahun'),
@@ -222,7 +231,7 @@ public function rekapPresensiBulanan()
             DB::raw("COUNT(CASE WHEN pengecualian = 'ERROR' THEN 1 END) as total_error"),
             DB::raw("SUM(hk) as total_hk")
         )
-        ->groupBy('nama', DB::raw('MONTH(tanggal)'), DB::raw('YEAR(tanggal)'))
+        ->groupBy('nama','nik', 'grade', DB::raw('MONTH(tanggal)'), DB::raw('YEAR(tanggal)'))
         ->get();
 
     return view('presensi.report_presensi', [
@@ -230,125 +239,6 @@ public function rekapPresensiBulanan()
         'datanama' => $datanama,
     ]);
 }
-
-// public function rekapPresensiBulanan()
-// {
-//     // Mendapatkan bulan dan tahun saat ini
-//     $currentMonth = now()->month; // Bulan sekarang
-//     $currentYear = now()->year;     // Tahun sekarang
-
-//     // Menghitung tanggal awal (26 bulan lalu) dan tanggal akhir (25 bulan ini)
-//     $startDate = now()->subMonth()->day(26)->startOfDay(); // 26 bulan lalu
-//     $endDate = now()->day(25)->endOfDay(); // 25 bulan ini
-
-//     // Mengambil data nama karyawan yang unik
-//     $datanama = DB::table('employee_presensi_bulanan')
-//         ->select('nama')
-//         ->distinct()
-//         ->get();
-
-//     // Mengambil rekap kehadiran
-//     $rekapKehadiran = DB::table('employee_presensi_bulanan')
-//         ->select(
-//             'nama',
-//             DB::raw('GROUP_CONCAT(DISTINCT jam_kerja SEPARATOR ", ") as jam_kerja'), 
-//             DB::raw('MONTH(tanggal) as bulan'),
-//             DB::raw('YEAR(tanggal) as tahun'),
-//             DB::raw("COUNT(CASE WHEN scan_masuk IS NOT NULL OR scan_pulang IS NOT NULL THEN 1 END) as total_hadir"),
-//             DB::raw("COUNT(CASE WHEN absent = 'TRUE' THEN 1 END) as total_absent"),
-//             DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja 
-//                 WHEN 'Shift 1A' THEN '06:00:00' 
-//                 WHEN 'Shift 1B' THEN '07:00:00' 
-//                 WHEN 'Shift 1C' THEN '08:00:00' 
-//                 WHEN 'Shift 1D' THEN '09:00:00'
-//                 WHEN 'Shift 1E' THEN '10:00:00' 
-//                 WHEN 'Shift 1F' THEN '05:00:00' 
-//                 WHEN 'Shift 2A' THEN '11:00:00'  
-//                 WHEN 'Shift 2B' THEN '12:00:00' 
-//                 WHEN 'Shift 2C' THEN '13:00:00' 
-//                 WHEN 'Shift 2D' THEN '14:00:00' 
-//                 WHEN 'Shift 2E' THEN '15:00:00' 
-//                 WHEN 'Shift 2F' THEN '16:00:00' 
-//                 WHEN 'Shift 3A' THEN '22:00:00' 
-//                 WHEN 'Shift 3B' THEN '23:00:00' 
-//                 WHEN 'Shift 1 5 jam' THEN '07:00:00' 
-//                 WHEN 'Shift 1A 5 jam' THEN '08:00:00'
-//                 WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
-//                 WHEN 'Shift 1C 5 jam' THEN '10:00:00'
-//                 WHEN 'Shift 3 5 jam' THEN '23:00:00'
-//                 WHEN 'Shift 3A 5 jam' THEN '24:00:00'
-//                 WHEN 'Shift 2 5 jam' THEN '12:00:00'
-//                 WHEN 'Shift 2A 5 jam' THEN '17:00:00'
-//                 WHEN 'Shift 2B 5 jam' THEN '18:00:00'
-//                 WHEN 'Staff Up 5 HK' THEN '08:00:00'
-//                 WHEN 'Driver Ops' THEN '08:00:00'
-//                 WHEN 'Driver Ekspedisi S-J' THEN '08:00:00'
-//                 WHEN 'Driver Ekspedisi Sab' THEN '08:00:00'
-//                 WHEN 'Fleksibel' THEN '07:00:00'
-//                 WHEN 'Laundry Sab' THEN '06:00:00'
-//                 WHEN 'OB Sab' THEN '07:00:00'
-//                 WHEN 'OB Sen-Jum' THEN '06:30:00'
-//                 WHEN 'Crew Marketing' THEN '08:00:00'
-//                 END) THEN 1 END) as total_telat"),
-//             DB::raw("COUNT(CASE WHEN TIME(scan_pulang) < TIME(CASE jam_kerja 
-//                 WHEN 'Shift 1A' THEN '14:00:00' 
-//                 WHEN 'Shift 1B' THEN '15:00:00'
-//                 WHEN 'Shift 1C' THEN '16:00:00' 
-//                 WHEN 'Shift 1D' THEN '17:00:00'
-//                 WHEN 'Shift 1E' THEN '18:00:00' 
-//                 WHEN 'Shift 1F' THEN '13:00:00' 
-//                 WHEN 'Shift 2A' THEN '19:00:00'  
-//                 WHEN 'Shift 2B' THEN '20:00:00' 
-//                 WHEN 'Shift 2C' THEN '21:00:00' 
-//                 WHEN 'Shift 2D' THEN '22:00:00' 
-//                 WHEN 'Shift 2E' THEN '23:00:00' 
-//                 WHEN 'Shift 2F' THEN '24:00:00' 
-//                 WHEN 'Shift 3A' THEN '06:00:00' 
-//                 WHEN 'Shift 3B' THEN '07:00:00' 
-//                 WHEN 'Shift 1 5 jam' THEN '12:00:00' 
-//                 WHEN 'Shift 1A 5 jam' THEN '13:10:00'
-//                 WHEN 'Shift 1B 5 jam' THEN '11:00:00' 
-//                 WHEN 'Shift 1C 5 jam' THEN '15:00:00'
-//                 WHEN 'Shift 3 5 jam' THEN '04:00:00'
-//                 WHEN 'Shift 3A 5 jam' THEN '05:00:00'
-//                 WHEN 'Shift 2 5 jam' THEN '17:00:00'
-//                 WHEN 'Shift 2A 5 jam' THEN '22:00:00'
-//                 WHEN 'Shift 2B 5 jam' THEN '23:00:00'
-//                 WHEN 'Staff Up 5 HK' THEN '17:00:00'
-//                 WHEN 'Driver Ops' THEN '17:00:00'
-//                 WHEN 'Driver Ekspedisi S-J' THEN '16:00:00'
-//                 WHEN 'Driver Ekspedisi Sab' THEN '13:10:00'
-//                 WHEN 'Fleksibel' THEN '23:59:00'
-//                 WHEN 'Laundry Sab' THEN '11:10:00'
-//                 WHEN 'OB Sab' THEN '13:10:00'
-//                 WHEN 'OB Sen-Jum' THEN '16:30:00'
-//                 WHEN 'Crew Marketing' THEN '17:00:00'
-//                 END) THEN 1 END) as total_awal"),
-//             DB::raw("COUNT(CASE WHEN pengecualian IS NOT NULL AND pengecualian != '' THEN 1 END) as total_pengecualian"),
-//             DB::raw("COUNT(CASE WHEN pengecualian IN ('SAKIT', 'sakit dg srt dokter') THEN 1 END) as total_sakit"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'SAKIT TANPA SD' THEN 1 END) as total_sakit_tanpa_sd"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'CUTI MELAHIRKAN' THEN 1 END) as total_cuti_melahirkan"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'DINAS LUAR' THEN 1 END) as total_dinas_luar"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'CUTI TAHUNAN' THEN 1 END) as total_cuti_tahunan"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'CUTI' THEN 1 END) as total_cuti"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'IZIN' THEN 1 END) as total_izin"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'ANAK BTIS/SUNAT' THEN 1 END) as total_anak_btis"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'ISTRI MELAHIRKAN' THEN 1 END) as total_istri_melahirkan"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'MENIKAH' THEN 1 END) as total_menikah"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'OT/MTUA/KLG MGL' THEN 1 END) as total_ot_mtua_klg_mgl"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'WFH' THEN 1 END) as total_wfh"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'PARUH WAKTU' THEN 1 END) as total_paruh_waktu"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'LIBUR' THEN 1 END) as total_libur"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'ERROR' THEN 1 END) as total_error"),
-//             DB::raw("COUNT(CASE WHEN pengecualian = 'KELUARGA KESULITAN' THEN 1 END) as total_keluarga_kesulitan"),
-//         )
-//         ->whereBetween('tanggal', [$startDate, $endDate])
-//         ->groupBy('nama')
-//         ->get();
-
-//     return view('presensi.rekap-presensi-bulanan', compact('rekapKehadiran', 'datanama', 'startDate', 'endDate'));
-// }
-
 
 public function getPresensiDetail(Request $request)
 {
@@ -533,24 +423,58 @@ public function getPresensiDetail(Request $request)
 
     public function exportExcel(Request $request)
     {
-
-        $month = $request->bulanfilter;
-        $year = $request->tahunfilter;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
         $name = $request->namafilter;
 
-        return Excel::download(new PresensiExport($month, $year, $name), 'rekap-presensi-bulanan.xlsx');
+        return Excel::download(new PresensiExport($startDate, $endDate, $name), 'rekap-presensi.xlsx');
     }
 
     public function deletepresensi($id)
     {
-        $presensi = EmployeePresensi::find($id);
-        if (!$presensi) {
-            return redirect()->back()->with('error', 'Data tidak ditemukan.');
-        }
-        $presensi->delete();
-        return redirect()->back()->with('success', 'Data berhasil dihapus.');
+
+        $data = EmployeePresensi::findOrFail($id);
+        $data->delete();
+        return redirect()->back()->with('success', 'Presensi berhasil dihapus!');
     }
-    
+
+    public function editpresensi($id_presensi_bulanan)
+{
+    $presensi = EmployeePresensi::findOrFail($id_presensi_bulanan);
+    return view('presensi.edit', compact('presensi'));
+}
+
+public function updatepresensi(Request $request, $id_presensi_bulanan)
+{
+    $data = [
+        'nik' => $request->nik !== null && $request->nik !== '-' ? $request->nik : null,
+        'nama' => $request->nama !== null && $request->nama !== '-' ? $request->nama : null,
+        'tanggal' => $request->tanggal !== null && $request->tanggal !== '-' ? $request->tanggal : null,
+        'week' => $request->week !== null && $request->week !== '-' ? $request->week : null,
+        'jam_kerja' => $request->jam_kerja !== null && $request->jam_kerja !== '-' ? $request->jam_kerja : null,
+        'scan_masuk' => $request->scan_masuk !== null && $request->scan_masuk !== '-' ? $request->scan_masuk : null,
+        'scan_pulang' => $request->scan_pulang !== null && $request->scan_pulang !== '-' ? $request->scan_pulang : null,
+        'terlambat' => $request->terlambat !== null && $request->terlambat !== '-' ? $request->terlambat : null,
+        'pulang_cepat' => $request->pulang_cepat !== null && $request->pulang_cepat !== '-' ? $request->pulang_cepat : null,
+        'absent' => $request->absent !== null && $request->absent !== '-' ? $request->absent : null,
+        'pengecualian' => $request->pengecualian !== null && $request->pengecualian !== '-' ? $request->pengecualian : null,
+        'HK' => $request->HK !== null && $request->HK !== '-' ? $request->HK : null,
+        'dept' => $request->dept !== null && $request->dept !== '-' ? $request->dept : null,
+        'section' => $request->section !== null && $request->section !== '-' ? $request->section : null,
+        'grade' => $request->grade !== null && $request->grade !== '-' ? $request->grade : null,
+        'join_date' => $request->join_date !== null && $request->join_date !== '-' ? $request->join_date : null,
+        'jt' => $request->jt !== null && $request->jt !== '-' ? $request->jt : null,
+        'atasan' => $request->atasan !== null && $request->atasan !== '-' ? $request->atasan : null,
+        'updated_by' => auth()->id(),
+    ];
+
+    // Update database
+    DB::table('employee_presensi_bulanan')
+        ->where('id_presensi_bulanan', $id_presensi_bulanan)
+        ->update($data);
+
+        return redirect()->route('presensi.index')->with('success', 'Presensi berhasil diupdate!');
+}
 
 
 

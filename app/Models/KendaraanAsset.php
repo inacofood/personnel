@@ -12,6 +12,16 @@ class KendaraanAsset extends Model
     
     protected $primaryKey = 'id_asset'; 
 
+    public function serviceAssets()
+    {
+    return $this->hasMany(ServiceAsset::class, 'id_asset', 'id_asset');
+    }
+
+    public function historyAssets()
+    {
+        return $this->hasMany(HistoryAsset::class, 'id_asset', 'id_asset');
+    }
+
 }
 
 

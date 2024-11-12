@@ -20,25 +20,15 @@
                     @endforeach
                 </select>
             </div>
-                <div class="col-md-3">
-                    <select id="bulanFilter" class="form-control" name="bulanfilter">
-                        <option value="">Pilih Bulan</option>
-                        @foreach (range(1, 12) as $month)
-                            <option value="{{ $month }}">{{ \Carbon\Carbon::create()->month($month)->translatedFormat('F') }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select id="tahunFilter" class="form-control" name="tahunfilter">
-                        <option value="">Pilih Tahun</option>
-                        @foreach (range(date('Y'), 2000) as $year)
-                            <option value="{{ $year }}">{{ $year }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2 text-right">
-                    <button type="submit" class="btn btn-primary">Export Excel</button>
-                </div>
+            <div class="col-md-3">
+                <input type="date" id="startDate" class="form-control" name="start_date">
+            </div>
+            <div class="col-md-3">
+                <input type="date" id="endDate" class="form-control" name="end_date">
+            </div>
+            <div class="col-md-2 text-right">
+                <button type="submit" class="btn btn-primary">Export Excel</button>
+            </div>
             </div>
         </form>
 
@@ -46,7 +36,9 @@
             <table class="table table-striped table-bordered display" id="dttable">
                 <thead>
                     <tr>
+                        <th>NIK</th>
                         <th>Nama</th>
+                        <th>Grade</th>
                         <th>Bulan</th>
                         <th hidden>Bulan</th>
                         <th>Tahun</th>
@@ -75,7 +67,9 @@
                 <tbody>
                 @foreach($rekapKehadiran as $kehadiran)
                     <tr>
+                        <td>{{ $kehadiran->nik }}</td>
                         <td>{{ $kehadiran->nama }}</td>
+                        <td>{{ $kehadiran->grade }}</td>
                         <td>{{ \Carbon\Carbon::create()->month($kehadiran->bulan)->translatedFormat('F') }}</td>
                         <td hidden>{{ $kehadiran->bulan }}</td>
                         <td>{{ $kehadiran->tahun }}</td>
@@ -232,16 +226,16 @@ $(document).ready(function() {
     });
 
     $('#namaFilter').on('change', function () {
-        table.columns(0).search(this.value).draw();
+        table.columns(1).search(this.value).draw();
         });
 
     $('#bulanFilter').on('change', function () {
-        table.columns(2).search(this.value).draw();
-        table.columns(2).search(this.value).draw();
+        table.columns(3).search(this.value).draw();
+        table.columns(3).search(this.value).draw();
     });
 
     $('#tahunFilter').on('change', function () {
-        table.columns(3).search(this.value).draw();
+        table.columns(4).search(this.value).draw();
     });
 
     $('#namaFilter, #bulanFilter, #tahunFilter').on('input change', function() {

@@ -15,13 +15,14 @@ class EmployeePresensi extends Model
      */
     // protected $connection = 'mysqlhrms';
     protected $table = 'employee_presensi_bulanan';
+    protected $primaryKey = 'id_presensi_bulanan';
 
     /**
      * The attributes that aren't mass assignable.
      *
      * @var array
      */
-    protected $guarded = ['id'];
+    protected $guarded = ['id_presensi_bulanan'];
 
 
 }

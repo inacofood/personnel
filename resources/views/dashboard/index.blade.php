@@ -38,7 +38,7 @@
             <div class="col-md-12">
                 <div class="row">
                     <!-- Total Leave -->
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                     <div class="total-box bg-primary text-white" style="border-radius: 10px; height: 100px;">
                         <h5 style="color:white; padding-top:10px"><b>Total Leave</b></h5>
                         <form action="{{ route('detail.count.dashboard') }}" method="GET">
@@ -67,7 +67,7 @@
                 </div>
 
                  <!-- Total Dinas Luar -->
-                 <div class="col-md-3">
+                 <div class="col-md-2">
                     <div class="total-box bg-secondary text-white" style="border-radius: 10px; height: 100px;">
                         <h5 style="color:white; padding-top:10px"><b>Total Dinas Luar</b></h5>
                         <form action="{{ route('detail.dinasluar.dashboard') }}" method="GET">
@@ -82,7 +82,7 @@
                 </div>
 
                 <!-- Total Telat -->
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <div class="total-box bg-danger text-white" style="border-radius: 10px; height: 100px;">
                         <h5 style="color:white; padding-top:10px"><b>Total Late</b></h5>
                         <form action="{{ route('detail.late.dashboard') }}" method="GET">
@@ -97,7 +97,7 @@
                 </div>
 
                 <!-- Total Pulang Awal -->
-                <!-- <div class="col-md-3">
+                <div class="col-md-2">
                     <div class="total-box bg-warning text-white" style="border-radius: 10px; height: 100px;">
                         <h5 style="color:white; padding-top:10px"><b>Total Pulang Awal</b></h5>
                         <form action="{{ route('detail.awal.dashboard') }}" method="GET">
@@ -105,16 +105,16 @@
                     <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
                     <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
                     <button type="submit" style="font-size:28px; font-weight:bold; padding-bottom:10px; border:none; background:none; cursor:pointer; color:white">
-                        {{ $telatAwalData[1]['y'] ?? 'N/A' }}
+                        {{ $telatAwalData[1]['y'] ?? '0' }}
                     </button>
                 </form>
                 </div>
-                </div> -->
+                </div>
 
 
                 <!-- Total Tidak Absen -->
-                <div class="col-md-3">
-                    <div class="total-box bg-warning text-white" style="border-radius: 10px; height: 100px;">
+                <div class="col-md-2">
+                    <div class="total-box bg-success text-white" style="border-radius: 10px; height: 100px;">
                         <h5 style="color:white; padding-top:10px"><b>Total Absen</b></h5>
                         <form action="{{ route('absent.detail') }}" method="GET">
                             @csrf
@@ -122,6 +122,21 @@
                             <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
                             <button type="submit" style="font-size:28px; font-weight:bold; padding-bottom:10px; border:none; background:none; cursor:pointer; color:white">
                                 {{ $totals->total_absent ?? 0 }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                  <!-- Total WFH -->
+                  <div class="col-md-2">
+                    <div class="total-box bg-dark text-white" style="border-radius: 10px; height: 100px;">
+                        <h5 style="color:white; padding-top:10px"><b>Total WFH</b></h5>
+                        <form action="{{ route('wfh.detail') }}" method="GET">
+                            @csrf
+                            <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
+                            <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
+                            <button type="submit" style="font-size:28px; font-weight:bold; padding-bottom:10px; border:none; background:none; cursor:pointer; color:white">
+                                {{ $totals->total_wfh ?? 0 }}
                             </button>
                         </form>
                     </div>
@@ -192,16 +207,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($rekapKehadiran as $kehadiran)
+                @foreach($rekapKehadiran as $kehadirans)
                 <tr>
-                    <td>{{ $kehadiran['nama'] }}</td>
+                    <td>{{ $kehadirans['nama'] }}</td>
                     <td>
                         <form action="{{ route('kehadiran.detail') }}" method="GET" style="display:inline;">
                         <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
                         <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
-                            <input type="hidden" name="nama" value="{{ $kehadiran['nama'] }}">
+                            <input type="hidden" name="nama" value="{{ $kehadirans['nama'] }}">
                             <button type="submit" style="border:none; background:none; padding:0; cursor:pointer; color:inherit; font-size:inherit; font-weight:inherit;">
-                                {{ $kehadiran['total_telat'] }}
+                                {{ $kehadirans['total_telat'] }}
                             </button>
                         </form>
                     </td>
@@ -210,6 +225,79 @@
                 </tbody>
             </table>
         </div>
+        </div>
+        <!-- PERMINGGU -->
+        @if ((request('bulan') ?? now()->month) == now()->month)
+        <div class="row justify-content-center">
+            <!-- Kolom untuk leave terbanyak -->
+            <div class="col-md-6">
+                <table class="table table-bordered table-hover">
+                    <thead class="bg-secondary text-white">
+                        <tr>
+                            <th colspan="3" class="text-center">5 Nama Leave Terbanyak Minggu Ini</th>
+                        </tr>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Kategori Leave</th>
+                            <th>Jumlah Leave</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($leavemingguan as $leave)
+                            <tr>
+                                <td>{{ $leave->nama }}</td>
+                                <td>{{ $leave->pengecualian }}</td>
+                                <td>
+                                    <form action="{{ route('leave.mingguan.detail') }}" method="GET" style="display:inline;">
+                                        @csrf
+                                        <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
+                                        <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
+                                        <input type="hidden" name="nama" value="{{ $leave->nama }}">
+                                        <input type="hidden" name="kategori_leave" value="{{ $leave->pengecualian }}">
+                                        <button type="submit" style="border:none; background:none; padding:0; cursor:pointer; color:inherit; font-size:inherit; font-weight:inherit;">
+                                            {{ $leave->total_leave }}
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Kolom untuk telat terbanyak -->
+            <div class="col-md-6">
+                <table class="table table-bordered table-hover">
+                    <thead class="bg-warning  text-white">
+                        <tr>
+                            <th colspan="2" class="text-center">5 Nama Telat Terbanyak Minggu Ini</th>
+                        </tr>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Jumlah Telat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($telatmingguan as $kehadiran)
+                    <tr>
+                    <td>{{ $kehadiran->nama }}</td>
+                        <td>
+                            <form action="{{ route('late.mingguan.detail') }}" method="GET" style="display:inline;">
+                                <input type="hidden" name="bulan" value="{{ request('bulan') ?? now()->month }}">
+                                <input type="hidden" name="tahun" value="{{ request('tahun') ?? now()->year }}">
+                                <input type="hidden" name="nama" value="{{ $kehadiran->nama }}">
+                                <button type="submit" style="border:none; background:none; padding:0; cursor:pointer; color:inherit; font-size:inherit; font-weight:inherit;">
+                                    {{ $kehadiran->total_telat }}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
 
         <!-- Leave Category Table -->
         <div class="row">
@@ -230,7 +318,6 @@
                         <th>Istri Melahirkan</th>
                         <th>Menikah</th>
                         <th>OT/MTUA/KLG MGL</th>
-                        <th>WFH</th>
                         <th>Paruh Waktu</th>
                     </tr>
                 </thead>
@@ -330,15 +417,6 @@
                         <a href="{{ route('leave.detail', [
                                     'bulan' => request('bulan') ?? now()->month,
                                     'tahun' => request('tahun') ?? now()->year,
-                                    'status' => 'wfh'
-                                ]) }}">
-                            {{ $totals->total_wfh ?? 0 }}
-                            </a>
-                        </td>
-                        <td>
-                        <a href="{{ route('leave.detail', [
-                                    'bulan' => request('bulan') ?? now()->month,
-                                    'tahun' => request('tahun') ?? now()->year,
                                     'status' => 'pw'
                                 ]) }}">
                             {{ $totals->total_paruh_waktu ?? 0 }}
@@ -429,7 +507,7 @@
                 name: 'Total',
                 colorByPoint: true,
                 data: [
-                    { name: 'Total Leave', y: {{ ($totals->total_sakit ?? 0) + ($totals->total_sakit_tanpa_sd ?? 0) + ($totals->total_cuti_melahirkan ?? 0) + ($totals->total_cuti_tahunan ?? 0) + ($totals->total_cuti ?? 0) + ($totals->total_izin ?? 0) + ($totals->total_anak_btis ?? 0) + ($totals->total_istri_melahirkan ?? 0) + ($totals->total_menikah ?? 0) + ($totals->total_ot_mtua_klg_mgl ?? 0) + ($totals->total_wfh ?? 0) + ($totals->total_paruh_waktu ?? 0) }}, sliced: true },
+                    { name: 'Total Leave', y: {{ ($totals->total_sakit ?? 0) + ($totals->total_sakit_tanpa_sd ?? 0) + ($totals->total_cuti_melahirkan ?? 0) + ($totals->total_cuti_tahunan ?? 0) + ($totals->total_cuti ?? 0) + ($totals->total_izin ?? 0) + ($totals->total_anak_btis ?? 0) + ($totals->total_istri_melahirkan ?? 0) + ($totals->total_menikah ?? 0) + ($totals->total_ot_mtua_klg_mgl ?? 0) + ($totals->total_paruh_waktu ?? 0) }}, sliced: true },
                     { name: 'Total Late', y: {{ $telatAwalData[0]['y'] ?? 0 }} },
                     { name: 'Total Pulang Awal', y: {{ $telatAwalData[1]['y'] ?? 0 }} }
                 ]
