@@ -40,16 +40,16 @@
 
     .blink-yellow {
         animation: blinkYellowBackground 1s infinite;
-        color: black; /* Teks hitam untuk kontras */
+        color: black; 
     }
 
     .blink-red {
         animation: blinkRedBackground 1s infinite;
-        color: black; /* Teks hitam untuk kontras */
+        color: black; 
     }
 
     .text-red {
-        color: red; /* Hanya mengubah warna teks menjadi merah */
+        color: red;
     }
 </style>
 
@@ -108,89 +108,96 @@
                   <td class="text-left">{{ \Carbon\Carbon::parse($data->masa_sewa_end)->format('d-m-Y') }}</td>
                   <td class="text-left">{{ $data->status }}</td>
                   <td class="text-left" style="white-space: nowrap;">
-                <button class="btn btn-info btn-sm btn-view-module" 
-                        data-plat_no="{{ $data->plat_no }}" 
-                        data-nik="{{ $data->nik }}" 
-                        data-nama_karyawan="{{ $data->nama_karyawan }}" 
-                        data-lokasi="{{ $data->lokasi }}" 
-                        data-cc="{{ $data->cc }}" 
-                        data-cc_nama="{{ $data->cc_nama }}" 
-                        data-departemen="{{ $data->departemen }}" 
-                        data-vendor="{{ $data->vendor }}" 
-                        data-grade_title="{{ $data->grade_title }}" 
-                        data-no_tlp="{{ $data->no_tlp }}" 
-                        data-merk="{{ $data->merk }}" 
-                        data-tipe="{{ $data->tipe }}" 
-                        data-tahun="{{ $data->tahun }}" 
-                        data-jenis="{{ $data->jenis }}" 
-                        data-harga_sewa="{{ $data->harga_sewa }}" 
-                        data-harga_sewa_ppn="{{ $data->harga_sewa_ppn }}" 
-                        data-masa_sewa_start="{{ $data->masa_sewa_start }}" 
-                        data-masa_sewa_end="{{ $data->masa_sewa_end }}" 
-                        data-end_date_h_empatlima="{{ $data->end_date_h_empatlima }}" 
-                        data-alert_masa_sewa="{{ $data->alert_masa_sewa }}" 
-                        data-status="{{ $data->status }}" 
-                        data-note_to_do="{{ $data->note_to_do }}" 
-                        data-ket="{{ $data->ket }}"
-                        data-kondisi="{{ $data->kondisi }}"  
-                        data-pic_vendor="{{ $data->pic_vendor }}" 
-                        data-kontak_vendor="{{ $data->kontak_vendor }}"
-                        data-foto_tanda_terima="{{ $data->foto_tanda_terima }}"
-                        data-foto_stnk="{{ $data->foto_stnk }}"  
-                        data-lokasi_parkir="{{ $data->lokasi_parkir }}"  
-                        data-toggle="modal" 
-                        data-target="#viewModal">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn btn-warning btn-sm btn-edit-module" 
-                    data-id="{{ $data->id_sewa }}"  
-                    data-plat_no="{{ $data->plat_no }}" 
-                    data-nik="{{ $data->nik }}" 
-                    data-nama_karyawan="{{ $data->nama_karyawan }}" 
-                    data-lokasi="{{ $data->lokasi }}" 
-                    data-cc="{{ $data->cc }}" 
-                    data-cc_nama="{{ $data->cc_nama }}" 
-                    data-departemen="{{ $data->departemen }}" 
-                    data-vendor="{{ $data->vendor }}" 
-                    data-grade_title="{{ $data->grade_title }}" 
-                    data-no_tlp="{{ $data->no_tlp }}" 
-                    data-merk="{{ $data->merk }}" 
-                    data-tipe="{{ $data->tipe }}" 
-                    data-tahun="{{ $data->tahun }}" 
-                    data-jenis="{{ $data->jenis }}" 
-                    data-harga_sewa="{{ $data->harga_sewa }}" 
-                    data-harga_sewa_ppn="{{ $data->harga_sewa_ppn }}" 
-                    data-masa_sewa_start="{{ $data->masa_sewa_start }}" 
-                    data-masa_sewa_end="{{ $data->masa_sewa_end }}" 
-                    data-end_date_h_empatlima="{{ $data->end_date_h_empatlima }}" 
-                    data-alert_masa_sewa="{{ $data->alert_masa_sewa }}" 
-                    data-status="{{ $data->status }}" 
-                    data-note_to_do="{{ $data->note_to_do }}" 
-                    data-ket="{{ $data->ket }}" 
-                    data-kondisi="{{ $data->kondisi }}"  
-                    data-pic_vendor="{{ $data->pic_vendor }}" 
-                    data-kontak_vendor="{{ $data->kontak_vendor }}"
-                    data-foto_tanda_terima="{{ $data->foto_tanda_terima }}"
-                    data-foto_stnk="{{ $data->foto_stnk }}"  
-                    data-lokasi_parkir="{{ $data->lokasi_parkir }}"  
-                    data-toggle="modal" 
-                    data-target="#editModal">
-                    <i class="fas fa-pencil-alt"></i>
-                </button>
-                <button class="btn btn-success btn-sm btn-sewa-module" 
-                    data-nama_karyawan="{{ $data->nama_karyawan }}" 
-                    data-departemen="{{ $data->departemen }}" 
-                    data-masa_sewa_start="{{ $data->masa_sewa_start }}" 
-                    data-masa_sewa_end="{{ $data->masa_sewa_end }}" 
-                    data-id="{{ $data->id_sewa }}">
-                    <i class="fas fa-book"></i> 
-                </button>
-                <button class="btn btn-primary btn-sm btn-user-module" 
-                    data-nama_karyawan="{{ $data->nama_karyawan }}" 
-                    data-id="{{ $data->id_sewa }}">
-                    <i class="fas fa-user"></i>
-                </button>
-                </td>
+                      <button class="btn btn-info btn-sm btn-view-module" 
+                              data-plat_no="{{ $data->plat_no }}" 
+                              data-nik="{{ $data->nik }}" 
+                              data-nama_karyawan="{{ $data->nama_karyawan }}" 
+                              data-lokasi="{{ $data->lokasi }}" 
+                              data-cc="{{ $data->cc }}" 
+                              data-cc_nama="{{ $data->cc_nama }}" 
+                              data-departemen="{{ $data->departemen }}" 
+                              data-vendor="{{ $data->vendor }}" 
+                              data-grade_title="{{ $data->grade_title }}" 
+                              data-no_tlp="{{ $data->no_tlp }}" 
+                              data-merk="{{ $data->merk }}" 
+                              data-tipe="{{ $data->tipe }}" 
+                              data-tahun="{{ $data->tahun }}" 
+                              data-jenis="{{ $data->jenis }}" 
+                              data-harga_sewa="{{ $data->harga_sewa }}" 
+                              data-harga_sewa_ppn="{{ $data->harga_sewa_ppn }}" 
+                              data-masa_sewa_start="{{ $data->masa_sewa_start }}" 
+                              data-masa_sewa_end="{{ $data->masa_sewa_end }}" 
+                              data-end_date_h_empatlima="{{ $data->end_date_h_empatlima }}" 
+                              data-alert_masa_sewa="{{ $data->alert_masa_sewa }}" 
+                              data-status="{{ $data->status }}" 
+                              data-note_to_do="{{ $data->note_to_do }}" 
+                              data-ket="{{ $data->ket }}"
+                              data-kondisi="{{ $data->kondisi }}"  
+                              data-pic_vendor="{{ $data->pic_vendor }}" 
+                              data-kontak_vendor="{{ $data->kontak_vendor }}"
+                              data-foto_tanda_terima="{{ $data->foto_tanda_terima }}"
+                              data-foto_stnk="{{ $data->foto_stnk }}"  
+                              data-lokasi_parkir="{{ $data->lokasi_parkir }}"  
+                              data-toggle="modal" 
+                              data-target="#viewModal"
+                              title="Details">
+                          <i class="fas fa-eye"></i>
+                      </button>
+                      
+                      <button class="btn btn-warning btn-sm btn-edit-module" 
+                              data-id="{{ $data->id_sewa }}"  
+                              data-plat_no="{{ $data->plat_no }}" 
+                              data-nik="{{ $data->nik }}" 
+                              data-nama_karyawan="{{ $data->nama_karyawan }}" 
+                              data-lokasi="{{ $data->lokasi }}" 
+                              data-cc="{{ $data->cc }}" 
+                              data-cc_nama="{{ $data->cc_nama }}" 
+                              data-departemen="{{ $data->departemen }}" 
+                              data-vendor="{{ $data->vendor }}" 
+                              data-grade_title="{{ $data->grade_title }}" 
+                              data-no_tlp="{{ $data->no_tlp }}" 
+                              data-merk="{{ $data->merk }}" 
+                              data-tipe="{{ $data->tipe }}" 
+                              data-tahun="{{ $data->tahun }}" 
+                              data-jenis="{{ $data->jenis }}" 
+                              data-harga_sewa="{{ $data->harga_sewa }}" 
+                              data-harga_sewa_ppn="{{ $data->harga_sewa_ppn }}" 
+                              data-masa_sewa_start="{{ $data->masa_sewa_start }}" 
+                              data-masa_sewa_end="{{ $data->masa_sewa_end }}" 
+                              data-end_date_h_empatlima="{{ $data->end_date_h_empatlima }}" 
+                              data-alert_masa_sewa="{{ $data->alert_masa_sewa }}" 
+                              data-status="{{ $data->status }}" 
+                              data-note_to_do="{{ $data->note_to_do }}" 
+                              data-ket="{{ $data->ket }}" 
+                              data-kondisi="{{ $data->kondisi }}"  
+                              data-pic_vendor="{{ $data->pic_vendor }}" 
+                              data-kontak_vendor="{{ $data->kontak_vendor }}"
+                              data-foto_tanda_terima="{{ $data->foto_tanda_terima }}"
+                              data-foto_stnk="{{ $data->foto_stnk }}"  
+                              data-lokasi_parkir="{{ $data->lokasi_parkir }}"  
+                              data-toggle="modal" 
+                              data-target="#editModal"
+                              title="Edit">
+                          <i class="fas fa-pencil-alt"></i>
+                      </button>
+                      
+                      <button class="btn btn-success btn-sm btn-sewa-module" 
+                              data-nama_karyawan="{{ $data->nama_karyawan }}" 
+                              data-departemen="{{ $data->departemen }}" 
+                              data-masa_sewa_start="{{ $data->masa_sewa_start }}" 
+                              data-masa_sewa_end="{{ $data->masa_sewa_end }}" 
+                              data-id="{{ $data->id_sewa }}"
+                              title="Perpanjang Sewa">
+                          <i class="fas fa-book"></i> 
+                      </button>
+                      
+                      <button class="btn btn-primary btn-sm btn-user-module" 
+                              data-nama_karyawan="{{ $data->nama_karyawan }}" 
+                              data-id="{{ $data->id_sewa }}"
+                              title="Perpindahan User">
+                          <i class="fas fa-user"></i>
+                      </button>
+                  </td>
                 </tr>
                 @endforeach
                 </tbody>
@@ -354,7 +361,7 @@
 <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <form id="createForm" action="{{ route('sewa.store') }}" method="POST">
+      <form id="createForm" action="{{ route('sewa.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="modal-header">
           <h5 class="modal-title" id="createModalLabel"><b>Create Data Sewa</b></h5>
@@ -471,12 +478,12 @@
           </div>
           <div class="row">
             <div class="col-md-3 mb-3">
-              <label><b>Foto STNK</b></label>
-              <input type="file" id="edit_foto_stnk" name="foto_stnk" class="form-control">
+                <label><b>Foto STNK</b></label>
+                <input type="file" id="edit_foto_stnk" name="foto_stnk" class="form-control">
             </div>
             <div class="col-md-3 mb-3">
-              <label><b>Foto Tanda Terima</b></label>
-              <input type="file" id="edit_foto_tanda_terima" name="foto_tanda_terima" class="form-control">
+                <label><b>Foto Tanda Terima</b></label>
+                <input type="file" id="edit_foto_tanda_terima" name="foto_tanda_terima" class="form-control">
             </div>
             <div class="col-md-3 mb-3">
               <label><b>Status</b></label>
@@ -761,16 +768,16 @@
             <div id="alert_masa_sewa"></div>
         </div>
         <div class="mb-3">
-          <label class="fw-bold"><b>Foto Tanda Terima</b></label>
+            <label class="fw-bold"><b>Foto Tanda Terima</b></label>
             <div id="view_foto_tanda_terima">
-              <a id="view_foto_tanda_terima" href="#" target="_blank">View Foto Tanda Terima</a>
+                <a id="link_foto_tanda_terima" href="#" target="_blank">View Foto Tanda Terima</a>
             </div>
         </div>
         <div class="mb-3">
-          <label class="fw-bold"><b>Foto STNK</b></label>
+            <label class="fw-bold"><b>Foto STNK</b></label>
             <div id="view_foto_stnk">
-              <a id="view_foto_stnk" href="#" target="_blank">View Foto STNK</a>
-          </div>
+                <a id="link_foto_stnk" href="#" target="_blank">View Foto STNK</a>
+            </div>
         </div>
         <div class="mb-3">
             <label class="fw-bold"><b>Lokasi Parkir</b></label>
@@ -902,7 +909,6 @@ $('.btn-user-module').on('click', function() {
         return history.id_sewa == idSewa; 
     });
 
-    // Inisialisasi atau bersihkan DataTables
     var table = $('#history-user-table').DataTable();
     table.clear();
 
@@ -1049,11 +1055,23 @@ $(document).on('click', '.btn-delete-history', function(event) {
         $('#kontak_vendor').text(data.kontak_vendor);
         $('#lokasi_parkir').text(data.lokasi_parkir);
 
-        const basePath = '/storage/';
-    $('#view_foto_tanda_terima a').attr('href', basePath + data.foto_tanda_terima);
-    $('#view_foto_stnk a').attr('href', basePath + data.foto_stnk);
+        const basePath = '/storage/service/';
 
-        // Show the modal
+          if (data.foto_tanda_terima && data.foto_tanda_terima !== '-') {
+              const filePathTandaTerima = basePath + encodeURIComponent(data.foto_tanda_terima);
+              $('#link_foto_tanda_terima').attr('href', filePathTandaTerima).text('View Foto Tanda Terima').attr('target', '_blank');
+          } else {
+              $('#link_foto_tanda_terima').attr('href', '#').text('No file tersedia');
+          }
+
+          if (data.foto_stnk && data.foto_stnk !== '-') {
+              const filePathSTNK = basePath + encodeURIComponent(data.foto_stnk);
+              $('#link_foto_stnk').attr('href', filePathSTNK).text('View Foto STNK').attr('target', '_blank');
+          } else {
+              $('#link_foto_stnk').attr('href', '#').text('No file tersedia');
+          }
+
+
         $('#viewModal').modal('show');
     });
 

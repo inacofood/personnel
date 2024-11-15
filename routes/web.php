@@ -28,6 +28,7 @@ use App\Http\Controllers\DashboardController;
 
 Route::get('/', 'AuthController@showLoginForm')->middleware('checkUserId');
 Route::post('/login', 'AuthController@login');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/logout', 'AuthController@logout')->name('logout');
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', 'DashboardController@index')->name('dashboard');

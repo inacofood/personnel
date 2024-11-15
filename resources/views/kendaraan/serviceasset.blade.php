@@ -79,7 +79,7 @@
                                         <td>Rp {{ number_format($service->harga, 0, ',', '.') }}</td>
                                         <td>
                                             @if($service->bukti)
-                                                <a href="{{ asset('storage/' . $service->bukti) }}" target="_blank">Lihat Bukti</a>
+                                                <a href="{{ asset('storage/service/' . $service->bukti) }}" target="_blank">Lihat Bukti</a>
                                             @else
                                                 Tidak ada bukti
                                             @endif
