@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\KendaraanSewa;
 use App\Models\KendaraanAsset;
 use App\Models\HistoryAsset;
+use App\Models\HistorySewa;
+use App\Models\HistoryUser;
 use App\Models\ServiceAsset;
 use App\Imports\KendaraanImport;
 use Carbon\Carbon;
@@ -31,7 +33,10 @@ class KendaraanController extends Controller
     public function indexsewa()
     {
         $kendaraan = KendaraanSewa::all();
-        return view('kendaraan.kendaraansewa', compact('kendaraan')); 
+        $historysewa = HistorySewa::get();
+        $historyuser = HistoryUser::get();
+   
+        return view('kendaraan.kendaraansewa', compact('kendaraan','historysewa', 'historyuser')); 
     }
 
     // IMPORT KENDARAAN ASSET
@@ -257,6 +262,12 @@ class KendaraanController extends Controller
                             'status' => $rowData[20] ?? null,
                             'note_to_do' => $rowData[21] ?? null,
                             'ket' => $rowData[22] ?? null,
+                            'kondisi' =>  $rowData[23] ?? null,
+                            'pic_vendor' =>  $rowData[24] ?? null,
+                            'kontak_vendor' =>  $rowData[25] ?? null,
+                            'foto_tanda_terima' =>  $rowData[26] ?? null,
+                            'foto_stnk' =>  $rowData[27] ?? null,
+                            'lokasi_parkir' =>  $rowData[28] ?? null,
                         ]
                     );
     
@@ -280,7 +291,7 @@ class KendaraanController extends Controller
         ]);
     }
     
-    // FUNGSI UNRUK 
+    // FUNGSI UNTUK IMPORT MENJADI EXCEL
     private function convertExcelDate($value, $fieldName, $row)
     {
         if (empty($value)) {
@@ -299,116 +310,198 @@ class KendaraanController extends Controller
         }
     }
 
-    // FUNGSI UNTUK MELAKUKAN UPDATE KENDARAAN SEWA
-    public function updatesewa(Request $request)
-    {
-       
-        $sewa = KendaraanSewa::findOrFail($request->id);
+   // Method `updatesewa` yang sudah diperbaiki
+public function updatesewa(Request $request)
+{
+    $sewa = KendaraanSewa::findOrFail($request->id);
 
-        $masa_sewa_start = \Carbon\Carbon::parse($request->masa_sewa_start)->format('Y-m-d');
-        $masa_sewa_end = \Carbon\Carbon::parse($request->masa_sewa_end)->format('Y-m-d');
-        $end_date_h_empatlima = \Carbon\Carbon::parse($request->end_date_h_empatlima)->format('Y-m-d');
-    
-        $sewa->update([
-            'plat_no' => $request->plat_no,
-            'nik' => $request->nik,
-            'nama_karyawan' => $request->nama_karyawan,
-            'lokasi' => $request->lokasi,
-            'cc' => $request->cc,
-            'cc_nama' => $request->cc_nama,
-            'departemen' => $request->departemen,
-            'vendor' => $request->vendor,
-            'grade_title' => $request->grade_title,
-            'no_tlp' => $request->no_tlp,
-            'merk' => $request->merk,
-            'tipe' => $request->tipe,
-            'tahun' => $request->tahun,
-            'jenis' => $request->jenis,
-            'harga_sewa' => $request->harga_sewa,
-            'harga_sewa_ppn' => $request->harga_sewa_ppn,
-            'masa_sewa_start' => $masa_sewa_start,
-            'masa_sewa_end' => $masa_sewa_end,
-            'end_date_h_empatlima' => $end_date_h_empatlima,
-            'alert_masa_sewa' => $request->alert_masa_sewa,
-            'status' => $request->status,
-            'note_to_do' => $request->note_to_do,
-            'ket' => $request->ket,
-        ]);
-    
-        return redirect()->back()->with('success', 'Data Sewa berhasil diperbarui.');
-    }
-    
-    // FUNGSI UNTUK MELAKUKAN UPDATE USER 
-    public function updateuser(Request $request)
-    {
-        $validated = $request->validate([
-            'nama_karyawan' => 'required|string|max:255',
-            'departemen' => 'required|string|max:255',
-        ]);
+    // Format tanggal sebelum disimpan
+    $masa_sewa_start = \Carbon\Carbon::parse($request->masa_sewa_start)->format('Y-m-d');
+    $masa_sewa_end = \Carbon\Carbon::parse($request->masa_sewa_end)->format('Y-m-d');
+    $end_date_h_empatlima = \Carbon\Carbon::parse($request->end_date_h_empatlima)->format('Y-m-d');
 
-        $sewa = KendaraanSewa::findOrFail($request->id);
-        $sewa->update([
-            'nama_karyawan' => $request->nama_karyawan,
-            'departemen' => $request->departemen,
-        ]);
-
-        return redirect()->back()->with('success', 'User updated successfully.');
+    // Mengatur path default dari foto jika tidak ada update baru
+    $fotoStnkPath = $sewa->foto_stnk;
+    if ($request->hasFile('foto_stnk')) {
+        $foto_stnk = $request->file('foto_stnk');
+        $fotoStnkPath = 'uploads/foto_stnk/' . $foto_stnk->getClientOriginalName();
+        $foto_stnk->storeAs('public/uploads/foto_stnk', $foto_stnk->getClientOriginalName());
     }
 
+    $fotoTandaTerimaPath = $sewa->foto_tanda_terima;
+    if ($request->hasFile('foto_tanda_terima')) {
+        $foto_tanda_terima = $request->file('foto_tanda_terima');
+        $fotoTandaTerimaPath = 'uploads/foto_tanda_terima/' . $foto_tanda_terima->getClientOriginalName();
+        $foto_tanda_terima->storeAs('public/uploads/foto_tanda_terima', $foto_tanda_terima->getClientOriginalName());
+    }
 
+    // Update data di database
+    $sewa->update([
+        'plat_no' => $request->plat_no,
+        'nik' => $request->nik,
+        'nama_karyawan' => $request->nama_karyawan,
+        'lokasi' => $request->lokasi,
+        'cc' => $request->cc,
+        'cc_nama' => $request->cc_nama,
+        'departemen' => $request->departemen,
+        'vendor' => $request->vendor,
+        'grade_title' => $request->grade_title,
+        'no_tlp' => $request->no_tlp,
+        'merk' => $request->merk,
+        'tipe' => $request->tipe,
+        'tahun' => $request->tahun,
+        'jenis' => $request->jenis,
+        'harga_sewa' => $request->harga_sewa,
+        'harga_sewa_ppn' => $request->harga_sewa_ppn,
+        'masa_sewa_start' => $masa_sewa_start,
+        'masa_sewa_end' => $masa_sewa_end,
+        'end_date_h_empatlima' => $end_date_h_empatlima,
+        'alert_masa_sewa' => $request->alert_masa_sewa,
+        'status' => $request->status,
+        'note_to_do' => $request->note_to_do,
+        'ket' => $request->ket,
+        'kondisi' => $request->kondisi,
+        'pic_vendor' => $request->pic_vendor,
+        'kontak_vendor' => $request->kontak_vendor,
+        'foto_stnk' => $fotoStnkPath,
+        'foto_tanda_terima' => $fotoTandaTerimaPath,
+        'lokasi_parkir' => $request->lokasi_parkir,
+    ]);
+
+    return redirect()->back()->with('success', 'Data sewa berhasil diperbarui.');
+}
+
+
+    // FUNGSI UNTUK MELIHAT DATA HISTORY SEWA
+    public function getdataperpanjangsewa($id)
+    {
+
+        $perpanjangsewa = KendaraanSewa::with('historySewa')->findOrFail($id);
+        $historySewa = HistorySewa::where('id_sewa', $perpanjangsewa->id_sewa)->get();
+
+        return view('kendaraan.kendaraansewa', compact('perpanjangsewa', 'historySewa'));
+    }
+
+    // FUNGSI UNTUK MELAKUKAN PERPANJANGAN SEWA 
     public function perpanjangsewa(Request $request)
     {
-        $validated = $request->validate([
-            'nama_karyawan' => 'required|string|max:255',
-            'departemen' => 'required|string|max:255',
-            'masa_sewa_start' => 'required|string|max:255',
-            'masa_sewa_end' => 'required|string|max:255',
-        ]);
-
         $sewa = KendaraanSewa::findOrFail($request->id);
         $sewa->update([
             'nama_karyawan' => $request->nama_karyawan,
-            'departemen' => $request->departemen,
             'masa_sewa_start' => $request->masa_sewa_start,
             'masa_sewa_end' => $request->masa_sewa_end,
         ]);
 
-        return redirect()->back()->with('success', 'Data Sewa berhasil diperbarui.');
-    }
-
-    public function createsewa(Request $request)
-    {
-
-        KendaraanSewa::create([
-                'plat_no' => $request->plat_no,
-                'nik' => $request->nik,
-                'nama_karyawan' => $request->nama_karyawan,
-                'lokasi' => $request->lokasi,
-                'cc' => $request->cc,
-                'cc_nama' => $request->cc_nama,
-                'departemen' => $request->departemen,
-                'vendor' => $request->vendor,
-                'grade_title' => $request->grade_title,
-                'no_tlp' => $request->no_tlp,
-                'merk' => $request->merk,
-                'tipe' => $request->tipe,
-                'tahun' => $request->tahun,
-                'jenis' => $request->jenis,
-                'harga_sewa' => $request->harga_sewa,
-                'harga_sewa_ppn' => $request->harga_sewa_ppn,
-                'masa_sewa_start' =>  $request->masa_sewa_start,
-                'masa_sewa_end' => $request->masa_sewa_end,
-                'end_date_h_empatlima' =>  $request->end_date_h_empatlima,
-                'alert_masa_sewa' => $request->alert_masa_sewa,
-                'status' => $request->status,
-                'note_to_do' => $request->note_to_do,
-                'ket' => $request->ket,
+        HistorySewa::create([
+            'id_sewa' => $sewa->id_sewa, 
+            'nama_karyawan' => $request->nama_karyawan,
+            'ownrisk' => $request->ownrisk,
+            'masa_sewa_start' => $request->masa_sewa_start,
+            'masa_sewa_end' => $request->masa_sewa_end,
+            'updated_at' => now(),
+            'created_at' => now(),
         ]);
 
-        return redirect()->back()->with('success', 'Data Sewa berhasil ditambahkan.');
+        $historySewa = HistorySewa::where('id_sewa', $sewa->id_sewa)->get();
+
+        return redirect()->back()->with('success', 'Perpanjangan Sewa berhasil ditambahkan.');
     }
 
+   // Method to handle user transfer
+public function perpindahanuser(Request $request)
+{
+    $sewa = KendaraanSewa::findOrFail($request->id);
+    $sewa->update([
+        'nama_karyawan' => $request->nama_karyawan_baru,
+    ]);
 
+    HistoryUser::create([
+        'id_sewa' => $sewa->id_sewa, 
+        'nama_karyawan' => $request->nama_karyawan,
+        'nama_karyawan_baru' => $request->nama_karyawan_baru,
+        'tanggal_pindah_resign' => $request->tanggal_pindah_resign,
+        'updated_at' => now(),
+        'created_at' => now(),
+    ]);
+
+    return redirect()->back()->with('success', 'Perpindahan User berhasil ditambahkan!');
+}
+
+// Method to delete user transfer history
+public function deletePerpindahanuser($id_history_user)
+{
+    $history = HistoryUser::where('id_history_user', $id_history_user)->first();
+    
+    if ($history) {
+        $history->delete();
+        return redirect()->back()->with('success', 'Data deleted successfully.');
+    } else {
+        return redirect()->back()->with('error', 'Data not found.');
+    }
+}
+
+
+    // FUNGSI UNTUK MELAKUKAN DELETE DATA HISTORY PERPANJANGAN SEWA
+    public function deleteHistory($id_history_sewa)
+    {
+        $history = HistorySewa::where('id_history_sewa', $id_history_sewa)->first();
+    
+        if ($history) {
+            $history->delete();
+            return redirect()->back()->with('success', 'Data deleted successfully.');
+        } else {
+            return redirect()->back()->with('error', 'Data not found.');
+        }
+    }
+    
+    // FUNGSI UNTUK MELAKUKAN CREATE DATA SEWA
+    public function createsewa(Request $request)
+{
+    $fotoTandaTerimaPath = $request->hasFile('foto_tanda_terima')
+        ? $request->file('foto_tanda_terima')->store('uploads/foto_tanda_terima', 'public')
+        : null;
+
+    $fotoStnkPath = $request->hasFile('foto_stnk')
+        ? $request->file('foto_stnk')->store('uploads/foto_stnk', 'public')
+        : null;
+
+    KendaraanSewa::create([
+        'plat_no' => $request->plat_no,
+        'nik' => $request->nik,
+        'nama_karyawan' => $request->nama_karyawan,
+        'lokasi' => $request->lokasi,
+        'cc' => $request->cc,
+        'cc_nama' => $request->cc_nama,
+        'departemen' => $request->departemen,
+        'vendor' => $request->vendor,
+        'grade_title' => $request->grade_title,
+        'no_tlp' => $request->no_tlp,
+        'merk' => $request->merk,
+        'tipe' => $request->tipe,
+        'tahun' => $request->tahun,
+        'jenis' => $request->jenis,
+        'harga_sewa' => $request->harga_sewa,
+        'harga_sewa_ppn' => $request->harga_sewa_ppn,
+        'masa_sewa_start' => $request->masa_sewa_start,
+        'masa_sewa_end' => $request->masa_sewa_end,
+        'end_date_h_empatlima' => $request->end_date_h_empatlima,
+        'alert_masa_sewa' => $request->alert_masa_sewa,
+        'status' => $request->status,
+        'note_to_do' => $request->note_to_do,
+        'ket' => $request->ket,
+        'kondisi' => $request->kondisi,
+        'pic_vendor' => $request->pic_vendor,
+        'kontak_vendor' => $request->kontak_vendor,
+        'foto_tanda_terima' => $fotoTandaTerimaPath,
+        'foto_stnk' => $fotoStnkPath,
+        'lokasi_parkir' => $request->lokasi_parkir,
+    ]);
+
+    return redirect()->back()->with('success', 'Data Sewa berhasil ditambahkan.');
+}
+
+
+    //FUNGSI UNTUK MELAKUKAN UPDATE DATA KENDARAAN ASSET
     public function updateasset(Request $request)
     {
         $asset = KendaraanAsset::findOrFail($request->id);
@@ -448,6 +541,7 @@ class KendaraanController extends Controller
         return redirect()->back()->with('success', 'Asset data updated successfully!');
     }
 
+    //FUNGSI UNTUK MELAKUKAN CREATE DATA KENDARAAN ASSET
     public function createasset(Request $request)
     {
         KendaraanAsset::create([
@@ -494,8 +588,11 @@ class KendaraanController extends Controller
     
     public function HistoryAsset(Request $request)
     {
-        $filePath = $request->hasFile('file') ? $request->file('file')->store('assets', 'public') : null;
-
+        
+        $filePath = $request->hasFile('file') 
+            ? $request->file('file')->storeAs($request->file('file')->getClientOriginalName()) 
+            : null;
+    
         $historyData = [
             'id_asset' => $request->id_asset,
             'tipe' => $request->tipe,
@@ -514,7 +611,7 @@ class KendaraanController extends Controller
             $historyData['lima_tahunan_start'] = $request->lima_tahunan_start;
             $historyData['lima_tahunan_end'] = $request->lima_tahunan_end;
         }
-
+    
         HistoryAsset::create($historyData);
     
         $kendaraan = KendaraanAsset::find($request->id_asset);
@@ -530,12 +627,13 @@ class KendaraanController extends Controller
                 $kendaraan->lima_tahunan_start = $request->lima_tahunan_start;
                 $kendaraan->lima_tahunan_end = $request->lima_tahunan_end;
             }
-
+    
             $kendaraan->save();
         }
     
         return redirect()->back()->with('success', 'Data service kendaraan berhasil ditambahkan dan diperbarui!');
-    }    
+    }
+    
     
     public function  deleteHistoryAsset($id_history_asset)
     {
@@ -547,7 +645,14 @@ class KendaraanController extends Controller
     
     public function service(Request $request)
     {
-
+        $request->validate([
+            'bukti' => 'required|file|mimes:jpg,png,pdf,doc,docx|max:2048',
+        ]);
+    
+        if ($request->hasFile('bukti')) {
+            $filePath = $request->file('bukti')->store('uploads/bukti', 'public');
+        }
+    
         ServiceAsset::create([
             'id_asset' => $request->id_asset,
             'km_sebelum' => $request->km_sebelum,
@@ -555,11 +660,13 @@ class KendaraanController extends Controller
             'jenis_service' => $request->jenis_service,
             'vendor' => $request->vendor,
             'harga' => $request->harga,
+            'bukti' => $filePath ?? null,
             'keterangan' => $request->keterangan,
         ]);
     
         return redirect()->back()->with('success', 'Data service kendaraan berhasil ditambahkan!');
     }
+    
     
     public function serviceasset($id)
         {
@@ -568,4 +675,6 @@ class KendaraanController extends Controller
             return view('kendaraan.serviceasset', compact('kendaraan'));
         }
 
+
+        
 }

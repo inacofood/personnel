@@ -8,15 +8,14 @@
             @method('POST')
             <input type="hidden" name="id_asset" value="{{ $kendaraan->id_asset ?? '' }}">
             <div class="row">
-                <!-- Form Column -->
                 <div class="col-md-4">
                     <div class="card mb-4">
                         <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <h5><b>Service Kendaraan Asset</b></h5>
-                            <button class="btn btn-sm btn-warning" onclick="history.back()">
+                            <a href="{{ route('kendaraanasset') }}" class="btn btn-sm btn-warning">
                                 <i class="fa fa-arrow-left"></i> Back
-                            </button>
+                            </a>
                         </div>
                             <br>
                             <div class="form-group pb-1">
@@ -40,6 +39,10 @@
                                 <input name="harga" class="form-control" placeholder="Harga" required>
                             </div>
                             <div class="form-group pb-1">
+                                <label for="bukti"><b>Bukti Service</b></label>
+                                <input name="bukti" type="file" class="form-control" placeholder="Bukti Service" required>
+                            </div>
+                            <div class="form-group pb-1">
                                 <label for="keterangan"><b>Keterangan</b></label>
                                 <input name="keterangan" class="form-control" placeholder="Keterangan" required>
                             </div>
@@ -54,7 +57,7 @@
                         <div class="card-body">
                             <h5><b>Riwayat Service</b></h5>
                             <br>
-                            <table id="dttable" class="table table-striped">
+                            <table id="dttable2" class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>KM Sebelum</th>
@@ -62,6 +65,7 @@
                                         <th>Jenis Service</th>
                                         <th>Vendor</th>
                                         <th>Harga</th>
+                                        <th>Bukti Service</th>
                                         <th>Keterangan</th>
                                     </tr>
                                 </thead>
@@ -72,7 +76,14 @@
                                         <td>{{ $service->km_saat_ini }}</td>
                                         <td>{{ $service->jenis_service }}</td>
                                         <td>{{ $service->vendor }}</td>
-                                        <td>{{ $service->harga }}</td>
+                                        <td>Rp {{ number_format($service->harga, 0, ',', '.') }}</td>
+                                        <td>
+                                            @if($service->bukti)
+                                                <a href="{{ asset('storage/' . $service->bukti) }}" target="_blank">Lihat Bukti</a>
+                                            @else
+                                                Tidak ada bukti
+                                            @endif
+                                        </td>
                                         <td>{{ $service->keterangan }}</td>
                                     </tr>
                                     @endforeach

@@ -19,6 +19,23 @@
     td {
         border-bottom: 1px solid #ddd;
     }
+    .blink-yellow {
+    animation: blinkYellow 1s infinite;
+    }
+
+    .blink-red {
+        animation: blinkRed 1s infinite;
+    }
+
+    @keyframes blinkYellow {
+        0%, 100% { background-color: yellow;  color: black; }
+        50% { background-color: transparent; }
+    }
+
+    @keyframes blinkRed {
+        0%, 100% { background-color: red; color: black; }
+        50% { background-color: transparent; }
+    }
 </style>
 
 @section('content')
@@ -50,7 +67,19 @@
     </thead>
     <tbody>
         @foreach ($kendaraan as $data)
-            <tr>
+        @php
+            $satuTahunanEnd = \Carbon\Carbon::parse($data->satu_tahunan_end);
+            $isNearSatuTahunanExpiry = $satuTahunanEnd->diffInMonths(now()) <= 2;
+            $isSatuTahunanExpired = $satuTahunanEnd->isPast();
+            
+            $rowClass = '';
+            if ($isSatuTahunanExpired) {
+                $rowClass = 'blink-red'; // Blinking red background if expired
+            } elseif ($isNearSatuTahunanExpiry) {
+                $rowClass = 'blink-yellow'; // Blinking yellow background if near expiry
+            }
+        @endphp
+        <tr class="{{ $rowClass }}">
                 <td class="content" style="text-align: left;">{{ $data->plat_no }}</td>
                 <td class="content" style="text-align: left;">{{ $data->nama_karyawan }}</td>
                 <td class="content" style="text-align: left;">{{ $data->lokasi }}</td>
@@ -638,6 +667,11 @@
     return `${day}-${month}-${year}`;
 }
 
+function formatRupiah(amount) {
+    if (amount === '-') return amount; 
+    return 'Rp ' + parseInt(amount).toLocaleString('id-ID');
+}
+
 $('.btn-view-module').on('click', function() {
     const data = {
         plat_no: $(this).data('plat_no') || '-',
@@ -692,13 +726,13 @@ $('.btn-view-module').on('click', function() {
     $('#asuransi_end_date').text(data.asuransi_end_date);
     $('#vendor_asuransi').text(data.vendor_asuransi);
     $('#no_polis_asuransi').text(data.no_polis_asuransi);
-    $('#premi_asuransi').text(data.premi_asuransi);
+    $('#premi_asuransi').text(formatRupiah($(this).data('premi_asuransi')));
     $('#satu_tahunan_start').text(data.satu_tahunan_start);
     $('#satu_tahunan_end').text(data.satu_tahunan_end);
     $('#lima_tahunan_start').text(data.lima_tahunan_start);
     $('#lima_tahunan_end').text(data.lima_tahunan_end);
     $('#ket').text(data.ket);
-    $('#ownrisk').text(data.ownrisk);
+    $('#ownrisk').text(formatRupiah($(this).data('ownrisk')));
     $('#jenis_asuransi').text(data.jenis_asuransi);
 
 
@@ -725,7 +759,7 @@ $('.btn-edit-module').on('click', function() {
     $('#edit_no_mesin').val($(this).data('no_mesin'));
     $('#edit_no_bpkb').val($(this).data('no_bpkb'));
     $('#edit_no_polis_asuransi').val($(this).data('no_polis_asuransi'));
-    $('#edit_premi_asuransi').val($(this).data('premi_asuransi'));
+    $('#edit_premi_asuransi').val(formatRupiah($(this).data('premi_asuransi')));
     $('#edit_vendor_asuransi').val($(this).data('vendor_asuransi'));
     $('#edit_asuransi_start_date').val($(this).data('asuransi_start_date'));
     $('#edit_asuransi_end_date').val($(this).data('asuransi_end_date'));
@@ -734,7 +768,7 @@ $('.btn-edit-module').on('click', function() {
     $('#edit_lima_tahunan_start').val($(this).data('lima_tahunan_start'));
     $('#edit_lima_tahunan_end').val($(this).data('lima_tahunan_end'));
     $('#edit_ket').val($(this).data('ket'));
-    $('#edit_ownrisk').val($(this).data('ownrisk'));
+    $('#edit_ownrisk').val(formatRupiah($(this).data('ownrisk')));
     $('#edit_jenis_asuransi').val($(this).data('jenis_asuransi'));
     $('#editModal').modal('show');
 });

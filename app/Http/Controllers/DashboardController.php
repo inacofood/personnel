@@ -121,7 +121,7 @@ class DashboardController extends Controller
                 DB::raw("COUNT(CASE WHEN pengecualian = 'OT/MTUA/KLG MGL' THEN 1 END) as total_ot_mtua_klg_mgl"),
                 DB::raw("COUNT(CASE WHEN pengecualian = 'WFH' THEN 1 END) as total_wfh"),
                 DB::raw("COUNT(CASE WHEN pengecualian = 'PARUH WAKTU' THEN 1 END) as total_paruh_waktu"),
-                DB::raw("SUM(hk) as total_hk"),
+                DB::raw("SUM(hk) as total_hk")
             )
             ->whereBetween('tanggal', [$startDate, $endDate])->whereYear('tanggal', $tahun)
             ->get();

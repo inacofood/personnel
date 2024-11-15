@@ -14,9 +14,9 @@
                         <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <h5><b>Form Perpanjang </b></h5>
-                            <button class="btn btn-sm btn-warning" onclick="history.back()">
+                            <a href="{{ route('kendaraanasset') }}" class="btn btn-sm btn-warning">
                                 <i class="fa fa-arrow-left"></i> Back
-                            </button>
+                            </a>
                         </div>
                             <div class="form-group pb-1">
                                 <label for="tipe"><b>Tipe</b></label>
@@ -114,7 +114,7 @@
                                 @if($history->tipe === 'Asuransi')
                                     <tr>
                                         <td>{{ $history->nama_karyawan }}</td>
-                                        <td>{{ $history->harga_asset }}</td>
+                                        <td>{{ 'Rp ' . number_format($history->harga_asset, 0, ',', '.') }}</td>
                                         <td><a href="{{ asset('storage/' . $history->file_asset) }}" target="_blank">View File</a></td>
                                         <td>{{ $history->no_polis_asuransi }}</td>
                                         <td>{{ $history->asuransi_start_date ? \Carbon\Carbon::parse($history->asuransi_start_date)->format('d-m-Y') : '-'}}</td>
@@ -158,7 +158,7 @@
                                         @if($history->tipe === 'Pajak')
                                             <tr>
                                                 <td>{{ $history->nama_karyawan }}</td>
-                                                <td>{{ $history->harga_asset }}</td>
+                                                <td>{{ 'Rp ' . number_format($history->harga_asset, 0, ',', '.') }}</td>
                                                 <td><a href="{{ asset('storage/' . $history->file_asset) }}" target="_blank">View File</a></td>
                                                 <td>{{ $history->satu_tahunan_start ? \Carbon\Carbon::parse($history->satu_tahunan_start)->format('d-m-Y') : '-'}}</td>
                                                 <td>{{ $history->satu_tahunan_end ? \Carbon\Carbon::parse($history->satu_tahunan_end)->format('d-m-Y') : '-'}}</td>

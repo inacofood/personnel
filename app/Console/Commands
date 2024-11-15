@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use App\Mail\WorkOrderMail;
+use App\Models\KendaraanSewa; 
+use App\Models\KendaraanAsset; 
+use Illuminate\Support\Facades\Mail;
+
+class SendWorkOrderEmail extends Command
+{
+    protected $signature = 'send:workorder-email';
+    protected $description = 'Mengirimkan email Work Order jika sudah H-2 bulan';
+
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    public function handle()
+    {
+        $dateNow = now();
+        $sewa = KendaraanSewa::whereDate('tanggal_sewa', '=', $dateNow->addMonths(2)->toDateString())->get();
+        $asset = KendaraanAsset::whereDate('tanggal_asset', '=', $dateNow->addMonths(2)->toDateString())->get();
+
+        // Kirimkan email untuk KendaraanSewa
+        foreach ($sewa as $sewaItem) {
+            $sendmail = [
+                'namefrom' => $sewaItem->user->name,  
+                'email' => $sewaItem->user->email,    
+            ];
+            Mail::to($sendmail['email'])->send(new WorkOrderMail($sendmail));
+        }
+
+        // Kirimkan email untuk KendaraanAsset
+        foreach ($asset as $assetItem) {
+            $sendmail = [
+                'namefrom' => $assetItem->user->name,  
+                'email' => $assetItem->user->email,    
+            ];
+            Mail::to($sendmail['email'])->send(new WorkOrderMail($sendmail));
+        }
+
+        $this->info('Email berhasil dikirim!');
+    }
+}

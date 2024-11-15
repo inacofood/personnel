@@ -115,8 +115,12 @@ Route::prefix('presensi')->middleware(['auth'])->group(function () {
     Route::post('/import-kendaraan', [KendaraanController::class, 'importKendaraan'])->name('kendaraan.import');
     Route::post('/import-kendaraan-sewa', [KendaraanController::class, 'importKendaraanSewa'])->name('kendaraan.sewa.import');
     Route::put('/update-data-sewa', [KendaraanController::class, 'updatesewa'])->name('sewa.update');
-    Route::put('/update-user-sewa', [KendaraanController::class, 'updateuser'])->name('user.update');
+    Route::put('/update-user-sewa', [KendaraanController::class, 'perpindahanuser'])->name('perpindahan.user');
+    Route::delete('/delete-perpindahan-user/{id_history_user}', [KendaraanController::class, 'deletePerpindahanuser'])->name('deletePerpindahanuser');
+    Route::get('/getdata-perpanjang-sewa/{id}', [KendaraanController::class, 'getdataperpanjangsewa'])->name('getdataperpanjangsewa');
     Route::put('/perpanjang-sewa', [KendaraanController::class, 'perpanjangsewa'])->name('perpanjangsewa');
+    Route::delete('/deleteHistory/{id_history_sewa}', [KendaraanController::class, 'deleteHistory'])->name('deleteHistory');
+    Route::get('/kendaraan/perpanjang-sewa/{id}', [KendaraanController::class, 'getdataperpanjangsewa'])->name('perpanjangsewa.getdata');
     Route::put('/update-data-asset', [KendaraanController::class, 'updateasset'])->name('asset.update');
     Route::post('/create-data-asset', [KendaraanController::class, 'createasset'])->name('asset.store');
     Route::post('/create-data-sewa', [KendaraanController::class, 'createsewa'])->name('sewa.store');
@@ -125,6 +129,9 @@ Route::prefix('presensi')->middleware(['auth'])->group(function () {
     Route::post('/service', [KendaraanController::class, 'service'])->name('service.store');
     Route::get('/serviceasset/{id}', [KendaraanController::class, 'serviceasset'])->name('service.form');
     Route::delete('/delete-history-asset/{id_history_asset}', [KendaraanController::class, 'deleteHistoryAsset'])->name('historyasset.delete');
+
+
+
 
 
 
