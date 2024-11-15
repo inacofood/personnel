@@ -39,7 +39,7 @@
                     <span class="display-4 text-center currency" style="font-size:25px; font-weight:bold;">{{ number_format($total, 0, ',', '.') }}</span>
                 </div>
             </div>
-            <table id="dttable1" class="table table-striped mb-0 align-middle">
+            <table id="dttable" class="table table-striped mb-0 align-middle">
                 <thead>
                     <tr>
                         <th>Tgl</th>
@@ -484,17 +484,20 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 
-<script>
+<!-- <script>
     $(document).ready(function() {
         $('#dttable1').DataTable({
             order: [[0, 'asc']]
         });
-
+    });
+</script>
+<script>
+    $(document).ready(function() {
         $('#dttable2').DataTable({
             order: [[0, 'asc']]
         });
     });
-</script>
+</script> -->
 
 <style>
    .modal-header {
