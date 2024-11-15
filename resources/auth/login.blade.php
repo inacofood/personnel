@@ -11,6 +11,13 @@
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
 
+                        <!-- Menampilkan error umum jika login gagal -->
+                        @if (session('login_error'))
+                            <div class="alert alert-danger">
+                                {{ session('login_error') }}
+                            </div>
+                        @endif
+
                         <div class="form-group row">
                             <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
 

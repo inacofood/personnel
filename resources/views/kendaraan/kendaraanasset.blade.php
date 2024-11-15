@@ -271,16 +271,16 @@
                                 <input type="text" class="form-control" name="no_polis_asuransi">
                             </div>
                             <div class="mb-3">
-                                <label class="fw-bold"><b>Premi Asuransi</b></label>
-                                <input type="text" class="form-control" name="premi_asuransi">
-                            </div>
-                            <div class="mb-3">
                                 <label class="fw-bold"><b>Vendor Asuransi</b></label>
                                 <input type="text" class="form-control" name="vendor_asuransi">
                             </div>
+                                <div class="mb-3">
+                                <label class="fw-bold"><b>Premi Asuransi</b></label>
+                                <input type="text" class="form-control" name="premi_asuransi" oninput="formatRupiah(this)">
+                            </div>
                             <div class="mb-3">
                                 <label class="fw-bold"><b>Own Risk (Harga)</b></label>
-                                <input type="text" class="form-control" name="ownrisk">
+                                <input type="text" class="form-control" name="ownrisk" oninput="formatRupiah(this)">
                             </div>
                         </div>
                         <!-- Fourth Column -->
@@ -445,16 +445,16 @@
                                 <input type="text" class="form-control" id="edit_no_polis_asuransi" name="no_polis_asuransi">
                             </div>
                             <div class="mb-3">
-                                <label class="fw-bold"><b>Premi Asuransi</b></label>
-                                <input type="text" class="form-control" id="edit_premi_asuransi" name="premi_asuransi">
+                                <label class="fw-bold"><b>Vendor Asuransi</b></label>
+                                <input type="text" class="form-control" id="edit_vendor_asuransi" name="vendor_asuransi" >
                             </div>
                             <div class="mb-3">
-                                <label class="fw-bold"><b>Vendor Asuransi</b></label>
-                                <input type="text" class="form-control" id="edit_vendor_asuransi" name="vendor_asuransi">
+                                <label class="fw-bold"><b>Premi Asuransi</b></label>
+                                <input type="text" class="form-control" id="edit_premi_asuransi" name="premi_asuransi" oninput="formatRupiah(this)" value="Rp 0" required>
                             </div>
                             <div class="mb-3">
                                 <label class="fw-bold"><b>Own Risk (Harga)</b></label>
-                                <input type="text"class="form-control" id="edit_ownrisk" name="ownrisk">
+                                <input type="text" class="form-control" id="edit_ownrisk" name="ownrisk" oninput="formatRupiah(this)" value="Rp 0" required>
                             </div>
                         </div>
                         <!-- Fourth Column -->
@@ -649,6 +649,24 @@
 
 @section('script')
 <script>
+    function formatRupiah(angka, prefix) {
+    var number_string = angka.value.replace(/[^,\d]/g, '').toString(),
+        split = number_string.split(','),
+        remainder = split[0].length % 3,
+        rupiah = split[0].substr(0, remainder),
+        thousands = split[0].substr(remainder).match(/\d{3}/gi);
+
+    // Jika ada ribuan, gabungkan dengan titik
+    if (thousands) {
+        separator = remainder ? '.' : '';
+        rupiah += separator + thousands.join('.');
+    }
+
+    // Gabungkan dengan desimal jika ada
+    rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+    angka.value = prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
+    }
+
     $(document).ready(function() {
         var successMessage = "{{ session('success') }}";
         var errorMessage = "{{ session('error') }}";
@@ -672,9 +690,10 @@
 }
 
 function formatRupiah(amount) {
-    if (amount === '-') return amount; 
-    return 'Rp ' + parseInt(amount).toLocaleString('id-ID');
-}
+        if (amount === '-' || !amount) return '-';
+        return 'Rp ' + parseInt(amount).toLocaleString('id-ID');
+    }
+
 
 $('.btn-view-module').on('click', function() {
     const data = {
@@ -699,13 +718,13 @@ $('.btn-view-module').on('click', function() {
         asuransi_end_date: formatDate($(this).data('asuransi_end_date')),
         vendor_asuransi: $(this).data('vendor_asuransi') || '-',
         no_polis_asuransi: $(this).data('no_polis_asuransi') || '-',
-        premi_asuransi: $(this).data('premi_asuransi') || '-',
+        premi_asuransi: formatRupiah($(this).data('premi_asuransi')),
         satu_tahunan_start: formatDate($(this).data('satu_tahunan_start')) || '-',
         satu_tahunan_end: formatDate($(this).data('satu_tahunan_end')) || '-',
         lima_tahunan_start: formatDate($(this).data('lima_tahunan_start')) || '-',
         lima_tahunan_end: formatDate($(this).data('lima_tahunan_end')) || '-',
         ket: $(this).data('ket') || '-',
-        ownrisk: $(this).data('ownrisk') || '-',
+        ownrisk: formatRupiah($(this).data('ownrisk')),
         jenis_asuransi: $(this).data('jenis_asuransi') || '-',
     };
     $('id').val($(this).data('id') || '-');

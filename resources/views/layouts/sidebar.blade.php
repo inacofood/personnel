@@ -21,7 +21,7 @@
                     <span class="hide-menu">Home</span>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('dashboard') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ route('dashboard') }}" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-home"></i></span>
                         <span class="hide-menu">Dashboard</span>
                     </a>
@@ -34,7 +34,7 @@
                     <span class="hide-menu">Payroll</span>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('presensi.index') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ route('presensi.index') }}" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-calendar"></i></span>
                         <span class="hide-menu">Presensi</span>
                     </a>
@@ -48,7 +48,7 @@
                     <span class="hide-menu">L & D</span>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('emodule') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ route('emodule') }}" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-book"></i></span>
                         <span class="hide-menu">Emodule</span>
                     </a>
@@ -62,25 +62,25 @@
                     <span class="hide-menu">GA</span>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" aria-expanded="false">
+                    <a class="sidebar-link" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-users"></i></span>
                         <span class="hide-menu">Visitor</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link has-arrow" aria-expanded="false">
+                    <a class="sidebar-link has-arrow" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-car"></i></span>
                         <span class="hide-menu">Vehicle</span>
                     </a>
                     <ul aria-expanded="false" class="collapse first-level">
                         <li class="sidebar-item" style="padding-left: 30px;"> <!-- Menambahkan padding-left untuk menjorok -->
-                            <a href="{{ route('kendaraanasset') }}" class="sidebar-link">
+                            <a href="{{ route('kendaraanasset') }}" class="sidebar-link" target="_blank" target="_blank">
                                 <span><i class="ti ti-package"></i></span> <!-- Ikon untuk Kendaraan Asset -->
                                 <span class="hide-menu">Kendaraan Asset</span>
                             </a>
                         </li>
                         <li class="sidebar-item" style="padding-left: 30px;"> <!-- Menambahkan padding-left untuk menjorok -->
-                            <a href="{{ route('kendaraansewa') }}" class="sidebar-link">
+                            <a href="{{ route('kendaraansewa') }}" class="sidebar-link" target="_blank" target="_blank">
                                 <span><i class="ti ti-key"></i></span> <!-- Ikon untuk Kendaraan Sewa -->
                                 <span class="hide-menu">Kendaraan Sewa</span>
                             </a>
@@ -88,31 +88,31 @@
                     </ul>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" aria-expanded="false">
+                    <a class="sidebar-link" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-clipboard"></i></span>
                         <span class="hide-menu">Work Order</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('home') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ route('home') }}" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-wallet"></i></span>
                         <span class="hide-menu">Petty Cash</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" aria-expanded="false">
+                    <a class="sidebar-link" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-archive"></i></span>
                         <span class="hide-menu">Management ATK</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" aria-expanded="false">
+                    <a class="sidebar-link" aria-expanded="false" target="_blank">
                         <span><i class="fas fa-hard-hat"></i></span>
                         <span class="hide-menu">Temuan GA</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" aria-expanded="false">
+                    <a class="sidebar-link" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-settings"></i></span>
                         <span class="hide-menu">Monitoring PR</span>
                     </a>
@@ -125,7 +125,7 @@
                     <span class="hide-menu">Other</span>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('invoice') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ route('invoice') }}" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-file"></i></span>
                         <span class="hide-menu">Monitoring Invoice</span>
                     </a>
@@ -139,19 +139,19 @@
                     <span class="hide-menu">Permission</span>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('users') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ route('users') }}" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-user"></i></span>
                         <span class="hide-menu">User</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('role') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ route('role') }}" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-lock"></i></span>
                         <span class="hide-menu">Role</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('usersrole') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ route('usersrole') }}" aria-expanded="false" target="_blank">
                         <span><i class="fas fa-users"></i></span>
                         <span class="hide-menu">User Role</span>
                     </a>
