@@ -8,16 +8,15 @@
             <div class="col-md-4">
                 <form id="sewaForm" action="{{ route('history.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    @method('POST')
                     <input type="hidden" name="id_asset" value="{{ $kendaraan->id_asset ?? '' }}">
                     <div class="card">
                         <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h5><b>Form Perpanjang </b></h5>
-                            <a href="{{ route('kendaraanasset') }}" class="btn btn-sm btn-warning">
-                                <i class="fa fa-arrow-left"></i> Back
-                            </a>
-                        </div>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h5><b>Form Perpanjang</b></h5>
+                                <a href="{{ route('kendaraanasset') }}" class="btn btn-sm btn-warning">
+                                    <i class="fa fa-arrow-left"></i> Back
+                                </a>
+                            </div>
                             <div class="form-group pb-1">
                                 <label for="tipe"><b>Tipe</b></label>
                                 <div class="form-check">
@@ -46,7 +45,7 @@
 
                             <!-- File upload -->
                             <div class="form-group pb-1">
-                                <label for="file"><b>File</b></label>
+                                <label for="file"><b>Upload File</b></label>
                                 <input name="file" class="form-control" type="file">
                             </div>
 
@@ -97,40 +96,46 @@
                     <div class="card-body">
                         <h5><b>Riwayat Perpanjangan Asuransi</b></h5>
                         <div class="table-responsive">
-                        <table id="dttable" class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Nama</th>
-                                    <th>Harga</th>
-                                    <th>File</th>
-                                    <th>No Polis Asuransi</th>
-                                    <th>Asuransi Start Date</th>
-                                    <th>Asuransi End Date</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($kendaraan->historyAssets as $history)
-                                @if($history->tipe === 'Asuransi')
+                            <table id="dttable" class="table table-bordered">
+                                <thead>
                                     <tr>
-                                        <td>{{ $history->nama_karyawan }}</td>
-                                        <td>{{ 'Rp ' . number_format($history->harga_asset, 0, ',', '.') }}</td>
-                                        <td><a href="{{ asset('storage/' . $history->file_asset) }}" target="_blank">View File</a></td>
-                                        <td>{{ $history->no_polis_asuransi }}</td>
-                                        <td>{{ $history->asuransi_start_date ? \Carbon\Carbon::parse($history->asuransi_start_date)->format('d-m-Y') : '-'}}</td>
-                                        <td>{{ $history->asuransi_end_date ? \Carbon\Carbon::parse($history->asuransi_end_date)->format('d-m-Y') : '-' }}</td>
-                                        <td>
-                                        <form action="{{ route('historyasset.delete', $history->id_history_asset) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this history?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
-                                        </form>
-                                        </td>
+                                        <th>Nama</th>
+                                        <th>Harga</th>
+                                        <th>File</th>
+                                        <th>No Polis Asuransi</th>
+                                        <th>Asuransi Start Date</th>
+                                        <th>Asuransi End Date</th>
+                                        <th>Action</th>
                                     </tr>
-                                    @endif
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach($kendaraan->historyAssets as $history)
+                                        @if($history->tipe === 'Asuransi')
+                                            <tr>
+                                                <td>{{ $history->nama_karyawan }}</td>
+                                                <td>{{ 'Rp ' . number_format($history->harga_asset, 0, ',', '.') }}</td>
+                                                <td>
+                                                    @if($history->file_asset)
+                                                        <a href="{{ asset('storage/aset/' . $history->file_asset) }}" target="_blank">Lihat Bukti</a>
+                                                    @else
+                                                        Tidak ada bukti
+                                                    @endif
+                                                </td>
+                                                <td>{{ $history->no_polis_asuransi }}</td>
+                                                <td>{{ $history->asuransi_start_date ? \Carbon\Carbon::parse($history->asuransi_start_date)->format('d-m-Y') : '-' }}</td>
+                                                <td>{{ $history->asuransi_end_date ? \Carbon\Carbon::parse($history->asuransi_end_date)->format('d-m-Y') : '-' }}</td>
+                                                <td>
+                                                    <form action="{{ route('historyasset.delete', $history->id_history_asset) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this history?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -159,23 +164,28 @@
                                             <tr>
                                                 <td>{{ $history->nama_karyawan }}</td>
                                                 <td>{{ 'Rp ' . number_format($history->harga_asset, 0, ',', '.') }}</td>
-                                                <td><a href="{{ asset('storage/' . $history->file_asset) }}" target="_blank">View File</a></td>
-                                                <td>{{ $history->satu_tahunan_start ? \Carbon\Carbon::parse($history->satu_tahunan_start)->format('d-m-Y') : '-'}}</td>
-                                                <td>{{ $history->satu_tahunan_end ? \Carbon\Carbon::parse($history->satu_tahunan_end)->format('d-m-Y') : '-'}}</td>
-                                                <td>{{ $history->lima_tahunan_start ? \Carbon\Carbon::parse($history->lima_tahunan_start)->format('d-m-Y') : '-' }}</td>
-                                                <td>{{ $history->lima_tahunan_end ? \Carbon\Carbon::parse($history->lima_tahunan_end)->format('d-m-Y') : '-'}}</td>
                                                 <td>
-                                                <form action="{{ route('historyasset.delete', $history->id_history_asset) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this history?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
-                                                </form>
+                                                    @if($history->file_asset)
+                                                        <a href="{{ asset('storage/aset/' . $history->file_asset) }}" target="_blank">Lihat Bukti</a>
+                                                    @else
+                                                        Tidak ada bukti
+                                                    @endif
+                                                </td>
+                                                <td>{{ $history->satu_tahunan_start ? \Carbon\Carbon::parse($history->satu_tahunan_start)->format('d-m-Y') : '-' }}</td>
+                                                <td>{{ $history->satu_tahunan_end ? \Carbon\Carbon::parse($history->satu_tahunan_end)->format('d-m-Y') : '-' }}</td>
+                                                <td>{{ $history->lima_tahunan_start ? \Carbon\Carbon::parse($history->lima_tahunan_start)->format('d-m-Y') : '-' }}</td>
+                                                <td>{{ $history->lima_tahunan_end ? \Carbon\Carbon::parse($history->lima_tahunan_end)->format('d-m-Y') : '-' }}</td>
+                                                <td>
+                                                    <form action="{{ route('historyasset.delete', $history->id_history_asset) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this history?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                                    </form>
                                                 </td>
                                             </tr>
                                         @endif
                                     @endforeach
                                 </tbody>
-
                             </table>
                         </div>
                     </div>
@@ -184,26 +194,14 @@
         </div>
     </div>
 </section>
-@endsection
 
-@section('script')
 <script>
-    function toggleFields(type) {
-        if (type === 'Pajak') {
-            document.querySelectorAll('.Pajak').forEach(function (el) { el.style.display = 'block'; });
-            document.querySelectorAll('.Asuransi').forEach(function (el) { el.style.display = 'none'; });
-        } else if (type === 'Asuransi') {
-            document.querySelectorAll('.Asuransi').forEach(function (el) { el.style.display = 'block'; });
-            document.querySelectorAll('.Pajak').forEach(function (el) { el.style.display = 'none'; });
-        }
-    }
-
-    window.onload = function() {
-        if (document.getElementById('Pajak').checked) {
-            toggleFields('Pajak');
-        } else if (document.getElementById('Asuransi').checked) {
-            toggleFields('Asuransi');
-        }
-    };
+function toggleFields(type) {
+    const asuransiFields = document.querySelectorAll('.Asuransi');
+    const pajakFields = document.querySelectorAll('.Pajak');
+    
+    asuransiFields.forEach(field => field.style.display = (type === 'Asuransi') ? 'block' : 'none');
+    pajakFields.forEach(field => field.style.display = (type === 'Pajak') ? 'block' : 'none');
+}
 </script>
 @endsection

@@ -87,7 +87,7 @@
                 <td class="content" style="text-align: left;">{{ $data->satu_tahunan_start ? \Carbon\Carbon::parse($data->satu_tahunan_start)->format('d-m-Y') : '-' }}</td>
                 <td class="content" style="text-align: left;">{{ $data->satu_tahunan_end ? \Carbon\Carbon::parse($data->satu_tahunan_end)->format('d-m-Y') : '-' }}</td>
                 <td style="white-space: nowrap;">
-                    <button class="btn btn-info btn-sm btn-view-module" 
+                    <button class="btn btn-info btn-sm btn-view-module"
                         data-plat_no="{{ $data->plat_no }}" 
                         data-nik="{{ $data->nik }}" 
                         data-nama_karyawan="{{ $data->nama_karyawan }}" 
@@ -118,10 +118,13 @@
                         data-ownrisk="{{ $data->ownrisk }}"
                         data-jenis_asuransi="{{ $data->jenis_asuransi }}"  
                         data-toggle="modal" 
-                        data-target="#viewModal">
+                        data-target="#viewModal"
+                        title="Details">
                         <i class="fas fa-eye"></i>
                     </button>
                     <button class="btn btn-warning btn-sm btn-edit-module" 
+                        data-bs-toggle="tooltip"
+                        title="Edit"
                         data-id="{{ $data->id_asset }}"
                         data-plat_no="{{ $data->plat_no }}" 
                         data-nik="{{ $data->nik }}" 
@@ -153,13 +156,14 @@
                         data-ownrisk="{{ $data->ownrisk }}"
                         data-jenis_asuransi="{{ $data->jenis_asuransi }}"  
                         data-toggle="modal" 
-                        data-target="#editModal">
+                        data-target="#editModal"
+                        title="Edit">
                         <i class="fas fa-pencil"></i>
                     </button>
-                    <a href="{{ route('perpanjangasset', ['id' => $data->id_asset]) }}" class="btn btn-success btn-sm">
+                    <a href="{{ route('perpanjangasset', ['id' => $data->id_asset]) }}" class="btn btn-success btn-sm" title="Perpanjang Pajak/Asuransi">
                         <i class="fas fa-book"></i> 
                     </a>
-                    <a href="{{ route('service.form', ['id' => $data->id_asset]) }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('service.form', ['id' => $data->id_asset]) }}" class="btn btn-primary btn-sm" title="Service">
                         <i class="fas fa-wrench"></i>
                     </a>
                 </td>
