@@ -27,7 +27,7 @@
                 <input type="date" id="endDate" class="form-control" name="end_date">
             </div>
             <div class="col-md-2 text-right">
-                <button type="submit" class="btn btn-primary">Export Excel</button>
+                <button type="submit" class="btn btn-primary">Export</button>
             </div>
             </div>
         </form>

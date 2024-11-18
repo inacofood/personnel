@@ -484,64 +484,61 @@ class KendaraanController extends Controller
 
       //FUNGSI UNTUK MELAKUKAN CREATE KENDARAAN SEWA
       public function createsewa(Request $request)
-{
-    $nama_gambar_tanda_terima = null;
-    $nama_gambar_stnk = null;
-    
-    // Menangani file upload
-    if ($request->hasFile('foto_tanda_terima')) {
-        $gambar = $request->file('foto_tanda_terima');
-        $nama_gambar_tanda_terima = 'input_' . time() . '_' . $gambar->getClientOriginalName();
-        $gambar->storeAs('service', $nama_gambar_tanda_terima, 'public');
-    }
-    
-    if ($request->hasFile('foto_stnk')) {
-        $gambar = $request->file('foto_stnk');
-        $nama_gambar_stnk = 'input_' . time() . '_' . $gambar->getClientOriginalName();
-        $gambar->storeAs('service', $nama_gambar_stnk, 'public');
-    }
+        {
+            $nama_gambar_tanda_terima = null;
+            $nama_gambar_stnk = null;
+            
+            if ($request->hasFile('foto_tanda_terima')) {
+                $gambar = $request->file('foto_tanda_terima');
+                $nama_gambar_tanda_terima = 'input_' . time() . '_' . $gambar->getClientOriginalName();
+                $gambar->storeAs('service', $nama_gambar_tanda_terima, 'public');
+            }
+            
+            if ($request->hasFile('foto_stnk')) {
+                $gambar = $request->file('foto_stnk');
+                $nama_gambar_stnk = 'input_' . time() . '_' . $gambar->getClientOriginalName();
+                $gambar->storeAs('service', $nama_gambar_stnk, 'public');
+            }
 
-    // Mengambil nilai numerik dari input hidden
-    $premi_asuransi = str_replace('.', '', $request->premi_asuransi);
-    $ownrisk = str_replace('.', '', $request->ownrisk);
+            $premi_asuransi = str_replace('.', '', $request->premi_asuransi);
+            $ownrisk = str_replace('.', '', $request->ownrisk);
 
-    // Melakukan penyimpanan data ke database
-    KendaraanSewa::create([
-        'plat_no' => $request->plat_no,
-        'nik' => $request->nik,
-        'nama_karyawan' => $request->nama_karyawan,
-        'lokasi' => $request->lokasi,
-        'cc' => $request->cc,
-        'cc_nama' => $request->cc_nama,
-        'departemen' => $request->departemen,
-        'vendor' => $request->vendor,
-        'grade_title' => $request->grade_title,
-        'no_tlp' => $request->no_tlp,
-        'merk' => $request->merk,
-        'tipe' => $request->tipe,
-        'tahun' => $request->tahun,
-        'jenis' => $request->jenis,
-        'harga_sewa' => $request->harga_sewa,
-        'harga_sewa_ppn' => $request->harga_sewa_ppn,
-        'masa_sewa_start' => $request->masa_sewa_start,
-        'masa_sewa_end' => $request->masa_sewa_end,
-        'end_date_h_empatlima' => $request->end_date_h_empatlima,
-        'alert_masa_sewa' => $request->alert_masa_sewa,
-        'status' => $request->status,
-        'note_to_do' => $request->note_to_do,
-        'ket' => $request->ket,
-        'kondisi' => $request->kondisi,
-        'pic_vendor' => $request->pic_vendor,
-        'kontak_vendor' => $request->kontak_vendor,
-        'foto_tanda_terima' => $nama_gambar_tanda_terima,
-        'foto_stnk' => $nama_gambar_stnk,
-        'lokasi_parkir' => $request->lokasi_parkir,
-        'premi_asuransi' => $premi_asuransi, // Menyimpan nilai premi_asuransi
-        'ownrisk' => $ownrisk, // Menyimpan nilai ownrisk
-    ]);
+            KendaraanSewa::create([
+                'plat_no' => $request->plat_no,
+                'nik' => $request->nik,
+                'nama_karyawan' => $request->nama_karyawan,
+                'lokasi' => $request->lokasi,
+                'cc' => $request->cc,
+                'cc_nama' => $request->cc_nama,
+                'departemen' => $request->departemen,
+                'vendor' => $request->vendor,
+                'grade_title' => $request->grade_title,
+                'no_tlp' => $request->no_tlp,
+                'merk' => $request->merk,
+                'tipe' => $request->tipe,
+                'tahun' => $request->tahun,
+                'jenis' => $request->jenis,
+                'harga_sewa' => $request->harga_sewa,
+                'harga_sewa_ppn' => $request->harga_sewa_ppn,
+                'masa_sewa_start' => $request->masa_sewa_start,
+                'masa_sewa_end' => $request->masa_sewa_end,
+                'end_date_h_empatlima' => $request->end_date_h_empatlima,
+                'alert_masa_sewa' => $request->alert_masa_sewa,
+                'status' => $request->status,
+                'note_to_do' => $request->note_to_do,
+                'ket' => $request->ket,
+                'kondisi' => $request->kondisi,
+                'pic_vendor' => $request->pic_vendor,
+                'kontak_vendor' => $request->kontak_vendor,
+                'foto_tanda_terima' => $nama_gambar_tanda_terima,
+                'foto_stnk' => $nama_gambar_stnk,
+                'lokasi_parkir' => $request->lokasi_parkir,
+                'premi_asuransi' => $premi_asuransi, 
+                'ownrisk' => $ownrisk, 
+            ]);
 
-    return redirect()->back()->with('success', 'Data Sewa berhasil ditambahkan.');
-}
+            return redirect()->back()->with('success', 'Data Sewa berhasil ditambahkan.');
+        }
 
       
         // FUNGSI UPDATE DATA SEWA
@@ -683,8 +680,6 @@ class KendaraanController extends Controller
             return redirect()->back()->with('error', 'Data not found.');
         }
     }
-
-
    
     // FUNGSI UNTUK IMPORT MENJADI EXCEL
     private function convertExcelDate($value, $fieldName, $row)

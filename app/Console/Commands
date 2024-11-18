@@ -3,15 +3,16 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Mail\WorkOrderMail;
-use App\Models\KendaraanSewa; 
-use App\Models\KendaraanAsset; 
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
+use App\Models\KendaraanSewa;
+use App\Models\KendaraanAsset;
+use App\Mail\KendaraanMail;
 
-class SendWorkOrderEmail extends Command
+class SendExpirationNotices extends Command
 {
-    protected $signature = 'send:workorder-email';
-    protected $description = 'Mengirimkan email Work Order jika sudah H-2 bulan';
+    protected $signature = 'send:expiration-notices';
+    protected $description = 'Kirimkan notifikasi email 2 bulan sebelum perpanjangan kendaraan';
 
     public function __construct()
     {
@@ -20,28 +21,29 @@ class SendWorkOrderEmail extends Command
 
     public function handle()
     {
-        $dateNow = now();
-        $sewa = KendaraanSewa::whereDate('tanggal_sewa', '=', $dateNow->addMonths(2)->toDateString())->get();
-        $asset = KendaraanAsset::whereDate('tanggal_asset', '=', $dateNow->addMonths(2)->toDateString())->get();
+        $twoMonthsFromNow = Carbon::now()->addMonths(2);
 
-        // Kirimkan email untuk KendaraanSewa
-        foreach ($sewa as $sewaItem) {
+        $kendaraanSewaExpiring = KendaraanSewa::whereDate('sewa_end_date', '=', $twoMonthsFromNow->format('Y-m-d'))->get();
+        
+        foreach ($kendaraanSewaExpiring as $kendaraanSewa) {
             $sendmail = [
-                'namefrom' => $sewaItem->user->name,  
-                'email' => $sewaItem->user->email,    
+                'namefrom' => $kendaraanSewa->user->name, 
+                'details' => 'Peringatan sewa akan berakhir dalam 2 bulan.',
             ];
-            Mail::to($sendmail['email'])->send(new WorkOrderMail($sendmail));
+
+            Mail::to($kendaraanSewa->user->email)->send(new KendaraanMail($sendmail));
         }
 
-        // Kirimkan email untuk KendaraanAsset
-        foreach ($asset as $assetItem) {
+        $kendaraanAssetExpiring = KendaraanAsset::whereDate('satu_tahunan_end', '=', $twoMonthsFromNow->format('Y-m-d'))->get();
+        
+        foreach ($kendaraanAssetExpiring as $kendaraanAsset) {
             $sendmail = [
-                'namefrom' => $assetItem->user->name,  
-                'email' => $assetItem->user->email,    
+                'namefrom' => $kendaraanAsset->user->name, 
+                'details' => 'Peringatan perpanjangan satu tahunan akan berakhir dalam 2 bulan.',
             ];
-            Mail::to($sendmail['email'])->send(new WorkOrderMail($sendmail));
-        }
 
-        $this->info('Email berhasil dikirim!');
+            Mail::to($kendaraanAsset->user->email)->send(new KendaraanMail($sendmail));
+        }
     }
 }
+
