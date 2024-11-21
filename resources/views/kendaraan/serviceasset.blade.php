@@ -36,7 +36,8 @@
                             </div>
                             <div class="form-group pb-1">
                                 <label for="harga"><b>Harga</b></label>
-                                <input name="harga" class="form-control" placeholder="Harga" required>
+                                <input id="harga_display" class="form-control" placeholder="Harga" oninput="formatRupiah(this)" required>
+                                <input type="hidden" name="harga" id="harga" required>
                             </div>
                             <div class="form-group pb-1">
                                 <label for="bukti"><b>Bukti Service</b></label>
@@ -96,4 +97,23 @@
         </form>
     </div>
 </section>
+
+<script>
+function formatRupiah(input) {
+    let value = input.value.replace(/[^,\d]/g, ''); 
+    const split = value.split(',');
+    let sisa = split[0].length % 3;
+    let rupiah = split[0].substr(0, sisa);
+    const ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+    if (ribuan) {
+        const separator = sisa ? '.' : '';
+        rupiah += separator + ribuan.join('.');
+    }
+    rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+
+    input.value = 'Rp ' + rupiah;
+    document.getElementById('harga').value = value.replace(/\./g, ''); 
+}
+</script>
 @endsection

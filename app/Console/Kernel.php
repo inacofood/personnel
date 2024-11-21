@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        \App\Console\Commands\SendExpirationNotices::class, 
     ];
 
     /**
@@ -24,7 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('send:expiration-notices')->dailyAt('01:00');
     }
 
     /**
@@ -38,5 +38,4 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
-
 }

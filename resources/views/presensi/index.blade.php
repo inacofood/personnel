@@ -48,7 +48,7 @@
         </div>
     </form>
     <a href="{{ route('report.presensi') }}" class="btn btn-secondary btn me-2">
-        Report Absensi
+        Report Presensi
     </a>
     <button type="button" class="btn btn-success btn" data-bs-toggle="modal" data-bs-target="#importModal">
         Import Data

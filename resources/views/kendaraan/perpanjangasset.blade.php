@@ -40,8 +40,9 @@
                             </div>
                             <div class="form-group pb-1">
                                 <label for="harga_asset"><b>Harga</b></label>
-                                <input name="harga_asset" class="form-control" placeholder="Harga">
+                                <input name="harga_asset" id="harga_asset" class="form-control" placeholder="Harga" oninput="formatRupiah(this)">
                             </div>
+
 
                             <!-- File upload -->
                             <div class="form-group pb-1">
@@ -113,7 +114,7 @@
                                         @if($history->tipe === 'Asuransi')
                                             <tr>
                                                 <td>{{ $history->nama_karyawan }}</td>
-                                                <td>{{ 'Rp ' . number_format($history->harga_asset, 0, ',', '.') }}</td>
+                                                <td>{{ 'Rp ' . number_format((float) $history->harga_asset ?? 0, 0, ',', '.') }}</td>
                                                 <td>
                                                     @if($history->file_asset)
                                                         <a href="{{ asset('storage/aset/' . $history->file_asset) }}" target="_blank">Lihat Bukti</a>
@@ -163,7 +164,7 @@
                                         @if($history->tipe === 'Pajak')
                                             <tr>
                                                 <td>{{ $history->nama_karyawan }}</td>
-                                                <td>{{ 'Rp ' . number_format($history->harga_asset, 0, ',', '.') }}</td>
+                                                <td>{{ 'Rp ' . number_format((float) $history->harga_asset ?? 0, 0, ',', '.') }}</td>
                                                 <td>
                                                     @if($history->file_asset)
                                                         <a href="{{ asset('storage/aset/' . $history->file_asset) }}" target="_blank">Lihat Bukti</a>
@@ -199,9 +200,23 @@
 function toggleFields(type) {
     const asuransiFields = document.querySelectorAll('.Asuransi');
     const pajakFields = document.querySelectorAll('.Pajak');
-    
     asuransiFields.forEach(field => field.style.display = (type === 'Asuransi') ? 'block' : 'none');
     pajakFields.forEach(field => field.style.display = (type === 'Pajak') ? 'block' : 'none');
+}
+
+function formatRupiah(input) {
+    let value = input.value.replace(/[^,\d]/g, ''); 
+    const split = value.split(',');
+    let sisa = split[0].length % 3;
+    let rupiah = split[0].substr(0, sisa);
+    const ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+    if (ribuan) {
+        const separator = sisa ? '.' : '';
+        rupiah += separator + ribuan.join('.');
+    }
+    rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+    input.value = 'Rp ' + rupiah;
 }
 </script>
 @endsection
