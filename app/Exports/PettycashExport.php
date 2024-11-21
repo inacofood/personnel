@@ -19,7 +19,6 @@ class PettycashExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        // Menggunakan Eloquent untuk query data pettycash dengan join ke tabel kategori dan cost_center
         $query = Pettycash::select(
             'pettycash.tgl',
             'pettycash.uraian',
@@ -34,7 +33,6 @@ class PettycashExport implements FromCollection, WithHeadings
         ->leftJoin('kategori', 'pettycash.kategori_id', '=', 'kategori.id_kat')
         ->leftJoin('cost_center', 'pettycash.cost_center_id', '=', 'cost_center.id_cc');
 
-        // Filter berdasarkan rentang tanggal jika disediakan
         if ($this->params->start_date && $this->params->end_date) {
             $query->whereBetween('pettycash.tgl', [
                 "{$this->params->start_date} 00:00:00",
@@ -42,7 +40,6 @@ class PettycashExport implements FromCollection, WithHeadings
             ]);
         }
 
-        // Mengembalikan hasil query sebagai collection
         return $query->get();
     }
 

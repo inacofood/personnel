@@ -19,10 +19,8 @@ class PettycashInExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        // Menggunakan Eloquent untuk query data pettycash_in
         $query = PettycashIn::select('tgl', 'uraian', 'total', 'ket');
 
-        // Filter berdasarkan rentang tanggal jika disediakan
         if ($this->params->start_date && $this->params->end_date) {
             $query->whereBetween('tgl', [
                 "{$this->params->start_date} 00:00:00",
@@ -30,7 +28,6 @@ class PettycashInExport implements FromCollection, WithHeadings
             ]);
         }
 
-        // Mengembalikan hasil query sebagai collection
         return $query->get();
     }
 

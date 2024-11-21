@@ -297,8 +297,7 @@ class DashboardController extends Controller
         ];
     
         return $data;
-    }
-    
+    }    
 
     // FUNGSI UNTUK MENAMPILKAN 5 ORANG YANG TELAT TERBANYAK
     public function rekapTelatBulanan($bulan, $tahun)
@@ -422,12 +421,9 @@ class DashboardController extends Controller
     public function LeaveMingguanDetail(Request $request)
     {
         $nama = $request->input('nama');
-    
-        // Set consistent date range
         $startDate = Carbon::now()->subDays(6)->startOfDay();
         $endDate = Carbon::now()->endOfDay();
     
-        // Retrieve detailed data for the specified name within the date range
         $presensi = DB::table('employee_presensi_bulanan')
             ->select('nama', 'tanggal', 'pengecualian')
             ->where('nama', $nama)
@@ -447,8 +443,6 @@ class DashboardController extends Controller
     public function LateMingguanDetail(Request $request)
     {
         $nama = $request->input('nama');
-
-        // Menentukan rentang tanggal untuk minggu terakhir (7 hari terakhir)
         $startDate = Carbon::now()->subDays(6)->startOfDay();
         $endDate = Carbon::now()->endOfDay();
 
@@ -501,8 +495,6 @@ class DashboardController extends Controller
         ]);
     }
 
-
-    
     public function getTotalPresensi($bulan, $tahun)
     {
         $startDate = now()->setYear($tahun)->setMonth($bulan)->subMonth()->day(26);
@@ -532,7 +524,6 @@ class DashboardController extends Controller
             ->whereBetween('tanggal', [$startDate, $endDate])->whereYear('tanggal', $tahun)
             ->first();
         
-
         return $totals;
     }
 
@@ -550,7 +541,7 @@ class DashboardController extends Controller
 
         $query = EmployeePresensi::select('nama', 'jam_kerja', 'tanggal', 'scan_masuk', 'scan_pulang', 'pengecualian')
             ->whereBetween('tanggal', [$startDate, $endDate])
-            ->whereYear('tanggal', $request->tahun); // Fixed variable name to use $request->tahun
+            ->whereYear('tanggal', $request->tahun); 
 
         if ($request->status == 'Sakit') {
             $query->whereIn('pengecualian', ['SAKIT', 'sakit dg srt dokter']);
@@ -582,8 +573,7 @@ class DashboardController extends Controller
             $query->whereIn('pengecualian', ['LIBUR']);
         }
 
-        // Add sorting to the query
-        $lateDetails = $query->orderBy('tanggal', 'asc')->get(); // Sort by 'tanggal' in ascending order
+        $lateDetails = $query->orderBy('tanggal', 'asc')->get(); 
 
         return view('dashboard.detailskategorileave', compact('lateDetails'));
     }
@@ -632,7 +622,6 @@ class DashboardController extends Controller
                     END
                 ) as total_absent
             ")
-
             )
             ->whereBetween('tanggal', [$startDate, $endDate])->whereYear('tanggal', $tahun)
             ->first();
@@ -724,7 +713,7 @@ class DashboardController extends Controller
                 WHEN 'OB Sen-Jum' THEN '06:30:00'
                 WHEN 'Crew Marketing' THEN '08:00:00'
             END)")
-            ->orderBy('tanggal', 'asc'); // Sort by 'tanggal' in ascending order
+            ->orderBy('tanggal', 'asc'); 
 
         $lateRecords = $query->get();
         
@@ -791,8 +780,6 @@ class DashboardController extends Controller
         ]);
     }
 
-
-
     //FUNGSI UNTUK MENAMPILKAN DATA YANG DINAS LUAR 
     public function getDinasLuarData(Request $request)
     {
@@ -809,7 +796,7 @@ class DashboardController extends Controller
             ->where('pengecualian', 'DINAS LUAR')
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->whereYear('tanggal', $year)
-            ->orderBy('tanggal', 'ASC') // Urutkan secara descending
+            ->orderBy('tanggal', 'ASC')
             ->get();
 
         return view('dashboard.detailsdinasluar', [

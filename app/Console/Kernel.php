@@ -12,9 +12,14 @@ class Kernel extends ConsoleKernel
      *
      * @var array
      */
+    // protected $commands = [
+    //     \App\Console\Commands\SendExpirationNotices::class, 
+    // ];
+
     protected $commands = [
-        \App\Console\Commands\SendExpirationNotices::class, 
+        // Hapus \App\Console\Commands\SendExpirationNotices::class jika tidak digunakan
     ];
+    
 
     /**
      * Define the application's command schedule.

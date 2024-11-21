@@ -26,7 +26,6 @@ class InvoiceExport implements FromCollection, WithHeadings, WithMapping, Should
 
     public function collection()
     {
-        // Use Eloquent Query Builder instead of raw SQL
         $query = Invoice::select(
             'created_at', 
             'nama_perusahaan', 
@@ -47,7 +46,6 @@ class InvoiceExport implements FromCollection, WithHeadings, WithMapping, Should
             'tgl_bayar'
         );
 
-        // Apply the date filter if provided
         if (!empty($this->start_date) && !empty($this->end_date)) {
             $query->whereBetween(DB::raw('DATE(created_at)'), [$this->start_date, $this->end_date]);
         }
@@ -105,8 +103,8 @@ class InvoiceExport implements FromCollection, WithHeadings, WithMapping, Should
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $cellRange = 'A1:R1'; // Adjust range according to your headings
-                $event->sheet->getDelegate()->getStyle($cellRange)->getFont()->setSize(14); // Example: Set font size to 14
+                $cellRange = 'A1:R1';
+                $event->sheet->getDelegate()->getStyle($cellRange)->getFont()->setSize(14);
             },
         ];
     }
