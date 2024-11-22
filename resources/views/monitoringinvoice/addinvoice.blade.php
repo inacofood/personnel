@@ -121,12 +121,9 @@
 <script>
     var perusahaanSelect = document.getElementById("perusahaan");
     var otherSelect = document.getElementById("otherPerusahaan");
-
     perusahaanSelect.addEventListener("change", function () {
-
         var selectedOption = perusahaanSelect.options[perusahaanSelect.selectedIndex];
         var selectedValue = selectedOption.value;
-
         if (selectedValue !== "other") {
             otherSelect.style.display = "none";
             otherSelect.removeAttribute("name");
@@ -141,7 +138,6 @@
             otherSelect.getAttribute("name");
         }
     });
-
     $(document).ready(function() {
         $('.js-example-basic-single').select2();
     });
@@ -153,12 +149,10 @@
     $( "#non-pr" ).click(function() {
         $(".non").hide();
     });
-
     var rupiah = document.getElementById("rupiah");
     rupiah.addEventListener("keyup", function(e) {
         rupiah.value = formatRupiah(this.value, "Rp. ");
     });
-
     function formatRupiah(angka, prefix)
     {
         var number_string = angka.replace(/[^,\d]/g, "").toString(),
@@ -166,12 +160,10 @@
         sisa = split[0].length % 3,
         rupiah = split[0].substr(0, sisa),
         ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-
         if (ribuan) {
             separator = sisa ? "." : "";
             rupiah += separator + ribuan.join(".");
         }
-
         rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
         return prefix == undefined ? rupiah : rupiah ? "Rp. " + rupiah : "";
     }

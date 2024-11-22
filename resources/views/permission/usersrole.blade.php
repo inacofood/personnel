@@ -10,7 +10,6 @@
         border-radius: 0.25rem; 
         box-shadow: none; 
     }
-
     .select2-container--bootstrap4 .select2-selection--multiple,
     .select2-container--bootstrap4 .select2-selection--single {
         border: 1px solid #007bff;
@@ -18,7 +17,6 @@
         box-shadow: none; 
         height: 100%;
     }
-
 </style>
 
 <div class="row">
@@ -52,7 +50,6 @@
             </div>
         </div>
     </div>
-
     <div class="col-lg-9">
         <div class="card">
             <div class="card-body">
@@ -93,7 +90,6 @@
         </div>
     </div>
 </div>
-
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -131,8 +127,6 @@
 
 @section('script')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
-
-
 <script>
     $(document).ready(function() {
         $('#createUser, #createRoles').select2({
@@ -153,20 +147,15 @@
                     if (response.roles) {
                         var selectHTML = '<label for="editRoles">Roles</label>' +
                             '<select id="editRoles" class="form-control select2" name="roles[]" multiple="multiple" required style="width: 100%;">';
-
                         @foreach($roles as $role)
                             selectHTML += '<option value="{{ $role->id }}"' + (response.roles.includes({{ $role->id }}) ? ' selected' : '') + '>{{ $role->department_name }}</option>';
                         @endforeach
-
                         selectHTML += '</select>';
-
                         $('#rolesContainer').append(selectHTML);
-
                         $('#editRoles').select2({
                             theme: 'bootstrap4',
                             dropdownParent: $('#editModal')
                         });
-
                         $('#edit-form').attr('action', '/usersrole/' + userId); 
                     } else {
                         alert('Role tidak ditemukan.');
@@ -177,7 +166,6 @@
                     alert('Gagal mengambil data roles.');
                 }
             });
-
             $('#editModal').modal('show');
         });
     });
@@ -203,7 +191,6 @@
     justify-content: center;
     align-items: center;
 }
-
 .close span {
     color: black;
     font-size: 1.2rem; 
@@ -211,5 +198,4 @@
     display: inline-block; 
 }
 </style>
-
 @endsection

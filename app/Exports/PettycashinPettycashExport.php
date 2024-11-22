@@ -19,7 +19,6 @@ class PettycashinPettycashExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        // Query for 'Pengeluaran' from pettycash
         $pengeluaran = Pettycash::select(
             DB::raw("'Pengeluaran' AS jenis"),
             'pettycash.tgl',
@@ -32,10 +31,9 @@ class PettycashinPettycashExport implements FromCollection, WithHeadings
             'cost_center.code_cc AS cost_center',
             'pettycash.ket'
         )
-        ->leftJoin('kategori', 'pettycash.kategori_id', '=', 'kategori.id_kat') // Sesuaikan dengan nama kolom yang benar
+        ->leftJoin('kategori', 'pettycash.kategori_id', '=', 'kategori.id_kat') 
         ->leftJoin('cost_center', 'pettycash.cost_center_id', '=', 'cost_center.id_cc');
 
-        // Query for 'Pemasukan' from pettycash_in
         $pemasukan = PettycashIn::select(
             DB::raw("'Pemasukan' AS jenis"),
             'pettycash_in.tgl',
@@ -49,13 +47,11 @@ class PettycashinPettycashExport implements FromCollection, WithHeadings
             'pettycash_in.ket'
         );
 
-        // Filtering by date range if provided
         if (!empty($this->params->start_date) && !empty($this->params->end_date)) {
             $pengeluaran->whereBetween('pettycash.tgl', [$this->params->start_date, $this->params->end_date]);
             $pemasukan->whereBetween('pettycash_in.tgl', [$this->params->start_date, $this->params->end_date]);
         }
 
-        // Merge both queries using union
         return $pengeluaran->unionAll($pemasukan)->get();
     }
 

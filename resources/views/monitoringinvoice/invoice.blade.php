@@ -13,7 +13,6 @@
             </div>
         </div>
         <br>
-
     <div class="container">
         <table id="dttable" class="table table-striped mb-0 align-middle">
         <thead>
@@ -96,7 +95,6 @@
    .modal-header {
     position: relative;
 }
-
 .close {
     background-color: transparent;
     padding: 0;
@@ -112,7 +110,6 @@
     justify-content: center;
     align-items: center;
 }
-
 .close span {
     color: black;
     font-size: 1.2rem; 
@@ -120,5 +117,4 @@
     display: inline-block; 
 }
 </style>
-
 @endsection

@@ -1,4 +1,3 @@
-<!-- Modal for Export -->
 <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModalTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

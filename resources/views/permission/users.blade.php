@@ -207,7 +207,4 @@
     display: inline-block; 
 }
 </style>
-
-
-
 @endsection

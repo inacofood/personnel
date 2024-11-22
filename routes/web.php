@@ -11,6 +11,8 @@ use App\Http\Controllers\PettycashController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\VisitorController;
+use App\Http\Controllers\TemuanGAController;
 
 /*
 |--------------------------------------------------------------------------
@@ -129,6 +131,13 @@ Route::prefix('presensi')->middleware(['auth'])->group(function () {
     Route::post('/service', [KendaraanController::class, 'service'])->name('service.store');
     Route::get('/serviceasset/{id}', [KendaraanController::class, 'serviceasset'])->name('service.form');
     Route::delete('/delete-history-asset/{id_history_asset}', [KendaraanController::class, 'deleteHistoryAsset'])->name('historyasset.delete');
+
+    Route::get('/visitor', [VisitorController::class, 'indexvisitor'])->name('indexvisitor');
+    Route::get('/export-visitor', [VisitorController::class, 'exportvisitor'])->name('export.visitor');
+    
+
+    Route::get('/temuan-ga', [TemuanGAController::class, 'indextemuanga'])->name('indextemuanga');
+ 
 
 
 

@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Carbon\Carbon;
+
 class HCMController extends Controller
 {
     public function index()
@@ -26,24 +27,19 @@ class HCMController extends Controller
     {
         $filePath = 'C:/Users/User/Desktop/Presensi/absen.xlsx';
 
-        // Periksa apakah file ada
         if (!file_exists($filePath)) {
             return "File tidak ditemukan di path: " . $filePath;
         }
 
-        // Muat file Excel
         $spreadsheet = IOFactory::load($filePath);
         $allData = [];
         $employees = Employee::get();
         try {
-        // Iterasi melalui setiap sheet
         foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
-            // Iterasi melalui setiap baris
             $sheet->removeRow(1, 1);
             foreach ($sheet->getRowIterator() as $row) {
                 $cellIterator = $row->getCellIterator();
-                $cellIterator->setIterateOnlyExistingCells(false); // Ini agar semua sel diiterasi, termasuk yang kosong
-
+                $cellIterator->setIterateOnlyExistingCells(false); 
                 $rowData = [];
                 foreach ($cellIterator as $cell) {
                     $rowData[] = $cell->getValue();
@@ -65,8 +61,6 @@ class HCMController extends Controller
                 }
                 $tanggal = isset($rowData[4]) ? Carbon::createFromFormat('d-M-y', $rowData[4])->format('Y-m-d') : null;
                 $nik = $rowData[1] ?? null;
-
-                // Periksa apakah data dengan NIK dan tanggal yang sama sudah ada
                 $existingData = EmployeePresensi::where('nik', $nik)
                                                 ->where('tanggal', $tanggal)
                                                 ->first();
@@ -87,27 +81,19 @@ class HCMController extends Controller
                     'created_by' => 6,
                 ];
 
-                // Jika data sudah ada, lakukan update
                 if ($existingData) {
                     EmployeePresensi::where('nik', $nik)
                                     ->where('tanggal', $tanggal)
                                     ->update($data);
                 } else {
-                    // Insert data baru
                     EmployeePresensi::insert($data);
-
-                    // Periksa apakah waktu keluar kosong (tidak keluar)
                     if (!$data['keluar']) {
-                        // Buat entri baru untuk hari berikutnya jika karyawan masuk kembali
                         $nextDay = Carbon::createFromFormat('d-M-y', $rowData[4])->addDay()->format('Y-m-d');
-
-                        // Periksa apakah sudah ada entri untuk hari berikutnya
                         $nextDayData = EmployeePresensi::where('nik', $nik)
                                                     ->where('tanggal', $nextDay)
                                                     ->first();
 
                         if (!$nextDayData && $data['masuk']) {
-                            // Insert data baru untuk hari berikutnya dengan waktu masuk, keluarnya null
                             $newData = [
                                 'nik' => $nik,
                                 'nama' => $rowData[2] ?? null,
@@ -116,7 +102,7 @@ class HCMController extends Controller
                                 'nama_superior' => $nama_superior->fullname ?? null,
                                 'tanggal' => $nextDay,
                                 'jamkerja' => $rowData[5] ?? null,
-                                'masuk' => null, // Masuknya akan diisi nanti, saat ada data masuk yang valid
+                                'masuk' => null, 
                                 'keluar' => null,
                                 'terlambat' => null,
                                 'pulangcepat' => null,

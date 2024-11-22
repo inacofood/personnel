@@ -96,19 +96,16 @@ class PettycashController extends Controller
 
     public function updatepengeluaran(Request $req)
 {
-    // Pastikan data diterima dengan benar
-    // dd($req);
+
     $id = $req->idEdit;
     $HargaSatuan = str_replace(".", "", $req->harga_stnEdit);
     $Total = $req->qtyEdit * $HargaSatuan;
 
-    // Temukan data berdasarkan ID
     $model = Pettycash::find($id);
     if (!$model) {
         return redirect()->back()->with('error', 'Data tidak ditemukan.');
     }
   
-    // Update data sesuai request
     $model->tgl = $req->tglEdit;
     $model->uraian = $req->uraianEdit;
     $model->kategori_id = $req->kategori_idEdit;
@@ -120,7 +117,6 @@ class PettycashController extends Controller
     $model->ket = $req->ketEdit;
     $model->save();
 
-    // Redirect dengan pesan sukses
     return redirect()->action([PettycashController::class, 'index'])->with('success', 'Pengeluaran berhasil diupdate!');
 }
 

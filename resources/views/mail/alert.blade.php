@@ -7,13 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Zen Flat Ping Email</title>
     <style type="text/css" media="screen">
-        /* Force Hotmail to display emails at full width */
         .ExternalClass {
             display: block !important;
             width: 100%;
         }
 
-        /* Force Hotmail to display normal line spacing */
         .ExternalClass,
         .ExternalClass p,
         .ExternalClass span,

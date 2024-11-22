@@ -76,7 +76,7 @@
                     <span class="hide-menu">GA</span>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" aria-expanded="false" target="_blank">
+                    <a href="{{ route('indexvisitor') }}" class="sidebar-link" target="_blank" target="_blank">
                         <span><i class="ti ti-users"></i></span>
                         <span class="hide-menu">Visitor</span>
                     </a>
@@ -120,7 +120,7 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" aria-expanded="false" target="_blank">
+                    <a class="sidebar-link" href="{{ route('indextemuanga') }}" aria-expanded="false" target="_blank">
                         <span><i class="fas fa-hard-hat"></i></span>
                         <span class="hide-menu">Temuan GA</span>
                     </a>

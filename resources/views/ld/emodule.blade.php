@@ -126,7 +126,6 @@
 </div>
 
 @include('ld.modal-import')
-
 <!-- Modal for Editing Module -->
 <div class="modal fade" id="editModuleModal" tabindex="-1" role="dialog" aria-labelledby="editModuleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -187,7 +186,6 @@
 @endsection
 
 @section('script')
-
 <script>
   $(document).ready(function() {
     $(document).on('click', '.btn-edit-module', function() {
@@ -210,7 +208,5 @@
 
     });
 });
-
-
 </script>
 @endsection
