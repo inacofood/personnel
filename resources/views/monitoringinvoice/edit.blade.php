@@ -5,7 +5,6 @@
     <div class="container">
     <h2 style="font-size: 24px;" class="text-center">Edit Form Monitoring Invoice</h2>
         <p class="has-line"></p>
-
         <form method="POST" action="{{ route('updateinvoice') }}">
             @csrf
             <div class="container">

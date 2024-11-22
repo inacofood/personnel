@@ -656,13 +656,11 @@
         rupiah = split[0].substr(0, remainder),
         thousands = split[0].substr(remainder).match(/\d{3}/gi);
 
-    // Jika ada ribuan, gabungkan dengan titik
     if (thousands) {
         separator = remainder ? '.' : '';
         rupiah += separator + thousands.join('.');
     }
 
-    // Gabungkan dengan desimal jika ada
     rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
     angka.value = prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
     }

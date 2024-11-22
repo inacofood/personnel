@@ -50,7 +50,6 @@
                             <input type="text" class="form-control count" name="qty" id="qty" maxlength="100" onkeypress="return ((event.charCode >= 48 &amp;&amp; event.charCode <= 57) || event.charCode ==0)" ondrop="return false;" onpaste="return false;" required>
                         </div>
                     </div>
-                    <!-- Satuan -->
                     <div class="col-md-6">
                         <div class="form-group pb-1">
                             <label for=""><b>Satuan</b><span style="color: red;">*</span></label>
@@ -62,7 +61,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="form-group pb-1">
                             <label for=""><b>Harga Satuan (Rp)</b><span style="color: red;">*</span></label>
@@ -75,7 +73,6 @@
                             <input type="text" class="form-control currency count" name="total" id="total" value="" maxlength="20" onkeypress="return ((event.charCode >= 48 &amp;&amp; event.charCode <= 57) || event.charCode ==0)" ondrop="return false;" onpaste="return false;" disabled>
                         </div>
                     </div>
-                   <!-- Cost Center -->
                     <div class="col-md-6">
                         <div class="form-group pb-1">
                             <label for=""><b>Cost Center</b><span style="color: red;">*</span></label>
@@ -166,7 +163,7 @@
 
         $("#pengeluaranForm").on('input', function () {
             var qty = parseFloat($("#qty").val()) || 0;
-            var price = $("#harga_stn").val().replace(/\./g, ''); // Remove existing dots
+            var price = $("#harga_stn").val().replace(/\./g, ''); 
             price = parseFloat(price) || 0;
 
             var total = qty * price;
@@ -179,7 +176,6 @@
 
 <script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/jquery.inputmask.bundle.js"></script>
 <script src="{{ asset ('js/jquery.mask.min.js')}}"></script>
-
 <script type="text/javascript">
 
 function showMe(value) {

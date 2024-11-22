@@ -53,7 +53,6 @@ class InputController extends Controller
             
                     $worksheet = $spreadsheet->getActiveSheet();
                     $highestRow = $worksheet->getHighestDataRow();
-                    // dd($highestRow);
 
                     for ($row = 2; $row <= $highestRow; ++$row) {
                        

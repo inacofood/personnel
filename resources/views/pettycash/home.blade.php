@@ -8,7 +8,7 @@
             <div class="d-flex justify-content-end" style="padding:10px">
             <a href="{{ route('pettycash.input') }}" class="btn btn-primary">Add New</a>
             <a href="#" class="btn btn-primary" style="margin-left:10px;" data-toggle="modal" data-target="#modalExport">
-                Export to Excel
+                Export
             </a>
             <button class="btn btn-primary" style="margin-left:10px;" data-toggle="modal" data-target="#modalExportPP">Cetak PP</button>
             </div>
@@ -63,7 +63,6 @@
                         <td>{{ number_format($d->total, 0, ',', '.') }}</td>
                         <td>{{ $d->ket }}</td>
                         <td>
-                            <!-- Your buttons for edit, delete, view -->
                             <a data-toggle="modal" href="#modalEdit" class="openModalEdit"
                             data-id="{{$d->id}}"
                             data-tgl="{{$d->tgl}}"
@@ -168,7 +167,6 @@
                 <form action="{{ route('pettycash.update.pengeluaran') }}" id="pengeluaranForm" method="POST">
                     @csrf
                     <input type="hidden" name="idEdit" id="idEdit" value="">
-                    
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="form-group pb-1">
@@ -484,21 +482,6 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 
-<!-- <script>
-    $(document).ready(function() {
-        $('#dttable1').DataTable({
-            order: [[0, 'asc']]
-        });
-    });
-</script>
-<script>
-    $(document).ready(function() {
-        $('#dttable2').DataTable({
-            order: [[0, 'asc']]
-        });
-    });
-</script> -->
-
 <style>
    .modal-header {
     position: relative;
@@ -550,7 +533,7 @@
     var id = $(this).data('id');
     var tgl = $(this).data('tgl');
     var uraian = $(this).data('uraian');
-    var kategori = $(this).data('kategori'); // Pastikan ini benar
+    var kategori = $(this).data('kategori');
     var qty = $(this).data('qty');
     var stn = $(this).data('stn');
     var harga_stn = $(this).data('harga_stn');
@@ -568,12 +551,9 @@
     $("#modalEdit #totalEdits").val(total);
     $("#modalEdit #ketEdit").val(ket);
 
-    // Set selected value di dropdown kategori
-    $("#modalEdit #kategori_idEdit").val(kategori).change(); // Pastikan change() untuk trigger update select
-    $("#modalEdit #cost_centerEdit").val(cost_center).change(); // Pastikan change() untuk trigger update select
+    $("#modalEdit #kategori_idEdit").val(kategori).change(); 
+    $("#modalEdit #cost_centerEdit").val(cost_center).change(); 
 
-
-    // Tampilkan modal
     $('#modalEdit').modal('show');
 });
 
@@ -636,13 +616,11 @@
     });
 </script>
 
-
 <script>
     $("#btnKlr").click(function(){
         $('#btnMsk').removeClass('active');
         $(this).addClass('active');
         event.preventDefault();
-
         $("#divKlr").show();
         $("#divMsk").hide();
     });
@@ -651,7 +629,6 @@
         $('#btnKlr').removeClass('active');
         $(this).addClass('active');
         event.preventDefault();
-
         $("#divMsk").show();
         $("#divKlr").hide();
     });
@@ -661,5 +638,4 @@
     $('.modal-backdrop').remove();
 });
 </script>
-
 @endsection

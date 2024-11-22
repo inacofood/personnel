@@ -5,11 +5,9 @@
     <div class="container">
         <h2 style="font-size: 24px;" class="text-center">Edit Presensi</h2>
         <p class="has-line"></p>
-
         <form action="{{ route('presensi.update', ['id_presensi_bulanan' => $presensi->id_presensi_bulanan]) }}" method="POST">
             @csrf
             @method('PUT')
-
             <div class="container">
                 <div class="row mb-4">
                     <div class="col-md-6">
