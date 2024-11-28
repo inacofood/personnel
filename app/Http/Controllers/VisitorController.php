@@ -18,8 +18,12 @@ class VisitorController extends Controller
         ]);
     }
 
-    public function exportvisitor()
+    public function exportVisitor(Request $request)
     {
-        return Excel::download(new VisitorExport, 'export_visitor.xlsx');
+        $jenis = $request->query('jenis', 'All');
+        $status = $request->query('status', 'All');
+    
+        return Excel::download(new VisitorExport($jenis, $status), 'visitor-data.xlsx');
     }
 }
+

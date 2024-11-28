@@ -7,12 +7,14 @@ use App\Http\Controllers\UsersroleController;
 use App\Http\Controllers\EmoduleController;
 use App\Http\Controllers\InputController;
 use App\Http\Controllers\MonitoringinvoiceController;
-use App\Http\Controllers\PettycashController;
+use App\Http\Controllers\PettycashController;                         
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\TemuanGAController;
+use App\Http\Controllers\WorkorderController;
+use App\Http\Controllers\ReservationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -133,10 +135,18 @@ Route::prefix('presensi')->middleware(['auth'])->group(function () {
     Route::delete('/delete-history-asset/{id_history_asset}', [KendaraanController::class, 'deleteHistoryAsset'])->name('historyasset.delete');
 
     Route::get('/visitor', [VisitorController::class, 'indexvisitor'])->name('indexvisitor');
-    Route::get('/export-visitor', [VisitorController::class, 'exportvisitor'])->name('export.visitor');
-    
+    Route::get('/visitor/export', [VisitorController::class, 'exportvisitor'])->name('export.visitor');    
 
     Route::get('/temuan-ga', [TemuanGAController::class, 'indextemuanga'])->name('indextemuanga');
+    Route::get('/temuan-ga/export', [TemuanGAController::class, 'export'])->name('temuanga.export');
+
+    Route::get('/workorder', [WorkorderController::class, 'indexWorkorder'])->name('indexworkorder');
+    Route::get('/workorder/export', [WorkorderController::class, 'exportworkorder'])->name('export.workorder');  
+
+    Route::get('/reservation-meeting-room', [ReservationController::class, 'ReservationMeetingRoom'])->name('meetingroom');
+    Route::get('/meetingroom/export', [ReservationController::class, 'ExportMeetingRoom'])->name('meetingroom.export');  
+    Route::get('/reservation-vehicle', [ReservationController::class, 'ReservationVehicle'])->name('vehicle');
+    Route::get('/vehicle/export', [ReservationController::class, 'ExportVehicle'])->name('vehicle.export');  
  
 
 

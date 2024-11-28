@@ -65,7 +65,6 @@
             </select>
         </div>
 
-        <!-- Filter Status -->
         <div class="mb-3" style="flex: 1;">
             <label for="statusFilter" class="form-label">Status</label>
             <select id="statusFilter" class="form-select">
@@ -79,11 +78,11 @@
 
         <!-- Export Button -->
         <div class="mb-3">
-            <a href="{{ route('export.visitor') }}" class="btn btn-success">Export Data</a>
+            <a class="btn btn-primary export-button" href="{{ route('export.visitor') }}">Export</a>
         </div>
     </div>
 
-    <table class="display table-head-bg-primary" id="dttable">
+    <table class="display table-head-bg-primary" id="dttable5">
     <thead>
         <tr>
             <th class="content" style="display: none">ID</th>
@@ -255,80 +254,114 @@
 @section('script')
     <script>
     $(document).ready(function () {
-    var successMessage = "{{ session('success') }}";
-    var errorMessage = "{{ session('error') }}";
 
-    if (successMessage) {
-        toastr.success(successMessage);
-    }
-    if (errorMessage) {
-        toastr.error(errorMessage);
-    }
+        var successMessage = "{{ session('success') }}";
+        var errorMessage = "{{ session('error') }}";
 
-    $('#jenisFilter, #statusFilter').on('change', function () {
-        var jenisValue = $('#jenisFilter').val();
-        var statusValue = $('#statusFilter').val();
+        if (successMessage) {
+            toastr.success(successMessage);
+        }
+        if (errorMessage) {
+            toastr.error(errorMessage);
+        }
 
-        table.column(3).search(jenisValue === "All" || jenisValue === "" ? "" : jenisValue)
-            .column(5).search(statusValue === "All" || statusValue === "" ? "" : statusValue)
-            .draw();
+        var table = $('#dttable5').DataTable({
+            paging: true,
+            searching: true,
+            responsive: true,
+            columnDefs: [
+                { targets: [0], visible: false }, 
+                { orderable: false, targets: -1 } 
+            ]
+        });
+
+
+        $('#jenisFilter, #statusFilter').on('change', function () {
+            var jenisValue = $('#jenisFilter').val();
+            var statusValue = $('#statusFilter').val();
+
+            table.column(3).search(jenisValue === "All" ? "" : jenisValue)
+                .column(5).search(statusValue === "All" ? "" : statusValue)
+                .draw();
+        });
+
+        $('.btn-view-module').on('click', function () {
+            const data = {
+                jenis: $(this).data('jenis') || '-',
+                nama_tamu: $(this).data('nama_tamu') || '-',
+                perusahaan: $(this).data('perusahaan') || '-',
+                alamat: $(this).data('alamat') || '-',
+                jumlah: $(this).data('jumlah') || '-',
+                no_pol: $(this).data('no_pol') || '-',
+                bertemu_dengan: $(this).data('bertemu_dengan') || '-',
+                tujuan: $(this).data('tujuan') || '-',
+                securityName: $(this).data('securityname') || '-',
+                keterangan: $(this).data('keterangan') || '-',
+                masuk: $(this).data('masuk') || '-',
+                keluar: $(this).data('keluar') || '-',
+                status: $(this).data('status') || '-',
+                alasan: $(this).data('alasan') || '-',
+                image: $(this).data('image') || '#',
+            };
+
+            $('#jenis').text(data.jenis);
+            $('#nama_tamu').text(data.nama_tamu);
+            $('#perusahaan').text(data.perusahaan);
+            $('#alamat').text(data.alamat);
+            $('#jumlah').text(data.jumlah);
+            $('#no_pol').text(data.no_pol);
+            $('#bertemu_dengan').text(data.bertemu_dengan);
+            $('#tujuan').text(data.tujuan);
+            $('#securityName').text(data.securityName);
+            $('#keterangan').text(data.keterangan);
+            $('#tanggal_masuk').text(data.masuk.split(' ')[0] || '-');
+            $('#jam_masuk').text(data.masuk.split(' ')[1] || '-');
+            $('#tanggal_keluar').text(data.keluar.split(' ')[0] || '-');
+            $('#jam_keluar').text(data.keluar.split(' ')[1] || '-');
+            $('#status').text(data.status);
+            $('#alasan').text(data.alasan);
+            $('#lihatFoto').attr('href', data.image);
+
+            $('#viewModal').modal('show');
+        });
+
+        $('#viewModal').on('hidden.bs.modal', function () {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        });
+
+        $(".tanggal").flatpickr({
+            allowInput: true,
+            dateFormat: "d-m-Y",
+        });
+
+        $('#export').on('click', function () {
+            $('#exportModal').modal('show');
+        });
+        
+        const exportButton = document.querySelector('.export-button');
+        const jenisFilter = document.getElementById('jenisFilter');
+        const statusFilter = document.getElementById('statusFilter');
+
+        $('#jenisFilter, #statusFilter').on('change', function () {
+        
+        updateExportUrl();
+        });
+
+        function updateExportUrl() {
+            const baseUrl = "{{ route('export.visitor') }}";
+            const jenis = $('#jenisFilter').val() || 'All';
+            const status = $('#statusFilter').val() || 'All';
+
+            const exportUrl = `${baseUrl}?jenis=${jenis}&status=${status}`;
+            $('.export-button').attr('href', exportUrl);
+        }
+
+        jenisFilter.addEventListener('change', updateExportUrl);
+        statusFilter.addEventListener('change', updateExportUrl);
+
     });
-
-    $('.btn-view-module').on('click', function () {
-        const data = {
-            jenis: $(this).data('jenis') || '-',
-            nama_tamu: $(this).data('nama_tamu') || '-',
-            perusahaan: $(this).data('perusahaan') || '-',
-            alamat: $(this).data('alamat') || '-',
-            jumlah: $(this).data('jumlah') || '-',
-            no_pol: $(this).data('no_pol') || '-',
-            bertemu_dengan: $(this).data('bertemu_dengan') || '-',
-            tujuan: $(this).data('tujuan') || '-',
-            securityName: $(this).data('securityname') || '-',
-            keterangan: $(this).data('keterangan') || '-',
-            masuk: $(this).data('masuk') || '-',
-            keluar: $(this).data('keluar') || '-',
-            status: $(this).data('status') || '-',
-            alasan: $(this).data('alasan') || '-',
-            image: $(this).data('image') || '#',
-        };
-
-        $('#jenis').text(data.jenis);
-        $('#nama_tamu').text(data.nama_tamu);
-        $('#perusahaan').text(data.perusahaan);
-        $('#alamat').text(data.alamat);
-        $('#jumlah').text(data.jumlah);
-        $('#no_pol').text(data.no_pol);
-        $('#bertemu_dengan').text(data.bertemu_dengan);
-        $('#tujuan').text(data.tujuan);
-        $('#securityName').text(data.securityName);
-        $('#keterangan').text(data.keterangan);
-        $('#tanggal_masuk').text(data.masuk.split(' ')[0] || '-');
-        $('#jam_masuk').text(data.masuk.split(' ')[1] || '-');
-        $('#tanggal_keluar').text(data.keluar.split(' ')[0] || '-');
-        $('#jam_keluar').text(data.keluar.split(' ')[1] || '-');
-        $('#status').text(data.status);
-        $('#alasan').text(data.alasan);
-        $('#lihatFoto').attr('href', data.image);
-
-        $('#viewModal').modal('show');
-    });
-
-    $('#viewModal').on('hidden.bs.modal', function () {
-        $('body').removeClass('modal-open');
-        $('.modal-backdrop').remove();
-    });
-
-    $(".tanggal").flatpickr({
-        allowInput: true,
-        dateFormat: "d-m-Y",
-    });
-
-    $('#export').on('click', function () {
-        $('#exportModal').modal('show');
-    });
-});
-</script>
+    </script>
 @endsection
 
 

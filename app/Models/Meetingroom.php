@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Meetingroom extends Model
 {
     protected $connection = 'mysqlreservation';
-    protected $table = "meetingroom";
+    protected $table = "meeting_room";
     protected $guarded = [];
 }
