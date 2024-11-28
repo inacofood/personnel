@@ -33,7 +33,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item" style="padding-left: 30px;">
-                            <a href="{{ route('dashboard') }}" class="sidebar-link" target="_blank">
+                            <a class="sidebar-link" target="_blank">
                                 <span><i class="ti ti-file-invoice"></i></span>
                                 <span class="hide-menu">Monitoring Invoice</span>
                             </a>
@@ -102,7 +102,7 @@
                     </ul>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" aria-expanded="false" target="_blank">
+                    <a class="sidebar-link" href="{{ route('indexworkorder') }}" aria-expanded="false" target="_blank">
                         <span><i class="ti ti-clipboard"></i></span>
                         <span class="hide-menu">Work Order</span>
                     </a>
@@ -145,10 +145,24 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('invoice') }}" aria-expanded="false" target="_blank">
-                        <span><i class="ti ti-calendar"></i></span>
+                    <a class="sidebar-link has-arrow" aria-expanded="false" target="_blank">
+                        <span><i class="ti ti-key"></i></span>
                         <span class="hide-menu">Reservation</span>
                     </a>
+                    <ul aria-expanded="false" class="collapse first-level">
+                        <li class="sidebar-item" style="padding-left: 30px;"> 
+                            <a href="{{ route('meetingroom') }}" class="sidebar-link" target="_blank" target="_blank">
+                                <span><i class="fas fa-warehouse"></i></span> 
+                                <span class="hide-menu">Meeting Room</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item" style="padding-left: 30px;"> 
+                            <a href="{{ route('vehicle') }}" class="sidebar-link" target="_blank" target="_blank">
+                                <span><i class="ti ti-car"></i></span> 
+                                <span class="hide-menu">Vehicle</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
                 <!-- Permission Section -->

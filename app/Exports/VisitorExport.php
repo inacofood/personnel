@@ -3,7 +3,6 @@
 namespace App\Exports;
 
 use App\Models\Lists;
-use App\Controllers\VisitorController;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -11,17 +10,30 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class VisitorExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
 {
-    /**
-     * Mengambil data dari model Complaint
-     */
-    public function collection()
+    protected $jenis;
+    protected $status;
+
+    public function __construct($jenis = 'All', $status = 'All')
     {
-        return Lists::select('jenis','nama_tamu', 'alamat', 'jumlah', 'bertemu_dengan', 'tujuan', 'masuk', 'keluar', 'status')->get();
+        $this->jenis = $jenis;
+        $this->status = $status;
     }
 
-    /**
-     * Menentukan header kolom untuk file Excel
-     */
+    public function collection()
+    {
+        $query = Lists::query();
+
+        if ($this->jenis !== 'All') {
+            $query->where('jenis', $this->jenis);
+        }
+
+        if ($this->status !== 'All') {
+            $query->where('status', $this->status);
+        }
+
+        return $query->select('jenis', 'nama_tamu', 'alamat', 'jumlah', 'bertemu_dengan', 'tujuan', 'masuk', 'keluar', 'status')->get();
+    }
+
     public function headings(): array
     {
         return [
@@ -33,13 +45,10 @@ class VisitorExport implements FromCollection, WithHeadings, WithMapping, Should
             'Tujuan',
             'Masuk',
             'Keluar',
-            'Status'
+            'Status',
         ];
     }
 
-    /**
-     * Memetakan data dari collection ke format yang sesuai untuk diekspor
-     */
     public function map($row): array
     {
         return [
@@ -52,7 +61,6 @@ class VisitorExport implements FromCollection, WithHeadings, WithMapping, Should
             $row->masuk,
             $row->keluar,
             $row->status,
-           
         ];
     }
 }
