@@ -11,6 +11,7 @@ use App\Models\HistoryAsset;
 use App\Models\HistorySewa;
 use App\Models\HistoryUser;
 use App\Models\ServiceAsset;
+use App\Models\Vendor;
 use App\Imports\KendaraanImport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -32,6 +33,15 @@ class KendaraanController extends Controller
        
         return view('kendaraan.kendaraanasset', compact('kendaraan')); 
     }
+
+    //FUNGSI UNTUK MENAMPILKAN MASTER VENDOR
+    public function indexvendor()
+    {
+        $vendor = Vendor::all(); 
+       
+        return view('kendaraan.vendor', compact('vendor')); 
+    }
+
 
      // IMPORT KENDARAAN ASSET
      public function importKendaraan(Request $request) 

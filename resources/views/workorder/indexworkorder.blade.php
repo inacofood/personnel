@@ -312,8 +312,10 @@
         table.column(4).search(status, true, false).draw(); 
     });
 
-    var modal = new bootstrap.Modal(document.getElementById('viewModal'));
-    modal.hide(); 
+    $('#viewModal').on('hidden.bs.modal', function () {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        });   
 });
 </script>
 @endsection

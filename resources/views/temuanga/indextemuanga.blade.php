@@ -147,16 +147,18 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
         </div>
     </div>
 </div>
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
  $(document).ready(function() {
     var successMessage = "{{ session('success') }}";
@@ -176,6 +178,8 @@
 
         $('#modal-unsafe-envi').val(unsafeEnvi || '-'); 
         $('#modal-recom').val(recom || '-'); 
+
+        $('#viewModal').modal('show');
     });
 
 
@@ -194,8 +198,10 @@
     });
     });
 
-    var modal = new bootstrap.Modal(document.getElementById('viewModal'));
-    modal.hide(); 
+    $('#viewModal').on('hidden.bs.modal', function () {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        });   
 
     $('#export-data').on('click', function(e) {
         e.preventDefault();
