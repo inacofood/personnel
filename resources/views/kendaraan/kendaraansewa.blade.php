@@ -39,18 +39,19 @@
     }
 
     .blink-yellow {
-        animation: blinkYellowBackground 1s infinite;
+        animation: blinkYellowBackground 1s ease-in-out 5;
         color: black; 
     }
 
     .blink-red {
-        animation: blinkRedBackground 1s infinite;
+        animation: blinkRedBackground 1s ease-in-out 5;
         color: black; 
     }
 
     .text-red {
         color: red;
     }
+
 </style>
 
 @section('content')
@@ -64,6 +65,9 @@
                 </button>
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
                     Import
+                </button>
+                <button type="button" class="btn btn-warning btn-sm">
+                    Vendor
                 </button>
             </div>
         </h5>
@@ -569,7 +573,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- MODAL PINDAH USER -->
 <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">

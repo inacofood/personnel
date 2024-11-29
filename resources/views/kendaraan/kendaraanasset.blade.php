@@ -20,11 +20,11 @@
         border-bottom: 1px solid #ddd;
     }
     .blink-yellow {
-    animation: blinkYellow 1s infinite;
+    animation: blinkYellow 1s ease-in-out 5;
     }
 
     .blink-red {
-        animation: blinkRed 1s infinite;
+        animation: blinkRed 1s ease-in-out 5;
     }
 
     @keyframes blinkYellow {

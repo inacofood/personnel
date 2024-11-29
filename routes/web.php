@@ -116,6 +116,7 @@ Route::prefix('presensi')->middleware(['auth'])->group(function () {
 
     Route::get('/kendaraanasset', [KendaraanController::class, 'indexasset'])->name('kendaraanasset');
     Route::get('/kendaraansewa', [KendaraanController::class, 'indexsewa'])->name('kendaraansewa');
+    Route::get('/vendor', [KendaraanController::class, 'indexvendor'])->name('vendor');
     Route::post('/import-kendaraan', [KendaraanController::class, 'importKendaraan'])->name('kendaraan.import');
     Route::post('/import-kendaraan-sewa', [KendaraanController::class, 'importKendaraanSewa'])->name('kendaraan.sewa.import');
     Route::put('/update-data-sewa', [KendaraanController::class, 'updatesewa'])->name('sewa.update');
