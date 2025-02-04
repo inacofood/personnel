@@ -38,11 +38,11 @@ jobs:
     - name: Copy .env
       run: cp .env.example .env
 
-    - name: Generate application key
-      run: php artisan key:generate
-
     - name: Install Dependencies
       run: composer install --no-interaction --prefer-dist
+
+    - name: Generate Application Key
+      run: php artisan key:generate
 
     - name: Wait for MySQL to be ready
       run: sleep 10
