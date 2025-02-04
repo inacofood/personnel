@@ -3,31 +3,52 @@ name: Laravel CI/CD (PHP 7.3)
 on:
   push:
     branches:
-      - main  # Jalankan workflow setiap ada push ke branch main
+      - main
   pull_request:
     branches:
-      - main  # Jalankan workflow saat ada pull request ke main
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: forge
+          MYSQL_USER: forge
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v2  # Mengambil kode dari repositori
+      uses: actions/checkout@v2
 
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.3'  # Menyesuaikan dengan PHP 7.3
-        extensions: mbstring, pdo, pdo_mysql, xml  # Sesuaikan dengan kebutuhan Laravel
+        php-version: '7.3'
+        extensions: mbstring, pdo, pdo_mysql, xml
         coverage: none
+
+    - name: Copy .env
+      run: cp .env.example .env
+
+    - name: Generate application key
+      run: php artisan key:generate
 
     - name: Install Dependencies
       run: composer install --no-interaction --prefer-dist
 
+    - name: Wait for MySQL to be ready
+      run: sleep 10
+
     - name: Run Laravel Migrations
-      run: php artisan migrate --force  # Pastikan database sudah dikonfigurasi
+      run: php artisan migrate --force
 
     - name: Run Laravel Tests
-      run: php artisan test  # Jalankan pengujian Laravel
+      run: php artisan test
