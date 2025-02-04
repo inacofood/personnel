@@ -14,4 +14,7 @@ use App\Http\Controllers\UserController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Route::get('/rekappresensi', [App\Http\Controllers\Api\RekapPresensiController::class, 'index']);
+Route::get('/rekappresensi/{id}', [App\Http\Controllers\Api\RekapPresensiController::class, 'show']);
 Route::middleware('auth:api')->get('/user', [UserController::class, 'show']);

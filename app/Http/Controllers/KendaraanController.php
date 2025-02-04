@@ -24,52 +24,51 @@ class KendaraanController extends Controller
 {
 
 
-    // ASSET 
+    // ASSET
 
     // FUNGSI UNTUK MENAMPILKAN DATA KENDARAAN ASSET
     public function indexasset()
     {
-        $kendaraan = KendaraanAsset::all(); 
-       
-        return view('kendaraan.kendaraanasset', compact('kendaraan')); 
+        $kendaraan = KendaraanAsset::all();
+
+        return view('kendaraan.kendaraanasset', compact('kendaraan'));
     }
 
     //FUNGSI UNTUK MENAMPILKAN MASTER VENDOR
     public function indexvendor()
     {
-        $vendor = Vendor::all(); 
-       
-        return view('kendaraan.vendor', compact('vendor')); 
+        $vendor = Vendor::all();
+
+        return view('kendaraan.vendor', compact('vendor'));
     }
 
 
      // IMPORT KENDARAAN ASSET
-     public function importKendaraan(Request $request) 
+     public function importKendaraan(Request $request)
      {
          set_time_limit(300);
- 
-         $request->validate([
-             'file' => 'required|mimes:xls,xlsx'
-         ]);
-     
+
+        //  $request->validate([
+        //      'file' => 'required|mimes:xls,xlsx'
+        //  ]);
          $file = $request->file('file');
          $filePath = $file->getRealPath();
-     
+
          try {
              $spreadsheet = IOFactory::load($filePath);
-     
+
              foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
                  $sheet->removeRow(1, 1);
-     
+
                  foreach ($sheet->getRowIterator() as $row) {
                      $cellIterator = $row->getCellIterator();
-                     $cellIterator->setIterateOnlyExistingCells(false); 
-     
+                     $cellIterator->setIterateOnlyExistingCells(false);
+
                      $rowData = [];
                      foreach ($cellIterator as $cell) {
                          $rowData[] = $cell->getFormattedValue();
                      }
- 
+
                      if (!empty($rowData[18])) {
                          if (is_numeric($rowData[18])) {
                              $asuransiStartDate = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[18]))->format('Y-m-d');
@@ -78,11 +77,11 @@ class KendaraanController extends Controller
                                  $asuransiStartDate = Carbon::createFromFormat('d/M/y', $rowData[18])->format('Y-m-d');
                              } catch (\Exception $e) {
                                  \Log::error("Format asuransi start date tidak valid: " . $rowData[18]);
-                                 $asuransiStartDate = null; 
+                                 $asuransiStartDate = null;
                              }
                          }
                      }
- 
+
                      if (!empty($rowData[19])) {
                          if (is_numeric($rowData[19])) {
                              $asuransiEndDate = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[19]))->format('Y-m-d');
@@ -95,7 +94,7 @@ class KendaraanController extends Controller
                              }
                          }
                      }
-                     
+
                      if (!empty($rowData[23])) {
                          if (is_numeric($rowData[23])) {
                              $tahunanStart = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[23]))->format('Y-m-d');
@@ -108,7 +107,7 @@ class KendaraanController extends Controller
                              }
                          }
                      }
-                     
+
                      if (!empty($rowData[24])) {
                          if (is_numeric($rowData[24])) {
                              $tahunanEnd = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[24]))->format('Y-m-d');
@@ -121,7 +120,7 @@ class KendaraanController extends Controller
                              }
                          }
                      }
-                     
+
                      if (!empty($rowData[25])) {
                          if (is_numeric($rowData[25])) {
                              $limaTahunanStart = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[25]))->format('Y-m-d');
@@ -134,7 +133,7 @@ class KendaraanController extends Controller
                              }
                          }
                      }
-                     
+
                      if (!empty($rowData[26])) {
                          if (is_numeric($rowData[26])) {
                              $limaTahunanEnd = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData[26]))->format('Y-m-d');
@@ -147,10 +146,10 @@ class KendaraanController extends Controller
                              }
                          }
                      }
-                     
+
                      $platNo = $rowData[1] ?? null;
                      $existingData = KendaraanAsset::where('plat_no', $platNo)->first();
- 
+
                      $data = [
                          'plat_no' => $rowData[1] ?? null,
                          'nik' => !empty($rowData[2]) && is_numeric($rowData[2]) ? $rowData[2] : null,
@@ -192,7 +191,7 @@ class KendaraanController extends Controller
          } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
              return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
          }
-     
+
          return redirect()->back()->with('alert', [
              'msg' => 'Berhasil menambahkan data kendaraan'
          ]);
@@ -240,7 +239,7 @@ class KendaraanController extends Controller
     public function updateasset(Request $request)
     {
         $asset = KendaraanAsset::findOrFail($request->id);
-    
+
         $asset->update([
             'plat_no' => $request->plat_no,
             'nik' => $request->nik,
@@ -272,20 +271,20 @@ class KendaraanController extends Controller
             'ownrisk' => $request->ownrisk,
             'jenis_asuransi' => $request->jenis_asuransi,
         ]);
-    
+
         return redirect()->back()->with('success', 'Asset data updated successfully!');
     }
 
        // FUNGSI UNTUK MELAKUKAN PERPANJANGAN ASURANSI/PAJAK PADA KENDARAAN ASSET
        public function HistoryAsset(Request $request)
        {
-       
+
            if ($request->hasFile('file')) {
                $gambar = $request->file('file');
                $nama_gambar = 'input_' . time() . '' . $request->tipe . ''  . $gambar->getClientOriginalName();
                $gambar->storeAs('aset', $nama_gambar, 'public');
            }
-   
+
            $historyData = [
                'id_asset' => $request->id_asset,
                'tipe' => $request->tipe,
@@ -293,8 +292,8 @@ class KendaraanController extends Controller
                'harga_asset' => $request->harga_asset,
                'file_asset' => $nama_gambar ?? null,
            ];
-   
-   
+
+
            if ($request->tipe === 'Asuransi') {
                $historyData['no_polis_asuransi'] = $request->no_polis_asuransi;
                $historyData['asuransi_start_date'] = $request->asuransi_start_date;
@@ -305,13 +304,13 @@ class KendaraanController extends Controller
                $historyData['lima_tahunan_start'] = $request->lima_tahunan_start;
                $historyData['lima_tahunan_end'] = $request->lima_tahunan_end;
            }
-   
+
            HistoryAsset::create($historyData);
-   
+
            $kendaraan = KendaraanAsset::find($request->id_asset);
            if ($kendaraan) {
                $kendaraan->nama_karyawan = $request->nama_karyawan;
-   
+
                if ($request->tipe === 'Asuransi') {
                    $kendaraan->no_polis_asuransi = $request->no_polis_asuransi;
                    $kendaraan->asuransi_start_date = $request->asuransi_start_date;
@@ -322,10 +321,10 @@ class KendaraanController extends Controller
                    $kendaraan->lima_tahunan_start = $request->lima_tahunan_start;
                    $kendaraan->lima_tahunan_end = $request->lima_tahunan_end;
                }
-   
+
                $kendaraan->save();
            }
-   
+
            return redirect()->back()->with('success', 'Data service kendaraan berhasil ditambahkan dan diperbarui!');
        }
 
@@ -334,12 +333,12 @@ class KendaraanController extends Controller
     public function perpanjangasset($id)
     {
         $kendaraan = KendaraanAsset::with('historyAssets')->findOrFail($id);
-    
+
         return view('kendaraan.perpanjangasset', compact('kendaraan'));
     }
-    
- 
-    // FUNGSI UNTUK MENGHAPUS HISTORY DARI PERPANJANGAN ASURANSI/PAJAK PADA KENDARAAN ASSET   
+
+
+    // FUNGSI UNTUK MENGHAPUS HISTORY DARI PERPANJANGAN ASURANSI/PAJAK PADA KENDARAAN ASSET
     public function  deleteHistoryAsset($id_history_asset)
     {
         $historyAsset = HistoryAsset::findOrFail($id_history_asset);
@@ -353,10 +352,10 @@ class KendaraanController extends Controller
     {
         if ($request->hasFile('bukti')) {
             $gambar = $request->file('bukti');
-            $nama_gambar = 'input_' . time() . '_' . $gambar->getClientOriginalName(); 
+            $nama_gambar = 'input_' . time() . '_' . $gambar->getClientOriginalName();
             $gambar->storeAs('service', $nama_gambar, 'public');
         }
-    
+
         ServiceAsset::create([
             'id_asset' => $request->id_asset,
             'km_sebelum' => $request->km_sebelum,
@@ -367,16 +366,16 @@ class KendaraanController extends Controller
             'bukti' => $nama_gambar ?? null,
             'keterangan' => $request->keterangan,
         ]);
-    
+
         return redirect()->back()->with('success', 'Data service kendaraan berhasil ditambahkan!');
     }
-    
+
 
     // FUNGSI UNTUK MELIHAT HISTORY SERVICE PADA KENDARAAN ASSET
     public function serviceasset($id)
         {
             $kendaraan = KendaraanAsset::with('serviceAssets')->findOrFail($id);
-            
+
             return view('kendaraan.serviceasset', compact('kendaraan'));
         }
 
@@ -391,8 +390,8 @@ class KendaraanController extends Controller
         $kendaraan = KendaraanSewa::all();
         $historysewa = HistorySewa::get();
         $historyuser = HistoryUser::get();
-   
-        return view('kendaraan.kendaraansewa', compact('kendaraan','historysewa', 'historyuser')); 
+
+        return view('kendaraan.kendaraansewa', compact('kendaraan','historysewa', 'historyuser'));
     }
 
       // FUNGSI UNTUK MELAKUKAN IMPORT KENDARAAN SEWA
@@ -400,44 +399,44 @@ class KendaraanController extends Controller
       {
           ini_set('memory_limit', '1024M');
           set_time_limit(300);
-      
-          $request->validate([
-              'file' => 'required|mimes:xls,xlsx'
-          ]);
-      
+
+        //   $request->validate([
+        //       'file' => 'required|mimes:xls,xlsx'
+        //   ]);
+
           $file = $request->file('file');
           $filePath = $file->getRealPath();
-      
+
           try {
-      
+
               $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($filePath);
-              $reader->setReadDataOnly(true); 
+              $reader->setReadDataOnly(true);
               $spreadsheet = $reader->load($filePath);
-      
+
               $sheet = $spreadsheet->getActiveSheet();
               $highestRow = $sheet->getHighestRow();
-      
+
               $successCount = 0;
               $errorCount = 0;
-      
+
               for ($row = 2; $row <= $highestRow; $row++) {
                   try {
                       $rowData = [];
-                      for ($col = 'A'; $col <= 'W'; $col++) { 
+                      for ($col = 'A'; $col <= 'W'; $col++) {
                           $cell = $sheet->getCell($col . $row);
                           $rowData[] = $cell->getFormattedValue();
                       }
-  
+
                       $masaSewaStart = $this->convertExcelDate($rowData[16], 'masa sewa start', $row);
                       $masaSewaEnd = $this->convertExcelDate($rowData[17], 'masa sewa end', $row);
                       $endDateHEmpatLima = $this->convertExcelDate($rowData[18], 'end date h_45', $row);
                       $platNo = $rowData[0] ?? null;
-      
+
                       if (!$platNo) {
                           \Log::warning("Baris $row: Plat No kosong. Melewati baris ini.");
-                          continue; 
+                          continue;
                       }
-      
+
                       KendaraanSewa::updateOrCreate(
                           ['plat_no' => $platNo],
                           [
@@ -466,27 +465,26 @@ class KendaraanController extends Controller
                               'kondisi' =>  $rowData[23] ?? null,
                               'pic_vendor' =>  $rowData[24] ?? null,
                               'kontak_vendor' =>  $rowData[25] ?? null,
-                              'foto_tanda_terima' =>  $rowData[26] ?? null,
-                              'foto_stnk' =>  $rowData[27] ?? null,
-                              'lokasi_parkir' =>  $rowData[28] ?? null,
+                              'lokasi_parkir' =>  $rowData[26] ?? null,
+                              'no_sim' =>  $rowData[27] ?? null,
                           ]
                       );
-      
-                      $successCount++; 
+
+                      $successCount++;
                   } catch (\Exception $e) {
                       \Log::error("Baris $row: Error saat menyimpan data - " . $e->getMessage());
                       $errorCount++;
                       continue;
                   }
               }
-    
+
               \Log::info("Import selesai: $successCount data berhasil, $errorCount data gagal.");
-      
+
           } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
               \Log::error('Excel Import Error: ' . $e->getMessage());
               return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
           }
-      
+
           return redirect()->back()->with('alert', [
               'msg' => "Berhasil menambahkan $successCount data kendaraan sewa, $errorCount data gagal."
           ]);
@@ -497,13 +495,13 @@ class KendaraanController extends Controller
         {
             $nama_gambar_tanda_terima = null;
             $nama_gambar_stnk = null;
-            
+
             if ($request->hasFile('foto_tanda_terima')) {
                 $gambar = $request->file('foto_tanda_terima');
                 $nama_gambar_tanda_terima = 'input_' . time() . '_' . $gambar->getClientOriginalName();
                 $gambar->storeAs('service', $nama_gambar_tanda_terima, 'public');
             }
-            
+
             if ($request->hasFile('foto_stnk')) {
                 $gambar = $request->file('foto_stnk');
                 $nama_gambar_stnk = 'input_' . time() . '_' . $gambar->getClientOriginalName();
@@ -543,37 +541,37 @@ class KendaraanController extends Controller
                 'foto_tanda_terima' => $nama_gambar_tanda_terima,
                 'foto_stnk' => $nama_gambar_stnk,
                 'lokasi_parkir' => $request->lokasi_parkir,
-                'premi_asuransi' => $premi_asuransi, 
-                'ownrisk' => $ownrisk, 
+                'premi_asuransi' => $premi_asuransi,
+                'ownrisk' => $ownrisk,
             ]);
 
             return redirect()->back()->with('success', 'Data Sewa berhasil ditambahkan.');
         }
 
-      
+
         // FUNGSI UPDATE DATA SEWA
         public function updatesewa(Request $request)
         {
             $sewa = KendaraanSewa::findOrFail($request->id);
-    
+
             $masa_sewa_start = \Carbon\Carbon::parse($request->masa_sewa_start)->format('Y-m-d');
             $masa_sewa_end = \Carbon\Carbon::parse($request->masa_sewa_end)->format('Y-m-d');
             $end_date_h_empatlima = \Carbon\Carbon::parse($request->end_date_h_empatlima)->format('Y-m-d');
-        
+
             $nama_gambar_stnk = $sewa->foto_stnk;
             if ($request->hasFile('foto_stnk')) {
                 $gambar = $request->file('foto_stnk');
                 $nama_gambar_stnk = 'input_' . time() . '_' . $gambar->getClientOriginalName();
-                $gambar->storeAs('public/service', $nama_gambar_stnk);  
+                $gambar->storeAs('public/service', $nama_gambar_stnk);
             }
-        
+
             $nama_gambar_tanda_terima = $sewa->foto_tanda_terima;
             if ($request->hasFile('foto_tanda_terima')) {
                 $gambar = $request->file('foto_tanda_terima');
                 $nama_gambar_tanda_terima = 'input_' . time() . '_' . $gambar->getClientOriginalName();
-                $gambar->storeAs('public/service', $nama_gambar_tanda_terima);  
+                $gambar->storeAs('public/service', $nama_gambar_tanda_terima);
             }
-        
+
             $sewa->update([
                 'plat_no' => $request->plat_no,
                 'nik' => $request->nik,
@@ -601,16 +599,16 @@ class KendaraanController extends Controller
                 'kondisi' => $request->kondisi,
                 'pic_vendor' => $request->pic_vendor,
                 'kontak_vendor' => $request->kontak_vendor,
-                'foto_stnk' => $nama_gambar_stnk, 
-                'foto_tanda_terima' => $nama_gambar_tanda_terima, 
+                'foto_stnk' => $nama_gambar_stnk,
+                'foto_tanda_terima' => $nama_gambar_tanda_terima,
                 'lokasi_parkir' => $request->lokasi_parkir,
             ]);
-        
+
             return redirect()->back()->with('success', 'Data sewa berhasil diperbarui.');
         }
-        
-        
-    // FUNGSI UNTUK MELAKUKAN PERPANJANGAN SEWA 
+
+
+    // FUNGSI UNTUK MELAKUKAN PERPANJANGAN SEWA
     public function perpanjangsewa(Request $request)
     {
         $sewa = KendaraanSewa::findOrFail($request->id);
@@ -621,7 +619,7 @@ class KendaraanController extends Controller
         ]);
 
         HistorySewa::create([
-            'id_sewa' => $sewa->id_sewa, 
+            'id_sewa' => $sewa->id_sewa,
             'nama_karyawan' => $request->nama_karyawan,
             'ownrisk' => $request->ownrisk,
             'masa_sewa_start' => $request->masa_sewa_start,
@@ -649,7 +647,7 @@ class KendaraanController extends Controller
      public function deleteHistory($id_history_sewa)
      {
          $history = HistorySewa::where('id_history_sewa', $id_history_sewa)->first();
-     
+
          if ($history) {
              $history->delete();
              return redirect()->back()->with('success', 'Data deleted successfully.');
@@ -667,7 +665,7 @@ class KendaraanController extends Controller
         ]);
 
         HistoryUser::create([
-            'id_sewa' => $sewa->id_sewa, 
+            'id_sewa' => $sewa->id_sewa,
             'nama_karyawan' => $request->nama_karyawan,
             'nama_karyawan_baru' => $request->nama_karyawan_baru,
             'tanggal_pindah_resign' => $request->tanggal_pindah_resign,
@@ -682,7 +680,7 @@ class KendaraanController extends Controller
     public function deletePerpindahanuser($id_history_user)
     {
         $history = HistoryUser::where('id_history_user', $id_history_user)->first();
-        
+
         if ($history) {
             $history->delete();
             return redirect()->back()->with('success', 'Data deleted successfully.');
@@ -690,14 +688,14 @@ class KendaraanController extends Controller
             return redirect()->back()->with('error', 'Data not found.');
         }
     }
-   
+
     // FUNGSI UNTUK IMPORT MENJADI EXCEL
     private function convertExcelDate($value, $fieldName, $row)
     {
         if (empty($value)) {
             return null;
         }
-    
+
         try {
             if (is_numeric($value)) {
                 return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value))->format('Y-m-d');
@@ -709,5 +707,5 @@ class KendaraanController extends Controller
             return null;
         }
     }
-    
+
 }

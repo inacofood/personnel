@@ -1,9 +1,16 @@
 @extends('layouts.main')
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
+{{-- <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script> --}}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @section('content')
+<style>
+    .select2-container--default .select2-selection--multiple {
+
+    padding-bottom: 13px;
+
+}
+</style>
 <div class="card" style="max-width: 110%; margin: auto;">
     <div class="card-body">
         <h5 class="card-title fw-semibold mb-4 d-flex justify-content-between align-items-center">
@@ -12,7 +19,8 @@
         <form action="{{ route('presensi.exportExcel') }}" method="POST">
             @csrf
             <div class="row mb-3">
-            <div class="col-md-4">
+
+            <div class="col-md-3">
                 <select id="namaFilter" class="form-control" name="namafilter">
                     <option value="">Pilih Nama</option>
                     @foreach ($datanama as $nama)
@@ -21,9 +29,18 @@
                 </select>
             </div>
             <div class="col-md-3">
+                <select id="department" class="js-example-basic-multiple form-control" name="dept[]" multiple="multiple">
+                    <option value="All" selected>Select Department</option> <!-- Default -->
+                    @foreach ($datadept as $item)
+                        <option>{{ $item->dept }}</option>
+                    @endforeach
+                  </select>
+            </div>
+
+            <div class="col-md-2">
                 <input type="date" id="startDate" class="form-control" name="start_date">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <input type="date" id="endDate" class="form-control" name="end_date">
             </div>
             <div class="col-md-2 text-right">
@@ -38,6 +55,7 @@
                     <tr>
                         <th>NIK</th>
                         <th>Nama</th>
+                        <th>Department</th>
                         <th>Grade</th>
                         <th>Bulan</th>
                         <th hidden>Bulan</th>
@@ -69,109 +87,110 @@
                     <tr>
                         <td>{{ $kehadiran->nik }}</td>
                         <td>{{ $kehadiran->nama }}</td>
+                        <td>{{ $kehadiran->dept }}</td>
                         <td>{{ $kehadiran->grade }}</td>
                         <td>{{ \Carbon\Carbon::create()->month($kehadiran->bulan)->translatedFormat('F') }}</td>
                         <td hidden>{{ $kehadiran->bulan }}</td>
                         <td>{{ $kehadiran->tahun }}</td>
                         <td>
-                            <a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                            <a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="Hadir">{{ $kehadiran->total_hadir }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="Telat">{{ $kehadiran->total_telat }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="Awal">{{ $kehadiran->total_awal }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="absent">{{ $kehadiran->total_absent }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="HK">{{ $kehadiran->total_hk }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="Leave">{{ $kehadiran->total_pengecualian }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="Sakit">{{ $kehadiran->total_sakit }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="stsd">{{ $kehadiran->total_sakit_tanpa_sd }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="cuti">{{ $kehadiran->total_cuti }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="izin">{{ $kehadiran->total_izin }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="dl">{{ $kehadiran->total_dinas_luar }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="ct">{{ $kehadiran->total_cuti_tahunan }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="cm">{{ $kehadiran->total_cuti_melahirkan }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="nikah">{{ $kehadiran->total_menikah }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="im">{{ $kehadiran->total_istri_melahirkan }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="as">{{ $kehadiran->total_anak_btis }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="mgl">{{ $kehadiran->total_ot_mtua_klg_mgl }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="wfh">{{ $kehadiran->total_wfh }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="pw">{{ $kehadiran->total_paruh_waktu }}</a></td>
-                        <td><a href="#" class="show-presensi-modal" 
-                               data-nama="{{ $kehadiran->nama }}" 
-                               data-bulan="{{ $kehadiran->bulan }}" 
+                        <td><a href="#" class="show-presensi-modal"
+                               data-nama="{{ $kehadiran->nama }}"
+                               data-bulan="{{ $kehadiran->bulan }}"
                                data-tahun="{{ $kehadiran->tahun }}"
                                data-status="libur">{{ $kehadiran->total_libur }}</a></td>
                     </tr>
@@ -211,8 +230,11 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+
 $(document).ready(function() {
+    $('.js-example-basic-multiple').select2();
     var table = $('#dttable').DataTable({
         paging: true,
         searching: true,
@@ -222,15 +244,26 @@ $(document).ready(function() {
         columnDefs: [
             { orderable: false, targets: [4, 5, 6, 7, 8] }
         ],
-        destroy: true 
-    });
+        destroy: true,
 
+    });
+    $('#department').on('change', function () {
+        var selectedValues = $(this).val(); // Mengambil nilai array dari select2 (multiple selection)
+
+        if (selectedValues && selectedValues.length > 0) {
+            // Gabungkan nilai dengan regex OR untuk mencocokkan multiple values
+            var regex = selectedValues.join('|');
+            table.column(2).search(regex, true, false).draw(); // Set regex, dan nonaktifkan pencarian global
+        } else {
+            // Jika tidak ada yang dipilih, kosongkan pencarian
+            table.column(2).search('').draw();
+        }
+    });
     $('#namaFilter').on('change', function () {
         table.columns(1).search(this.value).draw();
         });
 
     $('#bulanFilter').on('change', function () {
-        table.columns(3).search(this.value).draw();
         table.columns(3).search(this.value).draw();
     });
 
@@ -253,7 +286,7 @@ $(document).ready(function() {
     var status = $(this).data('status');
 
     $.ajax({
-        url: '{{ route('presensi.detail') }}', 
+        url: '{{ route('presensi.detail') }}',
         method: 'GET',
         data: {
             nama: nama,
@@ -265,14 +298,14 @@ $(document).ready(function() {
             $('#modal-presensi-data').empty();
             var nomor = 1;
             function formatTanggal(tanggal) {
-                if (!tanggal) return '-'; 
+                if (!tanggal) return '-';
                 var days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                 var months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                
+
                 var dateObj = new Date(tanggal);
                 var day = days[dateObj.getUTCDay()];
-                var date = dateObj.getUTCDate(); 
-                var month = months[dateObj.getUTCMonth()]; 
+                var date = dateObj.getUTCDate();
+                var month = months[dateObj.getUTCMonth()];
                 var year = dateObj.getUTCFullYear();
 
                 return `${day}, ${date} ${month} ${year}`;
@@ -280,7 +313,7 @@ $(document).ready(function() {
 
             $.each(response.presensi, function(index, presensi) {
                 $('#modal-presensi-data').append(`
-                    <tr>  
+                    <tr>
                         <td>${nomor}</td> <!-- Nomor urut -->
                         <td>${formatTanggal(presensi.tanggal)}</td> <!-- Format date with day -->
                         <td>${presensi.jam_kerja || '-'}</td> <!-- Show '-' if jam_kerja is null -->

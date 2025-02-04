@@ -1,0 +1,33 @@
+name: Laravel CI/CD (PHP 7.3)
+
+on:
+  push:
+    branches:
+      - main  # Jalankan workflow setiap ada push ke branch main
+  pull_request:
+    branches:
+      - main  # Jalankan workflow saat ada pull request ke main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2  # Mengambil kode dari repositori
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.3'  # Menyesuaikan dengan PHP 7.3
+        extensions: mbstring, pdo, pdo_mysql, xml  # Sesuaikan dengan kebutuhan Laravel
+        coverage: none
+
+    - name: Install Dependencies
+      run: composer install --no-interaction --prefer-dist
+
+    - name: Run Laravel Migrations
+      run: php artisan migrate --force  # Pastikan database sudah dikonfigurasi
+
+    - name: Run Laravel Tests
+      run: php artisan test  # Jalankan pengujian Laravel

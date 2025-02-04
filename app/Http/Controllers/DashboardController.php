@@ -16,7 +16,7 @@ class DashboardController extends Controller
 
         $user = Auth::user();
         $roles = UsersRole::where('id_users', $user->id)->pluck('id_role');
-       
+
         $bulan = $request->input('bulan', session('bulan'));
         $tahun = $request->input('tahun', session('tahun'));
 
@@ -26,7 +26,7 @@ class DashboardController extends Controller
             $bulan = date('m');
             $tahun = date('Y');
         }
-      
+
         $data = $this->rekapPresensiBulanan($bulan, $tahun);
         $totals = $this->getTotalLeave($bulan, $tahun);
         $telatAwalData = $this->rekapTelatAwalBulanan($bulan, $tahun);
@@ -38,24 +38,24 @@ class DashboardController extends Controller
         $telatmingguan = DB::table('employee_presensi_bulanan')
         ->select(
             'nama',
-            DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja 
-                WHEN 'Shift 1A' THEN '06:00:00' 
-                WHEN 'Shift 1B' THEN '07:00:00' 
-                WHEN 'Shift 1C' THEN '08:00:00' 
+            DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja
+                WHEN 'Shift 1A' THEN '06:00:00'
+                WHEN 'Shift 1B' THEN '07:00:00'
+                WHEN 'Shift 1C' THEN '08:00:00'
                 WHEN 'Shift 1D' THEN '09:00:00'
-                WHEN 'Shift 1E' THEN '10:00:00' 
-                WHEN 'Shift 1F' THEN '05:00:00' 
-                WHEN 'Shift 2A' THEN '11:00:00'  
-                WHEN 'Shift 2B' THEN '12:00:00' 
-                WHEN 'Shift 2C' THEN '13:00:00' 
-                WHEN 'Shift 2D' THEN '14:00:00' 
-                WHEN 'Shift 2E' THEN '15:00:00' 
-                WHEN 'Shift 2F' THEN '16:00:00' 
-                WHEN 'Shift 3A' THEN '22:00:00' 
-                WHEN 'Shift 3B' THEN '23:00:00' 
-                WHEN 'Shift 1 5 jam' THEN '07:00:00' 
+                WHEN 'Shift 1E' THEN '10:00:00'
+                WHEN 'Shift 1F' THEN '05:00:00'
+                WHEN 'Shift 2A' THEN '11:00:00'
+                WHEN 'Shift 2B' THEN '12:00:00'
+                WHEN 'Shift 2C' THEN '13:00:00'
+                WHEN 'Shift 2D' THEN '14:00:00'
+                WHEN 'Shift 2E' THEN '15:00:00'
+                WHEN 'Shift 2F' THEN '16:00:00'
+                WHEN 'Shift 3A' THEN '22:00:00'
+                WHEN 'Shift 3B' THEN '23:00:00'
+                WHEN 'Shift 1 5 jam' THEN '07:00:00'
                 WHEN 'Shift 1A 5 jam' THEN '08:00:00'
-                WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
+                WHEN 'Shift 1B 5 jam' THEN '06:00:00'
                 WHEN 'Shift 1C 5 jam' THEN '10:00:00'
                 WHEN 'Shift 3 5 jam' THEN '23:00:00'
                 WHEN 'Shift 3A 5 jam' THEN '24:00:00'
@@ -79,33 +79,33 @@ class DashboardController extends Controller
         ->limit(5)
         ->get();
 
-        
+
         // FUNGSI UNTUK MENGHITUNG JUMLAH LEAVE PERMINGGU
         $startDate = Carbon::now()->subDays(6)->startOfDay();
-        $endDate = Carbon::now()->endOfDay();    
+        $endDate = Carbon::now()->endOfDay();
 
         $leavemingguan = DB::table('employee_presensi_bulanan')
         ->select(
             'nama',
-            'pengecualian', 
+            'pengecualian',
             DB::raw("COUNT(CASE WHEN pengecualian IS NOT NULL AND pengecualian != '' AND pengecualian != 'DINAS LUAR' THEN 1 END) as total_leave")
         )
         ->whereBetween('tanggal', [$startDate, $endDate])
-        ->groupBy('nama', 'pengecualian') 
-        ->orderBy('total_leave', 'DESC') 
-        ->limit(5) 
+        ->groupBy('nama', 'pengecualian')
+        ->orderBy('total_leave', 'DESC')
+        ->limit(5)
         ->get();
-    
-       
+
+
         return view('dashboard.index', compact('roles', 'data', 'totals', 'telatAwalData', 'rekapKehadiran', 'rekapLeave', 'telatmingguan', 'leavemingguan'));
     }
 
     public function rekapPresensiBulanan($bulan, $tahun)
     {
-     
+
         $startDate = now()->setYear($tahun)->setMonth($bulan)->subMonth()->day(26);
         $endDate = now()->setYear($tahun)->setMonth($bulan)->day(25);
-    
+
         $rekapKehadiran = DB::table('employee_presensi_bulanan')
             ->select(
                 DB::raw("COUNT(CASE WHEN pengecualian IS NOT NULL AND pengecualian != '' THEN 1 END) as total_pengecualian"),
@@ -125,9 +125,9 @@ class DashboardController extends Controller
             )
             ->whereBetween('tanggal', [$startDate, $endDate])->whereYear('tanggal', $tahun)
             ->get();
-    
-        $totalPengecualian = $rekapKehadiran->sum('total_pengecualian') ?: 1; 
-    
+
+        $totalPengecualian = $rekapKehadiran->sum('total_pengecualian') ?: 1;
+
         $data = [
             ['name' => 'Sakit', 'y' => ($rekapKehadiran->sum('total_sakit') / $totalPengecualian) * 100],
             ['name' => 'Sakit Tanpa SD', 'y' => ($rekapKehadiran->sum('total_sakit_tanpa_sd') / $totalPengecualian) * 100],
@@ -154,53 +154,53 @@ class DashboardController extends Controller
         $rekapKehadiran = DB::table('employee_presensi_bulanan')
         ->select(
             'nama',
-            'pengecualian', 
+            'pengecualian',
             DB::raw("COUNT(CASE WHEN pengecualian IS NOT NULL AND pengecualian != '' AND pengecualian != 'DINAS LUAR' THEN 1 END) as total_leave")
         )
         ->whereBetween('tanggal', [$startDate, $endDate])->whereYear('tanggal', $tahun)
-        ->groupBy('nama', 'pengecualian') 
-        ->orderBy('total_leave', 'DESC') 
-        ->limit(5) 
+        ->groupBy('nama', 'pengecualian')
+        ->orderBy('total_leave', 'DESC')
+        ->limit(5)
         ->get();
-    
+
         $data = [];
         foreach ($rekapKehadiran as $kehadiran) {
             $data[] = [
-                'nama' => $kehadiran->nama, 
-                'kategori_leave' => $kehadiran->pengecualian, 
+                'nama' => $kehadiran->nama,
+                'kategori_leave' => $kehadiran->pengecualian,
                 'total_leave' => $kehadiran->total_leave
             ];
         }
         return $data;
     }
-     
+
 
     // FUNGSI UNTUK MENAMPILKAN DATA 5 LEAVE TERBANYAK
     public function leaveterbanyak(Request $request)
     {
-     
+
     $month = $request->input('bulan', now()->month);
     $year = $request->input('tahun', now()->year);
 
     $startDate = now()->setYear($year)->setMonth($month)->subMonth()->day(26);
     $endDate = now()->setYear($year)->setMonth($month)->day(25);
 
-    $nama = $request->input('nama'); 
-    $kategoriLeave = $request->input('kategori_leave'); 
+    $nama = $request->input('nama');
+    $kategoriLeave = $request->input('kategori_leave');
 
     $query = EmployeePresensi::select('nama', 'tanggal', 'scan_masuk', 'scan_pulang')
     ->whereBetween('tanggal', [$startDate, $endDate])->whereYear('tanggal', $year);
-    
+
     if ($nama) {
         $query->where('nama', $nama);
-    }  
+    }
 
     if ($kategoriLeave) {
         $query->where('pengecualian', $kategoriLeave);
     }
 
     $presensi = $query->get();
-    
+
     return view('dashboard.limaterbanyakleave', [
         'presensi' => $presensi
     ]);
@@ -211,27 +211,27 @@ class DashboardController extends Controller
     {
         $startDate = now()->setYear($tahun)->setMonth($bulan)->subMonth()->day(26);
         $endDate = now()->setYear($tahun)->setMonth($bulan)->day(25);
-    
+
         $rekapKehadiran = DB::table('employee_presensi_bulanan')
             ->select(
-                DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja 
-                    WHEN 'Shift 1A' THEN '06:00:00' 
-                    WHEN 'Shift 1B' THEN '07:00:00' 
-                    WHEN 'Shift 1C' THEN '08:00:00' 
+                DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja
+                    WHEN 'Shift 1A' THEN '06:00:00'
+                    WHEN 'Shift 1B' THEN '07:00:00'
+                    WHEN 'Shift 1C' THEN '08:00:00'
                     WHEN 'Shift 1D' THEN '09:00:00'
-                    WHEN 'Shift 1E' THEN '10:00:00' 
-                    WHEN 'Shift 1F' THEN '05:00:00' 
-                    WHEN 'Shift 2A' THEN '11:00:00'  
-                    WHEN 'Shift 2B' THEN '12:00:00' 
-                    WHEN 'Shift 2C' THEN '13:00:00' 
-                    WHEN 'Shift 2D' THEN '14:00:00' 
-                    WHEN 'Shift 2E' THEN '15:00:00' 
-                    WHEN 'Shift 2F' THEN '16:00:00' 
-                    WHEN 'Shift 3A' THEN '22:00:00' 
-                    WHEN 'Shift 3B' THEN '23:00:00' 
-                    WHEN 'Shift 1 5 jam' THEN '07:00:00' 
+                    WHEN 'Shift 1E' THEN '10:00:00'
+                    WHEN 'Shift 1F' THEN '05:00:00'
+                    WHEN 'Shift 2A' THEN '11:00:00'
+                    WHEN 'Shift 2B' THEN '12:00:00'
+                    WHEN 'Shift 2C' THEN '13:00:00'
+                    WHEN 'Shift 2D' THEN '14:00:00'
+                    WHEN 'Shift 2E' THEN '15:00:00'
+                    WHEN 'Shift 2F' THEN '16:00:00'
+                    WHEN 'Shift 3A' THEN '22:00:00'
+                    WHEN 'Shift 3B' THEN '23:00:00'
+                    WHEN 'Shift 1 5 jam' THEN '07:00:00'
                     WHEN 'Shift 1A 5 jam' THEN '08:00:00'
-                    WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
+                    WHEN 'Shift 1B 5 jam' THEN '06:00:00'
                     WHEN 'Shift 1C 5 jam' THEN '10:00:00'
                     WHEN 'Shift 3 5 jam' THEN '23:00:00'
                     WHEN 'Shift 3A 5 jam' THEN '24:00:00'
@@ -248,24 +248,24 @@ class DashboardController extends Controller
                     WHEN 'OB Sen-Jum' THEN '06:30:00'
                     WHEN 'Crew Marketing' THEN '08:00:00'
                 END) THEN 1 END) as total_telat"),
-                DB::raw("COUNT(CASE WHEN TIME(scan_pulang) < TIME(CASE jam_kerja 
-                    WHEN 'Shift 1A' THEN '14:00:00' 
+                DB::raw("COUNT(CASE WHEN TIME(scan_pulang) < TIME(CASE jam_kerja
+                    WHEN 'Shift 1A' THEN '14:00:00'
                     WHEN 'Shift 1B' THEN '15:00:00'
-                    WHEN 'Shift 1C' THEN '16:00:00' 
+                    WHEN 'Shift 1C' THEN '16:00:00'
                     WHEN 'Shift 1D' THEN '17:00:00'
-                    WHEN 'Shift 1E' THEN '18:00:00' 
-                    WHEN 'Shift 1F' THEN '13:00:00' 
-                    WHEN 'Shift 2A' THEN '19:00:00'  
-                    WHEN 'Shift 2B' THEN '20:00:00' 
-                    WHEN 'Shift 2C' THEN '21:00:00' 
-                    WHEN 'Shift 2D' THEN '22:00:00' 
-                    WHEN 'Shift 2E' THEN '23:00:00' 
-                    WHEN 'Shift 2F' THEN '24:00:00' 
-                    WHEN 'Shift 3A' THEN '06:00:00' 
-                    WHEN 'Shift 3B' THEN '07:00:00' 
-                    WHEN 'Shift 1 5 jam' THEN '12:00:00' 
+                    WHEN 'Shift 1E' THEN '18:00:00'
+                    WHEN 'Shift 1F' THEN '13:00:00'
+                    WHEN 'Shift 2A' THEN '19:00:00'
+                    WHEN 'Shift 2B' THEN '20:00:00'
+                    WHEN 'Shift 2C' THEN '21:00:00'
+                    WHEN 'Shift 2D' THEN '22:00:00'
+                    WHEN 'Shift 2E' THEN '23:00:00'
+                    WHEN 'Shift 2F' THEN '24:00:00'
+                    WHEN 'Shift 3A' THEN '06:00:00'
+                    WHEN 'Shift 3B' THEN '07:00:00'
+                    WHEN 'Shift 1 5 jam' THEN '12:00:00'
                     WHEN 'Shift 1A 5 jam' THEN '13:10:00'
-                    WHEN 'Shift 1B 5 jam' THEN '11:00:00' 
+                    WHEN 'Shift 1B 5 jam' THEN '11:00:00'
                     WHEN 'Shift 1C 5 jam' THEN '15:00:00'
                     WHEN 'Shift 3 5 jam' THEN '04:00:00'
                     WHEN 'Shift 3A 5 jam' THEN '05:00:00'
@@ -289,15 +289,15 @@ class DashboardController extends Controller
                 $query->where('scan_masuk', '!=', '00:00:00')
                       ->orWhere('scan_pulang', '!=', '00:00:00');
             })
-            ->first(); 
-    
+            ->first();
+
         $data = [
             ['name' => 'Total Telat', 'y' => $rekapKehadiran->total_telat ?? 0],
             ['name' => 'Total Pulang Awal', 'y' => $rekapKehadiran->total_awal ?? 0]
         ];
-    
+
         return $data;
-    }    
+    }
 
     // FUNGSI UNTUK MENAMPILKAN 5 ORANG YANG TELAT TERBANYAK
     public function rekapTelatBulanan($bulan, $tahun)
@@ -308,24 +308,24 @@ class DashboardController extends Controller
         $rekapKehadiran = DB::table('employee_presensi_bulanan')
             ->select(
                 'nama',
-                DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja 
-                    WHEN 'Shift 1A' THEN '06:00:00' 
-                    WHEN 'Shift 1B' THEN '07:00:00' 
-                    WHEN 'Shift 1C' THEN '08:00:00' 
+                DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja
+                    WHEN 'Shift 1A' THEN '06:00:00'
+                    WHEN 'Shift 1B' THEN '07:00:00'
+                    WHEN 'Shift 1C' THEN '08:00:00'
                     WHEN 'Shift 1D' THEN '09:00:00'
-                    WHEN 'Shift 1E' THEN '10:00:00' 
-                    WHEN 'Shift 1F' THEN '05:00:00' 
-                    WHEN 'Shift 2A' THEN '11:00:00'  
-                    WHEN 'Shift 2B' THEN '12:00:00' 
-                    WHEN 'Shift 2C' THEN '13:00:00' 
-                    WHEN 'Shift 2D' THEN '14:00:00' 
-                    WHEN 'Shift 2E' THEN '15:00:00' 
-                    WHEN 'Shift 2F' THEN '16:00:00' 
-                    WHEN 'Shift 3A' THEN '22:00:00' 
-                    WHEN 'Shift 3B' THEN '23:00:00' 
-                    WHEN 'Shift 1 5 jam' THEN '07:00:00' 
+                    WHEN 'Shift 1E' THEN '10:00:00'
+                    WHEN 'Shift 1F' THEN '05:00:00'
+                    WHEN 'Shift 2A' THEN '11:00:00'
+                    WHEN 'Shift 2B' THEN '12:00:00'
+                    WHEN 'Shift 2C' THEN '13:00:00'
+                    WHEN 'Shift 2D' THEN '14:00:00'
+                    WHEN 'Shift 2E' THEN '15:00:00'
+                    WHEN 'Shift 2F' THEN '16:00:00'
+                    WHEN 'Shift 3A' THEN '22:00:00'
+                    WHEN 'Shift 3B' THEN '23:00:00'
+                    WHEN 'Shift 1 5 jam' THEN '07:00:00'
                     WHEN 'Shift 1A 5 jam' THEN '08:00:00'
-                    WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
+                    WHEN 'Shift 1B 5 jam' THEN '06:00:00'
                     WHEN 'Shift 1C 5 jam' THEN '10:00:00'
                     WHEN 'Shift 3 5 jam' THEN '23:00:00'
                     WHEN 'Shift 3A 5 jam' THEN '24:00:00'
@@ -352,7 +352,7 @@ class DashboardController extends Controller
         $data = [];
         foreach ($rekapKehadiran as $kehadiran) {
             $data[] = [
-                'nama' => $kehadiran->nama, 
+                'nama' => $kehadiran->nama,
                 'total_telat' => $kehadiran->total_telat
             ];
         }
@@ -369,29 +369,29 @@ class DashboardController extends Controller
         $startDate = now()->setYear($year)->setMonth($month)->subMonth()->day(26);
         $endDate = now()->setYear($year)->setMonth($month)->day(25);
 
-    
+
         $lateDetails = EmployeePresensi::select('nama', 'tanggal', 'scan_masuk', 'scan_pulang')
             ->where('nama', $nama)
             ->whereBetween('tanggal', [$startDate, $endDate])->whereYear('tanggal', $year)
             ->whereTime('scan_masuk', '>', DB::raw("
-                CASE jam_kerja 
-                    WHEN 'Shift 1A' THEN '06:00:00' 
-                    WHEN 'Shift 1B' THEN '07:00:00' 
-                    WHEN 'Shift 1C' THEN '08:00:00' 
+                CASE jam_kerja
+                    WHEN 'Shift 1A' THEN '06:00:00'
+                    WHEN 'Shift 1B' THEN '07:00:00'
+                    WHEN 'Shift 1C' THEN '08:00:00'
                     WHEN 'Shift 1D' THEN '09:00:00'
-                    WHEN 'Shift 1E' THEN '10:00:00' 
-                    WHEN 'Shift 1F' THEN '05:00:00' 
-                    WHEN 'Shift 2A' THEN '11:00:00'  
-                    WHEN 'Shift 2B' THEN '12:00:00' 
-                    WHEN 'Shift 2C' THEN '13:00:00' 
-                    WHEN 'Shift 2D' THEN '14:00:00' 
-                    WHEN 'Shift 2E' THEN '15:00:00' 
-                    WHEN 'Shift 2F' THEN '16:00:00' 
-                    WHEN 'Shift 3A' THEN '22:00:00' 
-                    WHEN 'Shift 3B' THEN '23:00:00' 
-                    WHEN 'Shift 1 5 jam' THEN '07:00:00' 
+                    WHEN 'Shift 1E' THEN '10:00:00'
+                    WHEN 'Shift 1F' THEN '05:00:00'
+                    WHEN 'Shift 2A' THEN '11:00:00'
+                    WHEN 'Shift 2B' THEN '12:00:00'
+                    WHEN 'Shift 2C' THEN '13:00:00'
+                    WHEN 'Shift 2D' THEN '14:00:00'
+                    WHEN 'Shift 2E' THEN '15:00:00'
+                    WHEN 'Shift 2F' THEN '16:00:00'
+                    WHEN 'Shift 3A' THEN '22:00:00'
+                    WHEN 'Shift 3B' THEN '23:00:00'
+                    WHEN 'Shift 1 5 jam' THEN '07:00:00'
                     WHEN 'Shift 1A 5 jam' THEN '08:00:00'
-                    WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
+                    WHEN 'Shift 1B 5 jam' THEN '06:00:00'
                     WHEN 'Shift 1C 5 jam' THEN '10:00:00'
                     WHEN 'Shift 3 5 jam' THEN '23:00:00'
                     WHEN 'Shift 3A 5 jam' THEN '00:00:00'
@@ -410,7 +410,7 @@ class DashboardController extends Controller
                 END
             "))
             ->get();
-    
+
         return view('dashboard.detailslateterbanyak', [
             'nama' => $nama,
             'lateDetails' => $lateDetails
@@ -423,7 +423,7 @@ class DashboardController extends Controller
         $nama = $request->input('nama');
         $startDate = Carbon::now()->subDays(6)->startOfDay();
         $endDate = Carbon::now()->endOfDay();
-    
+
         $presensi = DB::table('employee_presensi_bulanan')
             ->select('nama', 'tanggal', 'pengecualian')
             ->where('nama', $nama)
@@ -432,7 +432,7 @@ class DashboardController extends Controller
             ->where('pengecualian', '!=', '')
             ->where('pengecualian', '!=', 'DINAS LUAR')
             ->get();
-    
+
         return view('dashboard.detailsleave', [
             'nama' => $nama,
             'presensi' => $presensi
@@ -452,24 +452,24 @@ class DashboardController extends Controller
             ->where('nama', $nama)
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->whereTime('scan_masuk', '>', DB::raw("
-                CASE jam_kerja 
-                    WHEN 'Shift 1A' THEN '06:00:00' 
-                    WHEN 'Shift 1B' THEN '07:00:00' 
-                    WHEN 'Shift 1C' THEN '08:00:00' 
+                CASE jam_kerja
+                    WHEN 'Shift 1A' THEN '06:00:00'
+                    WHEN 'Shift 1B' THEN '07:00:00'
+                    WHEN 'Shift 1C' THEN '08:00:00'
                     WHEN 'Shift 1D' THEN '09:00:00'
-                    WHEN 'Shift 1E' THEN '10:00:00' 
-                    WHEN 'Shift 1F' THEN '05:00:00' 
-                    WHEN 'Shift 2A' THEN '11:00:00'  
-                    WHEN 'Shift 2B' THEN '12:00:00' 
-                    WHEN 'Shift 2C' THEN '13:00:00' 
-                    WHEN 'Shift 2D' THEN '14:00:00' 
-                    WHEN 'Shift 2E' THEN '15:00:00' 
-                    WHEN 'Shift 2F' THEN '16:00:00' 
-                    WHEN 'Shift 3A' THEN '22:00:00' 
-                    WHEN 'Shift 3B' THEN '23:00:00' 
-                    WHEN 'Shift 1 5 jam' THEN '07:00:00' 
+                    WHEN 'Shift 1E' THEN '10:00:00'
+                    WHEN 'Shift 1F' THEN '05:00:00'
+                    WHEN 'Shift 2A' THEN '11:00:00'
+                    WHEN 'Shift 2B' THEN '12:00:00'
+                    WHEN 'Shift 2C' THEN '13:00:00'
+                    WHEN 'Shift 2D' THEN '14:00:00'
+                    WHEN 'Shift 2E' THEN '15:00:00'
+                    WHEN 'Shift 2F' THEN '16:00:00'
+                    WHEN 'Shift 3A' THEN '22:00:00'
+                    WHEN 'Shift 3B' THEN '23:00:00'
+                    WHEN 'Shift 1 5 jam' THEN '07:00:00'
                     WHEN 'Shift 1A 5 jam' THEN '08:00:00'
-                    WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
+                    WHEN 'Shift 1B 5 jam' THEN '06:00:00'
                     WHEN 'Shift 1C 5 jam' THEN '10:00:00'
                     WHEN 'Shift 3 5 jam' THEN '23:00:00'
                     WHEN 'Shift 3A 5 jam' THEN '00:00:00'
@@ -523,7 +523,7 @@ class DashboardController extends Controller
             )
             ->whereBetween('tanggal', [$startDate, $endDate])->whereYear('tanggal', $tahun)
             ->first();
-        
+
         return $totals;
     }
 
@@ -541,7 +541,7 @@ class DashboardController extends Controller
 
         $query = EmployeePresensi::select('nama', 'jam_kerja', 'tanggal', 'scan_masuk', 'scan_pulang', 'pengecualian')
             ->whereBetween('tanggal', [$startDate, $endDate])
-            ->whereYear('tanggal', $request->tahun); 
+            ->whereYear('tanggal', $request->tahun);
 
         if ($request->status == 'Sakit') {
             $query->whereIn('pengecualian', ['SAKIT', 'sakit dg srt dokter']);
@@ -573,7 +573,7 @@ class DashboardController extends Controller
             $query->whereIn('pengecualian', ['LIBUR']);
         }
 
-        $lateDetails = $query->orderBy('tanggal', 'asc')->get(); 
+        $lateDetails = $query->orderBy('tanggal', 'asc')->get();
 
         return view('dashboard.detailskategorileave', compact('lateDetails'));
     }
@@ -601,24 +601,24 @@ class DashboardController extends Controller
                 DB::raw("SUM(CASE WHEN pengecualian = 'PARUH WAKTU' THEN 1 ELSE 0 END) as total_paruh_waktu"),
                 DB::raw("
                 SUM(
-                    CASE 
-                        WHEN absent = 'TRUE' AND pengecualian = '' 
+                    CASE
+                        WHEN absent = 'TRUE' AND pengecualian = ''
                             AND jam_kerja = 'Crew Marketing' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6 THEN 1
-                        WHEN absent = 'TRUE' AND pengecualian = '' 
+                        WHEN absent = 'TRUE' AND pengecualian = ''
                             AND jam_kerja = 'Driver Ekspedisi S-J' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6 THEN 1
-                        WHEN absent = 'TRUE' AND pengecualian = '' 
+                        WHEN absent = 'TRUE' AND pengecualian = ''
                             AND jam_kerja = 'Driver Ekspedisi Sab' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7 THEN 1
-                        WHEN absent = 'TRUE' AND pengecualian = '' 
+                        WHEN absent = 'TRUE' AND pengecualian = ''
                             AND jam_kerja = 'Driver Ops' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6 THEN 1
-                        WHEN absent = 'TRUE' AND pengecualian = '' 
+                        WHEN absent = 'TRUE' AND pengecualian = ''
                             AND jam_kerja = 'Fleksibel' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7 THEN 1
-                        WHEN absent = 'TRUE' AND pengecualian = '' 
+                        WHEN absent = 'TRUE' AND pengecualian = ''
                             AND jam_kerja = 'Shift 1A 5 jam' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7 THEN 1
-                        WHEN absent = 'TRUE' AND pengecualian = '' 
+                        WHEN absent = 'TRUE' AND pengecualian = ''
                             AND jam_kerja = 'Shift 1C' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7 THEN 1
-                        WHEN absent = 'TRUE' AND pengecualian = '' 
+                        WHEN absent = 'TRUE' AND pengecualian = ''
                             AND jam_kerja = 'Staff Up 5 HK' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6 THEN 1
-                        ELSE 0 
+                        ELSE 0
                     END
                 ) as total_absent
             ")
@@ -652,15 +652,15 @@ class DashboardController extends Controller
 
         if ($request->input('status') === 'LEAVE') {
             $query->whereIn('pengecualian', [
-                'SAKIT', 'sakit dg srt dokter', 'SAKIT TANPA SD', 'CUTI MELAHIRKAN', 
-                'CUTI TAHUNAN', 'CUTI', 'IZIN', 'ANAK BTIS/SUNAT', 
-                'ISTRI MELAHIRKAN', 'MENIKAH', 'OT/MTUA/KLG MGL', 
+                'SAKIT', 'sakit dg srt dokter', 'SAKIT TANPA SD', 'CUTI MELAHIRKAN',
+                'CUTI TAHUNAN', 'CUTI', 'IZIN', 'ANAK BTIS/SUNAT',
+                'ISTRI MELAHIRKAN', 'MENIKAH', 'OT/MTUA/KLG MGL',
                 'WFH', 'PARUH WAKTU'
             ]);
         }
 
         $presensi = $query->get();
-        
+
         return view('dashboard.detailsleave', [
             'presensi' => $presensi
         ]);
@@ -671,7 +671,7 @@ class DashboardController extends Controller
     {
         $month = $request->input('bulan', now()->month);
         $year = $request->input('tahun', now()->year);
-        
+
         $startDate = now()->setYear($year)->setMonth($month)->subMonth()->day(26);
         $endDate = now()->setYear($year)->setMonth($month)->day(25);
 
@@ -679,24 +679,24 @@ class DashboardController extends Controller
             ->select('nama', 'tanggal', 'scan_masuk', 'scan_pulang')
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->whereYear('tanggal', $year)
-            ->whereRaw("TIME(scan_masuk) > TIME(CASE jam_kerja 
-                WHEN 'Shift 1A' THEN '06:00:00' 
-                WHEN 'Shift 1B' THEN '07:00:00' 
-                WHEN 'Shift 1C' THEN '08:00:00' 
+            ->whereRaw("TIME(scan_masuk) > TIME(CASE jam_kerja
+                WHEN 'Shift 1A' THEN '06:00:00'
+                WHEN 'Shift 1B' THEN '07:00:00'
+                WHEN 'Shift 1C' THEN '08:00:00'
                 WHEN 'Shift 1D' THEN '09:00:00'
-                WHEN 'Shift 1E' THEN '10:00:00' 
-                WHEN 'Shift 1F' THEN '05:00:00' 
-                WHEN 'Shift 2A' THEN '11:00:00'  
-                WHEN 'Shift 2B' THEN '12:00:00' 
-                WHEN 'Shift 2C' THEN '13:00:00' 
-                WHEN 'Shift 2D' THEN '14:00:00' 
-                WHEN 'Shift 2E' THEN '15:00:00' 
-                WHEN 'Shift 2F' THEN '16:00:00' 
-                WHEN 'Shift 3A' THEN '22:00:00' 
-                WHEN 'Shift 3B' THEN '23:00:00' 
-                WHEN 'Shift 1 5 jam' THEN '07:00:00' 
+                WHEN 'Shift 1E' THEN '10:00:00'
+                WHEN 'Shift 1F' THEN '05:00:00'
+                WHEN 'Shift 2A' THEN '11:00:00'
+                WHEN 'Shift 2B' THEN '12:00:00'
+                WHEN 'Shift 2C' THEN '13:00:00'
+                WHEN 'Shift 2D' THEN '14:00:00'
+                WHEN 'Shift 2E' THEN '15:00:00'
+                WHEN 'Shift 2F' THEN '16:00:00'
+                WHEN 'Shift 3A' THEN '22:00:00'
+                WHEN 'Shift 3B' THEN '23:00:00'
+                WHEN 'Shift 1 5 jam' THEN '07:00:00'
                 WHEN 'Shift 1A 5 jam' THEN '08:00:00'
-                WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
+                WHEN 'Shift 1B 5 jam' THEN '06:00:00'
                 WHEN 'Shift 1C 5 jam' THEN '10:00:00'
                 WHEN 'Shift 3 5 jam' THEN '23:00:00'
                 WHEN 'Shift 3A 5 jam' THEN '24:00:00'
@@ -713,10 +713,10 @@ class DashboardController extends Controller
                 WHEN 'OB Sen-Jum' THEN '06:30:00'
                 WHEN 'Crew Marketing' THEN '08:00:00'
             END)")
-            ->orderBy('tanggal', 'asc'); 
+            ->orderBy('tanggal', 'asc');
 
         $lateRecords = $query->get();
-        
+
         return view('dashboard.detailslate', [
             'lateRecords' => $lateRecords
         ]);
@@ -739,24 +739,24 @@ class DashboardController extends Controller
                 $query->where('scan_masuk', '!=', '00:00:00')
                     ->orWhere('scan_pulang', '!=', '00:00:00');
             })
-            ->whereRaw("TIME(scan_pulang) < TIME(CASE jam_kerja 
-                WHEN 'Shift 1A' THEN '14:00:00' 
+            ->whereRaw("TIME(scan_pulang) < TIME(CASE jam_kerja
+                WHEN 'Shift 1A' THEN '14:00:00'
                 WHEN 'Shift 1B' THEN '15:00:00'
-                WHEN 'Shift 1C' THEN '16:00:00' 
+                WHEN 'Shift 1C' THEN '16:00:00'
                 WHEN 'Shift 1D' THEN '17:00:00'
-                WHEN 'Shift 1E' THEN '18:00:00' 
-                WHEN 'Shift 1F' THEN '13:00:00' 
-                WHEN 'Shift 2A' THEN '19:00:00'  
-                WHEN 'Shift 2B' THEN '20:00:00' 
-                WHEN 'Shift 2C' THEN '21:00:00' 
-                WHEN 'Shift 2D' THEN '22:00:00' 
-                WHEN 'Shift 2E' THEN '23:00:00' 
-                WHEN 'Shift 2F' THEN '24:00:00' 
-                WHEN 'Shift 3A' THEN '06:00:00' 
-                WHEN 'Shift 3B' THEN '07:00:00' 
-                WHEN 'Shift 1 5 jam' THEN '12:00:00' 
+                WHEN 'Shift 1E' THEN '18:00:00'
+                WHEN 'Shift 1F' THEN '13:00:00'
+                WHEN 'Shift 2A' THEN '19:00:00'
+                WHEN 'Shift 2B' THEN '20:00:00'
+                WHEN 'Shift 2C' THEN '21:00:00'
+                WHEN 'Shift 2D' THEN '22:00:00'
+                WHEN 'Shift 2E' THEN '23:00:00'
+                WHEN 'Shift 2F' THEN '24:00:00'
+                WHEN 'Shift 3A' THEN '06:00:00'
+                WHEN 'Shift 3B' THEN '07:00:00'
+                WHEN 'Shift 1 5 jam' THEN '12:00:00'
                 WHEN 'Shift 1A 5 jam' THEN '13:10:00'
-                WHEN 'Shift 1B 5 jam' THEN '11:00:00' 
+                WHEN 'Shift 1B 5 jam' THEN '11:00:00'
                 WHEN 'Shift 1C 5 jam' THEN '15:00:00'
                 WHEN 'Shift 3 5 jam' THEN '04:00:00'
                 WHEN 'Shift 3A 5 jam' THEN '05:00:00'
@@ -780,7 +780,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    //FUNGSI UNTUK MENAMPILKAN DATA YANG DINAS LUAR 
+    //FUNGSI UNTUK MENAMPILKAN DATA YANG DINAS LUAR
     public function getDinasLuarData(Request $request)
     {
         $month = $request->input('bulan', now()->month);
@@ -841,13 +841,13 @@ class DashboardController extends Controller
                             ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 7]); // Senin-Sabtu
                 })->orWhere(function ($subQuery) {
                     $subQuery->where('jam_kerja', 'Shift 1C')
-                            ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 7]); 
+                            ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 7]);
                 })->orWhere(function ($subQuery) {
                     $subQuery->where('jam_kerja', 'Staff Up 5 HK')
-                            ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 6]); 
+                            ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 6]);
                 });
             })
-            ->orderBy('tanggal', 'asc') 
+            ->orderBy('tanggal', 'asc')
             ->get();
 
         return view('dashboard.detailsabsent', [
@@ -871,7 +871,7 @@ class DashboardController extends Controller
             ->where('pengecualian', 'WFH')
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->whereYear('tanggal', $year)
-            ->orderBy('tanggal', 'ASC') 
+            ->orderBy('tanggal', 'ASC')
             ->get();
 
         return view('dashboard.detailswfh', [

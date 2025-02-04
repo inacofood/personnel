@@ -3,12 +3,13 @@
 <style>
     table {
         width: 100%;
-        border-collapse: collapse; 
+        border-collapse: collapse;
     }
     th, td {
         padding: 10px;
         text-align: left;
         vertical-align: middle;
+    }
     th {
         background-color: #f2f2f2;
     }
@@ -50,6 +51,8 @@
     <a href="{{ route('report.presensi') }}" class="btn btn-secondary btn me-2">
         Report Presensi
     </a>
+
+
     <button type="button" class="btn btn-success btn" data-bs-toggle="modal" data-bs-target="#importModal">
         Import Data
     </button>
@@ -111,7 +114,10 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="importModalLabel">Import File</h5>
+
+                    <h5 class="modal-title me-2" id="importModalLabel">Import File</h5> <a class="btn btn-danger " href="{{ asset('Template-Presensi.xlsx') }}">
+                        Template
+                    </a>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -142,11 +148,6 @@
                 toastr.error(errorMessage);
             }
         });
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 6124c71839bdc2370ff41b9c0c24e8d07ec8fab3
-    </script>
+  </script>
 @endsection
 

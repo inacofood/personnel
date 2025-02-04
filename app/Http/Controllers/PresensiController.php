@@ -20,11 +20,11 @@ class PresensiController extends Controller
     {
         $bulan = $request->input('bulan', Carbon::now()->format('m'));
         $tahun = $request->input('tahun', Carbon::now()->format('Y'));
-    
+
         $presensi = EmployeePresensi::whereMonth('tanggal', $bulan)
                                      ->whereYear('tanggal', $tahun)
                                      ->get();
-    
+
         return view('presensi.index', [
             'presensi' => $presensi,
             'bulan' => $bulan,
@@ -35,14 +35,14 @@ class PresensiController extends Controller
     public function import(Request $request)
 {
     set_time_limit(300);
-    
+
     $file = $request->file('file');
     $filePath = $file->getRealPath();
     $spreadsheet = IOFactory::load($filePath);
 
     try {
         foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
-            $sheet->removeRow(1, 1); 
+            $sheet->removeRow(1, 1);
             foreach ($sheet->getRowIterator() as $row) {
                 $cellIterator = $row->getCellIterator();
                 $cellIterator->setIterateOnlyExistingCells(false);
@@ -90,15 +90,15 @@ class PresensiController extends Controller
                     'nik' => $nik,
                     'nama' => $rowData[1] ?? null,
                     'tanggal' => $tanggal,
-                    'week' => $rowData[3] ?? null,
-                    'jam_kerja' => $rowData[4] ?? null,
-                    'scan_masuk' => $scan_masuk, 
-                    'scan_pulang' => $scan_pulang, 
+                    'jam_kerja' => $rowData[3] ?? null,
+                    'week' => $rowData[4] ?? null,
+                    'scan_masuk' => $scan_masuk,
+                    'scan_pulang' => $scan_pulang,
                     'terlambat' => $rowData[7] ? $rowData[7] . ':00' : null,
                     'pulang_cepat' => $rowData[8] ? $rowData[8] . ':00' : null,
                     'absent' => $rowData[9] ?? null,
                     'pengecualian' => $rowData[10] ?? null,
-                    'HK' => !empty($rowData[11]) && is_numeric($rowData[11]) ? $rowData[11] : null, 
+                    'HK' => !empty($rowData[11]) && is_numeric($rowData[11]) ? $rowData[11] : null,
                     'dept' => $rowData[12] ?? null,
                     'section' => $rowData[13] ?? null,
                     'grade' => $rowData[14] ?? null,
@@ -130,7 +130,11 @@ class PresensiController extends Controller
 public function rekapPresensiBulanan()
 {
     $datanama = DB::table('employee_presensi_bulanan')
-        ->select('nama', 'nik', 'grade')
+        ->select('nama', 'nik', 'grade','dept')
+        ->distinct()
+        ->get();
+    $datadept = DB::table('employee_presensi_bulanan')
+        ->select('dept')
         ->distinct()
         ->get();
 
@@ -138,82 +142,132 @@ public function rekapPresensiBulanan()
         ->select(
             'nama',
             'nik',
+            'dept',
             'grade',
-            DB::raw('GROUP_CONCAT(DISTINCT jam_kerja SEPARATOR ", ") as jam_kerja'), 
+            DB::raw('GROUP_CONCAT(DISTINCT jam_kerja SEPARATOR ", ") as jam_kerja'),
             DB::raw('MONTH(tanggal) as bulan'),
             DB::raw('YEAR(tanggal) as tahun'),
             DB::raw("COUNT(CASE WHEN scan_masuk IS NOT NULL OR scan_pulang IS NOT NULL THEN 1 END) as total_hadir"),
-            DB::raw("COUNT(CASE WHEN absent = 'TRUE' THEN 1 END) as total_absent"),
-            DB::raw("COUNT(CASE WHEN TIME(scan_masuk) > TIME(CASE jam_kerja 
-                 WHEN 'Shift 1A' THEN '06:00:00' 
-                 WHEN 'Shift 1B' THEN '07:00:00' 
-                 WHEN 'Shift 1C' THEN '08:00:00' 
-                 WHEN 'Shift 1D' THEN '09:00:00'
-                 WHEN 'Shift 1E' THEN '10:00:00' 
-                 WHEN 'Shift 1F' THEN '05:00:00' 
-                 WHEN 'Shift 2A' THEN '11:00:00'  
-                 WHEN 'Shift 2B' THEN '12:00:00' 
-                 WHEN 'Shift 2C' THEN '13:00:00' 
-                 WHEN 'Shift 2D' THEN '14:00:00' 
-                 WHEN 'Shift 2E' THEN '15:00:00' 
-                 WHEN 'Shift 2F' THEN '16:00:00' 
-                 WHEN 'Shift 3A' THEN '22:00:00' 
-                 WHEN 'Shift 3B' THEN '23:00:00' 
-                 WHEN 'Shift 1 5 jam' THEN '07:00:00' 
-                 WHEN 'Shift 1A 5 jam' THEN '08:00:00'
-                 WHEN 'Shift 1B 5 jam' THEN '06:00:00' 
-                 WHEN 'Shift 1C 5 jam' THEN '10:00:00'
-                 WHEN 'Shift 3 5 jam' THEN '23:00:00'
-                 WHEN 'Shift 3A 5 jam' THEN '24:00:00'
-                 WHEN 'Shift 2 5 jam' THEN '12:00:00'
-                 WHEN 'Shift 2A 5 jam' THEN '17:00:00'
-                 WHEN 'Shift 2B 5 jam' THEN '18:00:00'
-                 WHEN 'Staff Up 5 HK' THEN '08:00:00'
-                 WHEN 'Driver Ops' THEN '08:00:00'
-                 WHEN 'Driver Ekspedisi S-J' THEN '08:00:00'
-                 WHEN 'Driver Ekspedisi Sab' THEN '08:00:00'
-                 WHEN 'Fleksibel' THEN '07:00:00'
-                 WHEN 'Laundry Sab' THEN '06:00:00'
-                 WHEN 'OB Sab' THEN '07:00:00'
-                 WHEN 'OB Sen-Jum' THEN '06:30:00'
-                 WHEN 'Crew Marketing' THEN '08:00:00'
-                 END) THEN 1 END) as total_telat"),
-            DB::raw("COUNT(CASE WHEN TIME(scan_pulang) < TIME(CASE jam_kerja 
-                 WHEN 'Shift 1A' THEN '14:00:00' 
-                 WHEN 'Shift 1B' THEN '15:00:00'
-                 WHEN 'Shift 1C' THEN '16:00:00' 
-                 WHEN 'Shift 1D' THEN '17:00:00'
-                 WHEN 'Shift 1E' THEN '18:00:00' 
-                 WHEN 'Shift 1F' THEN '13:00:00' 
-                 WHEN 'Shift 2A' THEN '19:00:00'  
-                 WHEN 'Shift 2B' THEN '20:00:00' 
-                 WHEN 'Shift 2C' THEN '21:00:00' 
-                 WHEN 'Shift 2D' THEN '22:00:00' 
-                 WHEN 'Shift 2E' THEN '23:00:00' 
-                 WHEN 'Shift 2F' THEN '24:00:00' 
-                 WHEN 'Shift 3A' THEN '06:00:00' 
-                 WHEN 'Shift 3B' THEN '07:00:00' 
-                 WHEN 'Shift 1 5 jam' THEN '12:00:00' 
-                 WHEN 'Shift 1A 5 jam' THEN '13:10:00'
-                 WHEN 'Shift 1B 5 jam' THEN '11:00:00' 
-                 WHEN 'Shift 1C 5 jam' THEN '15:00:00'
-                 WHEN 'Shift 3 5 jam' THEN '04:00:00'
-                 WHEN 'Shift 3A 5 jam' THEN '05:00:00'
-                 WHEN 'Shift 2 5 jam' THEN '17:00:00'
-                 WHEN 'Shift 2A 5 jam' THEN '22:00:00'
-                 WHEN 'Shift 2B 5 jam' THEN '23:00:00'
-                 WHEN 'Staff Up 5 HK' THEN '17:00:00'
-                 WHEN 'Driver Ops' THEN '17:00:00'
-                 WHEN 'Driver Ekspedisi S-J' THEN '16:00:00'
-                 WHEN 'Driver Ekspedisi Sab' THEN '13:10:00'
-                 WHEN 'Fleksibel' THEN '23:59:00'
-                 WHEN 'Laundry Sab' THEN '11:10:00'
-                 WHEN 'OB Sab' THEN '13:10:00'
-                 WHEN 'OB Sen-Jum' THEN '16:30:00'
-                 WHEN 'Crew Marketing' THEN '17:00:00'
-                 END) THEN 1 END) as total_awal"),
-            
-            DB::raw("COUNT(CASE WHEN pengecualian IS NOT NULL AND pengecualian != '' THEN 1 END) as total_pengecualian"),
+            DB::raw("
+                COUNT(
+                    CASE
+                        WHEN absent = 'TRUE'
+                        AND jam_kerja != 'Fleksibel'
+                        AND pengecualian != 'LIBUR'
+                        AND (
+                            (jam_kerja = 'Crew Marketing' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6) OR
+                            (jam_kerja = 'Driver Ekspedisi S-J' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6) OR
+                            (jam_kerja = 'Driver Ekspedisi Sab' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7) OR
+                            (jam_kerja = 'Driver Ops' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6) OR
+                            (jam_kerja = 'Shift 1A 5 jam' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7) OR
+                            (jam_kerja = 'Shift 1C' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7) OR
+                            (jam_kerja = 'Staff Up 5 HK' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6)
+                        )
+                        THEN 1
+                    END
+                ) as total_absent
+            "),
+            DB::raw("
+            COUNT(
+                CASE
+                    WHEN TIME(scan_masuk) > TIME(CASE jam_kerja
+                        WHEN 'Shift 1A' THEN '06:00:00'
+                        WHEN 'Shift 1B' THEN '07:00:00'
+                        WHEN 'Shift 1C' THEN '08:00:00'
+                        WHEN 'Shift 1D' THEN '09:00:00'
+                        WHEN 'Shift 1E' THEN '10:00:00'
+                        WHEN 'Shift 1F' THEN '05:00:00'
+                        WHEN 'Shift 2A' THEN '11:00:00'
+                        WHEN 'Shift 2B' THEN '12:00:00'
+                        WHEN 'Shift 2C' THEN '13:00:00'
+                        WHEN 'Shift 2D' THEN '14:00:00'
+                        WHEN 'Shift 2E' THEN '15:00:00'
+                        WHEN 'Shift 2F' THEN '16:00:00'
+                        WHEN 'Shift 3A' THEN '22:00:00'
+                        WHEN 'Shift 3B' THEN '23:00:00'
+                        WHEN 'Shift 1 5 jam' THEN '07:00:00'
+                        WHEN 'Shift 1A 5 jam' THEN '08:00:00'
+                        WHEN 'Shift 1B 5 jam' THEN '06:00:00'
+                        WHEN 'Shift 1C 5 jam' THEN '10:00:00'
+                        WHEN 'Shift 3 5 jam' THEN '23:00:00'
+                        WHEN 'Shift 3A 5 jam' THEN '24:00:00'
+                        WHEN 'Shift 2 5 jam' THEN '12:00:00'
+                        WHEN 'Shift 2A 5 jam' THEN '17:00:00'
+                        WHEN 'Shift 2B 5 jam' THEN '18:00:00'
+                        WHEN 'Staff Up 5 HK' THEN '08:00:00'
+                        WHEN 'Driver Ops' THEN '08:00:00'
+                        WHEN 'Driver Ekspedisi S-J' THEN '08:00:00'
+                        WHEN 'Driver Ekspedisi Sab' THEN '08:00:00'
+                        WHEN 'Fleksibel' THEN '07:00:00'
+                        WHEN 'Laundry Sab' THEN '06:00:00'
+                        WHEN 'OB Sab' THEN '07:00:00'
+                        WHEN 'OB Sen-Jum' THEN '06:30:00'
+                        WHEN 'Crew Marketing' THEN '08:00:00'
+                                END)
+                                AND (
+                                    (jam_kerja = 'Crew Marketing' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6) OR
+                                    (jam_kerja = 'Driver Ekspedisi S-J' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6) OR
+                                    (jam_kerja = 'Driver Ekspedisi Sab' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7) OR
+                                    (jam_kerja = 'Driver Ops' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6) OR
+                                    (jam_kerja = 'Shift 1A 5 jam' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7) OR
+                                    (jam_kerja = 'Shift 1C' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7) OR
+                                    (jam_kerja = 'Staff Up 5 HK' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6)
+                                )
+                                THEN 1
+                            END
+                        ) as total_telat
+                    "),
+                    DB::raw("
+                    COUNT(
+                        CASE
+                            WHEN TIME(scan_pulang) < TIME(CASE jam_kerja
+                                WHEN 'Shift 1A' THEN '14:00:00'
+                                WHEN 'Shift 1B' THEN '15:00:00'
+                                WHEN 'Shift 1C' THEN '16:00:00'
+                                WHEN 'Shift 1D' THEN '17:00:00'
+                                WHEN 'Shift 1E' THEN '18:00:00'
+                                WHEN 'Shift 1F' THEN '13:00:00'
+                                WHEN 'Shift 2A' THEN '19:00:00'
+                                WHEN 'Shift 2B' THEN '20:00:00'
+                                WHEN 'Shift 2C' THEN '21:00:00'
+                                WHEN 'Shift 2D' THEN '22:00:00'
+                                WHEN 'Shift 2E' THEN '23:00:00'
+                                WHEN 'Shift 2F' THEN '24:00:00'
+                                WHEN 'Shift 3A' THEN '06:00:00'
+                                WHEN 'Shift 3B' THEN '07:00:00'
+                                WHEN 'Shift 1 5 jam' THEN '12:00:00'
+                                WHEN 'Shift 1A 5 jam' THEN '13:10:00'
+                                WHEN 'Shift 1B 5 jam' THEN '11:00:00'
+                                WHEN 'Shift 1C 5 jam' THEN '15:00:00'
+                                WHEN 'Shift 3 5 jam' THEN '04:00:00'
+                                WHEN 'Shift 3A 5 jam' THEN '05:00:00'
+                                WHEN 'Shift 2 5 jam' THEN '17:00:00'
+                                WHEN 'Shift 2A 5 jam' THEN '22:00:00'
+                                WHEN 'Shift 2B 5 jam' THEN '23:00:00'
+                                WHEN 'Staff Up 5 HK' THEN '17:00:00'
+                                WHEN 'Driver Ops' THEN '17:00:00'
+                                WHEN 'Driver Ekspedisi S-J' THEN '16:00:00'
+                                WHEN 'Driver Ekspedisi Sab' THEN '13:10:00'
+                                WHEN 'Fleksibel' THEN '23:59:00'
+                                WHEN 'Laundry Sab' THEN '11:10:00'
+                                WHEN 'OB Sab' THEN '13:10:00'
+                                WHEN 'OB Sen-Jum' THEN '16:30:00'
+                                WHEN 'Crew Marketing' THEN '17:00:00'
+                            END)
+                            AND (
+                                (jam_kerja = 'Crew Marketing' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6) OR
+                                (jam_kerja = 'Driver Ekspedisi S-J' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6) OR
+                                (jam_kerja = 'Driver Ekspedisi Sab' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7) OR
+                                (jam_kerja = 'Driver Ops' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6) OR
+                                (jam_kerja = 'Shift 1A 5 jam' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7) OR
+                                (jam_kerja = 'Shift 1C' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 7) OR
+                                (jam_kerja = 'Staff Up 5 HK' AND DAYOFWEEK(tanggal) BETWEEN 2 AND 6)
+                            )
+                            THEN 1
+                                END
+                                ) as total_awal
+            "),
+            DB::raw("COUNT(CASE WHEN pengecualian IS NOT NULL AND pengecualian != '' AND pengecualian != 'DINAS LUAR' AND pengecualian != 'LIBUR' THEN 1 END) as total_pengecualian"),
             DB::raw("COUNT(CASE WHEN pengecualian IN ('SAKIT', 'sakit dg srt dokter') THEN 1 END) as total_sakit"),
             DB::raw("COUNT(CASE WHEN pengecualian = 'SAKIT TANPA SD' THEN 1 END) as total_sakit_tanpa_sd"),
             DB::raw("COUNT(CASE WHEN pengecualian = 'CUTI MELAHIRKAN' THEN 1 END) as total_cuti_melahirkan"),
@@ -231,12 +285,13 @@ public function rekapPresensiBulanan()
             DB::raw("COUNT(CASE WHEN pengecualian = 'ERROR' THEN 1 END) as total_error"),
             DB::raw("SUM(hk) as total_hk")
         )
-        ->groupBy('nama','nik', 'grade', DB::raw('MONTH(tanggal)'), DB::raw('YEAR(tanggal)'))
+        ->groupBy('nama','nik','dept', 'grade', DB::raw('MONTH(tanggal)'), DB::raw('YEAR(tanggal)'))
         ->get();
 
     return view('presensi.report_presensi', [
         'rekapKehadiran' => $rekapKehadiran,
         'datanama' => $datanama,
+        'datadept'=> $datadept,
     ]);
 }
 
@@ -307,16 +362,41 @@ public function getPresensiDetail(Request $request)
             'OB Sen-Jum' => ['start' => '06:30:00', 'end' => '16:30:00'],
             'Crew Marketing' => ['start' => '08:00:00', 'end' => '17:00:00'],
         ];
-        
+
         $query->where(function ($q) use ($shifts) {
             foreach ($shifts as $shiftName => $shiftTimes) {
                 $q->orWhere(function ($query) use ($shiftName, $shiftTimes) {
                     $query->where('jam_kerja', $shiftName)
-                          ->whereTime('scan_masuk', '>', $shiftTimes['start']);
+                          ->whereTime('scan_masuk', '>', $shiftTimes['start'])
+                          ->where(function ($query) {
+                              $query->where(function ($q) {
+                                  $q->where('jam_kerja', 'Crew Marketing')
+                                    ->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 6');
+                              })->orWhere(function ($q) {
+                                  $q->where('jam_kerja', 'Driver Ekspedisi S-J')
+                                    ->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 6');
+                              })->orWhere(function ($q) {
+                                  $q->where('jam_kerja', 'Driver Ekspedisi Sab')
+                                    ->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 7');
+                              })->orWhere(function ($q) {
+                                  $q->where('jam_kerja', 'Driver Ops')
+                                    ->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 6');
+                              })->orWhere(function ($q) {
+                                  $q->where('jam_kerja', 'Shift 1A 5 jam')
+                                    ->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 7');
+                              })->orWhere(function ($q) {
+                                  $q->where('jam_kerja', 'Shift 1C')
+                                    ->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 7');
+                              })->orWhere(function ($q) {
+                                  $q->where('jam_kerja', 'Staff Up 5 HK')
+                                    ->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 6');
+                              });
+                          });
                 });
             }
         });
-        
+
+
     } elseif ($status == 'Awal') {
         $shifts = [
             'Shift 1A' => ['start' => '06:00:00', 'end' => '14:00:00'],
@@ -352,7 +432,7 @@ public function getPresensiDetail(Request $request)
             'OB Sen-Jum' => ['start' => '06:30:00', 'end' => '16:30:00'],
             'Crew Marketing' => ['start' => '08:00:00', 'end' => '17:00:00'],
         ];
-        
+
         $query->where(function ($q) use ($shifts) {
             foreach ($shifts as $shiftName => $shiftTimes) {
                 $q->orWhere(function ($query) use ($shiftName, $shiftTimes) {
@@ -360,16 +440,68 @@ public function getPresensiDetail(Request $request)
                           ->whereTime('scan_pulang', '<', $shiftTimes['end']);
                 });
             }
+        })
+        ->where(function ($q) {
+            $q->where(function ($q) {
+                $q->where('jam_kerja', 'Crew Marketing')->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 6');
+            })
+            ->orWhere(function ($q) {
+                $q->where('jam_kerja', 'Driver Ekspedisi S-J')->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 6');
+            })
+            ->orWhere(function ($q) {
+                $q->where('jam_kerja', 'Driver Ekspedisi Sab')->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 7');
+            })
+            ->orWhere(function ($q) {
+                $q->where('jam_kerja', 'Driver Ops')->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 6');
+            })
+            ->orWhere(function ($q) {
+                $q->where('jam_kerja', 'Shift 1A 5 jam')->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 7');
+            })
+            ->orWhere(function ($q) {
+                $q->where('jam_kerja', 'Shift 1C')->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 7');
+            })
+            ->orWhere(function ($q) {
+                $q->where('jam_kerja', 'Staff Up 5 HK')->whereRaw('DAYOFWEEK(tanggal) BETWEEN 2 AND 6');
+            });
         });
-        
+
     } elseif ($status == 'HK') {
         $query->where('HK', 1);
     } elseif ($status == 'absent') {
-        $query->whereIn('absent', ['TRUE']);
+        $query->where('absent', 'True')
+        ->where(function ($subQuery) {
+            $subQuery->where(function ($innerQuery) {
+                $innerQuery->where('jam_kerja', 'Crew Marketing')
+                           ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 6]); // Senin-Jumat
+            })->orWhere(function ($innerQuery) {
+                $innerQuery->where('jam_kerja', 'Driver Ekspedisi S-J')
+                           ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 6]); // Senin-Jumat
+            })->orWhere(function ($innerQuery) {
+                $innerQuery->where('jam_kerja', 'Driver Ekspedisi Sab')
+                           ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 7]); // Senin-Sabtu
+            })->orWhere(function ($innerQuery) {
+                $innerQuery->where('jam_kerja', 'Driver Ops')
+                           ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 6]); // Senin-Jumat
+            })->orWhere(function ($innerQuery) {
+                $innerQuery->where('jam_kerja', 'Fleksibel')
+                           ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 7]); // Senin-Sabtu
+            })->orWhere(function ($innerQuery) {
+                $innerQuery->where('jam_kerja', 'Shift 1A 5 jam')
+                           ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 7]); // Senin-Sabtu
+            })->orWhere(function ($innerQuery) {
+                $innerQuery->where('jam_kerja', 'Shift 1C')
+                           ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 7]); // Senin-Sabtu
+            })->orWhere(function ($innerQuery) {
+                $innerQuery->where('jam_kerja', 'Staff Up 5 HK')
+                           ->whereBetween(DB::raw('DAYOFWEEK(tanggal)'), [2, 6]); // Senin-Jumat
+            });
+        });
+
     } elseif ($status == 'Leave') {
         $query->whereNotNull('pengecualian')
-              ->where('pengecualian', '!=', ''); 
-    }    
+              ->where('pengecualian', '!=', '')
+              ->whereNotIn('pengecualian', ['DINAS LUAR', 'LIBUR']);
+    }
     elseif ($status == 'Sakit') {
         $query->whereIn('pengecualian', ['SAKIT', 'sakit dg srt dokter']);
     }
@@ -416,8 +548,8 @@ public function getPresensiDetail(Request $request)
     $presensi = $query->get();
     return response()->json([
         'status' => 'success',
-        'presensi' => $presensi, 
-        
+        'presensi' => $presensi,
+
     ]);
 }
 
@@ -426,8 +558,9 @@ public function getPresensiDetail(Request $request)
         $startDate = $request->start_date;
         $endDate = $request->end_date;
         $name = $request->namafilter;
+        $dept = $request->dept;
 
-        return Excel::download(new PresensiExport($startDate, $endDate, $name), 'rekap-presensi.xlsx');
+        return Excel::download(new PresensiExport($startDate, $endDate, $name, $dept), 'rekap-presensi.xlsx');
     }
 
     public function deletepresensi($id)
