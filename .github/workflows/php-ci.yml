@@ -3,10 +3,10 @@ name: Laravel CI/CD (PHP 7.3)
 on:
   push:
     branches:
-      - main
+      - main  # Jalankan workflow setiap ada push ke branch main
   pull_request:
     branches:
-      - main
+      - main  # Jalankan workflow saat ada pull request ke main
 
 jobs:
   build:
@@ -31,33 +31,39 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.3'
-        extensions: mbstring, pdo, pdo_mysql, xml
+        php-version: '7.3'  # Versi PHP yang digunakan
+        extensions: mbstring, pdo, pdo_mysql, xml  # Ekstensi yang dibutuhkan oleh Laravel
         coverage: none
 
     - name: Copy .env
-      run: cp .env.example .env
+      run: cp .env.example .env  # Salin .env dari .env.example
 
     - name: Set Environment Variables for Database
       run: |
         echo "DB_CONNECTION=mysql" >> .env
-        echo "DB_HOST=127.0.0.1" >> .env
-        echo "DB_PORT=3306" >> .env
-        echo "DB_DATABASE=forge" >> .env
-        echo "DB_USERNAME=root" >> .env
-        echo "DB_PASSWORD=root" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env  # Menetapkan host ke 127.0.0.1 (alamat kontainer MySQL)
+        echo "DB_PORT=3306" >> .env  # Port default MySQL
+        echo "DB_DATABASE=forge" >> .env  # Nama database
+        echo "DB_USERNAME=root" >> .env  # Username MySQL
+        echo "DB_PASSWORD=root" >> .env  # Password untuk root
 
     - name: Install Dependencies
-      run: composer install --no-interaction --prefer-dist
+      run: composer install --no-interaction --prefer-dist  # Install dependensi composer
 
     - name: Generate Application Key
-      run: php artisan key:generate
+      run: php artisan key:generate  # Generate application key
 
     - name: Wait for MySQL to be ready
-      run: sleep 10
+      run: |
+        echo "Waiting for MySQL to be ready..."
+        sleep 30  # Tunggu lebih lama untuk memastikan MySQL siap
+
+    - name: Check MySQL Connection
+      run: |
+        docker exec $(docker ps -q -f "ancestor=mysql:5.7") mysql -uroot -proot -e "SHOW DATABASES;"  # Verifikasi koneksi ke MySQL
 
     - name: Run Laravel Migrations
-      run: php artisan migrate --force
+      run: php artisan migrate --force  # Jalankan migrasi database Laravel
 
     - name: Run Laravel Tests
-      run: php artisan test
+      run: php artisan test  # Jalankan tes Laravel
