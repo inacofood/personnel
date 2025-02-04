@@ -19,11 +19,11 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: forge
           MYSQL_USER: root
-          MYSQL_PASSWORD: root  # Tentukan password untuk user root
+          MYSQL_PASSWORD: root
         ports:
           - 3306:3306
-        options: |
-          --health-cmd="mysqladmin ping --silent"  # Menambahkan perintah cek kesehatan MySQL
+        options: >
+          --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -35,32 +35,32 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.3'  # Versi PHP yang digunakan
-        extensions: mbstring, pdo, pdo_mysql, xml  # Ekstensi yang dibutuhkan oleh Laravel
+        php-version: '7.3'
+        extensions: mbstring, pdo, pdo_mysql, xml
         coverage: none
 
     - name: Copy .env
-      run: cp .env.example .env  # Salin .env dari .env.example
+      run: cp .env.example .env
 
     - name: Set Environment Variables for Database
       run: |
         echo "DB_CONNECTION=mysql" >> .env
-        echo "DB_HOST=127.0.0.1" >> .env  # Menetapkan host ke 127.0.0.1 (alamat kontainer MySQL)
-        echo "DB_PORT=3306" >> .env  # Port default MySQL
-        echo "DB_DATABASE=forge" >> .env  # Nama database
-        echo "DB_USERNAME=root" >> .env  # Username MySQL
-        echo "DB_PASSWORD=root" >> .env  # Password untuk root
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=forge" >> .env
+        echo "DB_USERNAME=root" >> .env
+        echo "DB_PASSWORD=root" >> .env
 
     - name: Install Dependencies
-      run: composer install --no-interaction --prefer-dist  # Install dependensi composer
+      run: composer install --no-interaction --prefer-dist
 
     - name: Generate Application Key
-      run: php artisan key:generate  # Generate application key
+      run: php artisan key:generate
 
     - name: Wait for MySQL to be ready
       run: |
         echo "Waiting for MySQL to be ready..."
-        for i in {1..30}; do  # Tunggu hingga MySQL siap (30 detik maksimal)
+        for i in {1..30}; do
           if mysqladmin ping -h 127.0.0.1 --silent; then
             echo "MySQL is up"
             break
@@ -70,7 +70,7 @@ jobs:
         done
 
     - name: Run Laravel Migrations
-      run: php artisan migrate --force  # Jalankan migrasi database Laravel
+      run: php artisan migrate --force
 
     - name: Run Laravel Tests
-      run: php artisan test  # Jalankan tes Laravel
+      run: php artisan test
