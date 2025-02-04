@@ -18,8 +18,8 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: forge
-          MYSQL_USER: forge
-          MYSQL_PASSWORD: secret
+          MYSQL_USER: root
+          MYSQL_PASSWORD: root  # Tentukan password untuk user root
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -37,6 +37,15 @@ jobs:
 
     - name: Copy .env
       run: cp .env.example .env
+
+    - name: Set Environment Variables for Database
+      run: |
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=forge" >> .env
+        echo "DB_USERNAME=root" >> .env
+        echo "DB_PASSWORD=root" >> .env
 
     - name: Install Dependencies
       run: composer install --no-interaction --prefer-dist
